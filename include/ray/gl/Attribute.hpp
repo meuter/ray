@@ -12,11 +12,9 @@ namespace ray { namespace gl {
         constexpr Attribute() = default;
         constexpr Attribute(GLint location) : mLocation(location) {}
 
-        void enable() const { gl(EnableVertexAttribArray(mLocation)); }
-        void disable() const { gl(DisableVertexAttribArray(mLocation)); }
-
         void pointer(GLboolean normalized, GLsizei stride, size_t offset)
         {
+            gl(EnableVertexAttribArray(mLocation));
             gl(VertexAttribPointer(mLocation, scalarCount(), scalarType(), normalized, stride*scalarSize(), (GLvoid *)(offset*scalarSize())));
         }
 

@@ -38,6 +38,11 @@ namespace ray { namespace gl {
             return result / sizeof(T);
         }
 
+        size_t count() const
+        {
+            return size() / stride;
+        }
+
         T *mapRange(size_t offset, size_t count, GLbitfield access)
         {
             bind();

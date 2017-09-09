@@ -11,25 +11,29 @@ using namespace ray::math;
 
 /******************************************************************************/
 
-class Quad : public VertexArray 
+class Quad 
 {
 public:
-    Quad() : VertexArray()
+    Quad() 
     {
-        setVertexAttribute(ATTRIBUTE_2F_POSITION, {
+        mVertexBuffer.load({
             -0.5f, -0.5f,
             -0.5f,  0.5f,
              0.5f, -0.5f,
              0.5f,  0.5f,
         });
+        mVertexArray.setAttribute(ATTRIBUTE_2F_POSITION, mVertexBuffer);
     }
 
     void draw() const
     {
-        bind();
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        unbind();
+        mVertexArray.bind();
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, mVertexBuffer.count());
     }
+
+private:
+    VertexArray mVertexArray;
+    VertexBuffer<2, f32> mVertexBuffer;
 };
 
 /******************************************************************************/

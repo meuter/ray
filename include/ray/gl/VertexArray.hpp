@@ -14,28 +14,22 @@ namespace ray { namespace gl {
         inline void bind() const { gl(BindVertexArray(mHandle)); }
         inline void unbind() const { gl(BindVertexArray(0)); }
 
-        template<typename V, typename F>
-        void setVertexAttribute(Attribute<V, F> attribute, const std::initializer_list<F> &vertexData)
-        {
-            setVertexAttribute(attribute, VertexBuffer<sizeof(V)/sizeof(F), F>(vertexData));
-        }
-
         template<typename V, typename F, size_t stride>
-        void setVertexAttribute(Attribute<V, F> attribute, const VertexBuffer<stride, F> &vbo, GLuint offset=0, GLboolean normalized=GL_FALSE)
+        void setAttributeAtOffset(GLuint offset, Attribute<V, F> attribute, const VertexBuffer<stride, F> &vbo, GLboolean normalized=GL_FALSE)
         {
             bind();
             vbo.bind();
-            attribute.enable();
             attribute.pointer(normalized, stride, offset); 
             unbind();
         }
 
-        void setVertexIndices(const std::initializer_list<GLuint> &indices)  
+        template<typename V, typename F, size_t stride>
+        void setAttribute(Attribute<V, F> attribute, const VertexBuffer<stride, F> &vbo, bool normalized=false)
         {
-            setVertexIndices(ElementBuffer(indices));
+            setAttributeAtOffset(0, attribute, vbo, normalized ? GL_TRUE : GL_FALSE);
         }
 
-        void setVertexIndices(const ElementBuffer &ebo)
+        void setIndices(const ElementBuffer &ebo)
         {
             bind();
             ebo.bind();

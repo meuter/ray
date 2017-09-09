@@ -11,32 +11,34 @@ using namespace ray::gl;
 
 /******************************************************************************/
 
-class TexturedQuad : public VertexArray 
+class TexturedQuad 
 {
 public:
-    TexturedQuad(const std::string &textureFilename) : VertexArray(), mTexture(textureFilename)
+    TexturedQuad(const std::string &textureFilename) 
     {
-        auto vbo = VertexBuffer<4, GLfloat>({
+        mTexture.load(textureFilename);
+        mVertexBuffer.load({
             // position     tex coord
             -0.5f, -0.5f,   0.0f, 1.0f, // bottom left
             -0.5f,  0.5f,   0.0f, 0.0f, // top left 
              0.5f, -0.5f,   1.0f, 1.0f, // bottom right
              0.5f,  0.5f,   1.0f, 0.0f, // top right
         });
-        setVertexAttribute(ATTRIBUTE_2F_POSITION, vbo, 0);
-        setVertexAttribute(ATTRIBUTE_2F_TEXCOORD, vbo, 2);
+        mVertexArray.setAttributeAtOffset(0, ATTRIBUTE_2F_POSITION, mVertexBuffer);
+        mVertexArray.setAttributeAtOffset(2, ATTRIBUTE_2F_TEXCOORD, mVertexBuffer);
     }
     
     void draw() const
     {
-        bind();
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        unbind();
+        mVertexArray.bind();
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, mVertexBuffer.count());
     }
 
     const Texture &texture() const { return mTexture; }
 private:
     Texture mTexture;
+    VertexArray mVertexArray;
+    VertexBuffer<4,GLfloat> mVertexBuffer;
 };
 
 /******************************************************************************/
