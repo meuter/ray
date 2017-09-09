@@ -19,7 +19,7 @@ addons:
 before_script:
   - mkdir -p build
   - cd build  
-  - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -D..
+  - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
 
 script:
   - cmake --build . -- -j10
