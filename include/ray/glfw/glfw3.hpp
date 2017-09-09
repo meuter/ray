@@ -94,7 +94,7 @@ namespace ray { namespace glfw {
         inline bool shouldClose() const { return glfwWindowShouldClose(mHandle); }        
         inline void setShouldClose(bool value) const { return glfwSetWindowShouldClose(mHandle, value); }
         inline void setTitle(const std::string &title) const { glfwSetWindowTitle(mHandle, title.c_str()); }
-        inline void setIcon(const std::vector<const GLFWimage> &images) const { glfwSetWindowIcon(mHandle, images.size(), &images[0]); } // @TODO: create proper Image class
+        inline void setIcon(const std::vector<GLFWimage> &images) const { glfwSetWindowIcon(mHandle, images.size(), &images[0]); } // @TODO: create proper Image class
         inline void getPosition(int &x, int &y) const { glfwGetWindowPos(mHandle, &x, &y); }
         inline void setPosition(int x, int y) const { glfwSetWindowPos(mHandle, x, y); }
         inline void getSize(int &w, int &h) const { glfwGetWindowSize(mHandle, &w, &h); }
