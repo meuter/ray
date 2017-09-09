@@ -56,7 +56,7 @@ before_install:
 before_script:
   - mkdir -p build
   - cd build  
-  - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
+  - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DGLFW_BUILD_EXAMPLES=0 -DGLFW_BUILD_TESTS=0 ..
 
 script:
   - cmake --build . -- -j10
