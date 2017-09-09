@@ -18,5 +18,10 @@ namespace ray { namespace platform {
     }
 }}
 
-#define panic(format, ...)                  ray::platform::details::_panic(__FILE__, __LINE__, format, ##__VA_ARGS__)
-#define panicif(condition, format, ...)     if (condition) ray::platform::details::_panic(__FILE__, __LINE__, format, ##__VA_ARGS__)
+#ifndef NDEBUG
+#   define panic(format, ...)                  ray::platform::details::_panic(__FILE__, __LINE__, format, ##__VA_ARGS__)
+#   define panicif(condition, format, ...)     if (condition) ray::platform::details::_panic(__FILE__, __LINE__, format, ##__VA_ARGS__)
+#else
+#   define panic(format, ...)
+#   define panicif(condition, format, ...)
+#endif

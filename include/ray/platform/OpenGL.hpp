@@ -29,4 +29,8 @@ namespace ray { namespace platform {
     
 }}
 
-#define gl(x) do { gl##x; ray::platform::details::checkGlError(__FILE__, __LINE__, #x); } while(false)
+#ifndef NDEBUG
+#   define gl(x) do { gl##x; ray::platform::details::checkGlError(__FILE__, __LINE__, #x); } while(false)
+#else
+#   define gl(x) gl##x;
+#endif
