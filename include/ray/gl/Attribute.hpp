@@ -20,11 +20,11 @@ namespace ray { namespace gl {
             gl(VertexAttribPointer(mLocation, scalarCount(), scalarType(), normalized, stride*scalarSize(), (GLvoid *)(offset*scalarSize())));
         }
 
-        auto type() const { return getType<V>(); }
-        auto size() const { return sizeof(V); }
-        auto scalarType() const { return getType<F>(); }
-        auto scalarSize() const { return sizeof(F); }
-        auto scalarCount() const { return size()/scalarSize(); }
+        constexpr auto type() const { return getType<V>(); }
+        constexpr auto size() const { return sizeof(V); }
+        constexpr auto scalarType() const { return getType<F>(); }
+        constexpr auto scalarSize() const { return sizeof(F); }
+        constexpr auto scalarCount() const { return size()/scalarSize(); }
 
     private:
         friend class ShaderProgram;
