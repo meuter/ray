@@ -1,0 +1,21 @@
+language: cpp
+
+compiler:
+  - gcc
+  - clang
+
+env:
+  - BUILD_TYPE=Debug
+  - BUILD_TYPE=Release
+
+before_script:
+  - mkdir -p build
+  - cd build  
+  - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
+
+script:
+  - cmake --build . -- -j10
+  - ctest -j10 -C ${BUILD_TYPE} --output-on-failure
+
+notifications:
+  email: false
