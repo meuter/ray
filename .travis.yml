@@ -1,6 +1,10 @@
 language: cpp
 
-# necessary for GLFW
+compiler:
+  - gcc
+  - clang
+
+# GLFW dependencies
 addons:
     apt:
         sources:
