@@ -33,7 +33,7 @@ namespace ray { namespace gl {
     }
 
     template<typename T>
-    GLenum getType() 
+    constexpr GLenum getType() 
     {
         return details::OpenGLType<T>::result;
     }

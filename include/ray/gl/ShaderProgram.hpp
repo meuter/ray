@@ -98,8 +98,8 @@ namespace ray { namespace gl {
             }
         }
 
-        template<typename T>
-        void bind(Attribute<T> attribute, const std::string &name)
+        template<typename V, typename T>
+        void bind(Attribute<V, T> attribute, const std::string &name)
         {
             panicif(mLinked, "attrbiutes must be bound before the program has been linked");
             gl(BindAttribLocation(mHandle, attribute.mLocation, name.c_str()));

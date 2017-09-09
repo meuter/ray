@@ -14,26 +14,19 @@ namespace ray { namespace gl {
         inline void bind() const { gl(BindVertexArray(mHandle)); }
         inline void unbind() const { gl(BindVertexArray(0)); }
 
-        template<typename T, typename U>
-        void setVertexAttribute(Attribute<T> attrib, const std::initializer_list<U> &vertexData)
+        template<typename V, typename F>
+        void setVertexAttribute(Attribute<V, F> attribute, const std::initializer_list<F> &vertexData)
         {
-            setVertexAttribute(attrib, VertexBuffer<U>(vertexData), attrib.size()/sizeof(U), 0);
+            setVertexAttribute(attribute, VertexBuffer<F>(vertexData), attribute.scalarCount(), 0);
         }
 
-        template<typename T, typename U>
-        void setVertexAttribute(Attribute<T> attrib,const VertexBuffer<U> &vbo, GLuint stride, GLuint offset)
-        {
-            const auto nComponent = attrib.size() / sizeof(U);            
-            vertexAttribute(vbo, attrib, attrib.size() / sizeof(U), getType<U>(), GL_FALSE, stride, offset);
-        }
-
-        template<typename T, typename U>
-        void vertexAttribute(const VertexBuffer<U> &vbo, Attribute<T> attrib, GLint count, GLenum type, GLboolean normalized, GLsizei stride, size_t offset)
+        template<typename V, typename F>
+        void setVertexAttribute(Attribute<V, F> attribute, const VertexBuffer<F> &vbo, GLuint stride, GLuint offset, GLboolean normalized=GL_FALSE)
         {
             bind();
             vbo.bind();
-            attrib.enable();
-            attrib.pointer(count, type, normalized, stride*sizeof(U), offset*sizeof(U));
+            attribute.enable();
+            attribute.pointer(normalized, stride, offset); 
             unbind();
         }
 
