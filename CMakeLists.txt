@@ -15,5 +15,15 @@ add_subdirectory(contrib/glfw)
 add_library(glad contrib/glfw/deps/glad.c)
 target_include_directories(glad PUBLIC contrib/glfw/deps/)
 
+###### Ray
+add_library(ray INTERFACE)
+target_include_directories(ray INTERFACE include/)
+target_link_libraries(ray INTERFACE glfw glad)
+
 ###### Samples
 add_subdirectory(samples)
+
+###### Tests
+enable_testing()
+add_subdirectory(contrib/googletest)
+add_subdirectory(test)

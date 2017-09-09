@@ -1,14 +1,8 @@
-include_directories(
-    ../include/
-    ../contrib/glfw/include
-)
+macro(add_sample TARGET)
+    add_executable(${TARGET} ${TARGET}.cpp)
+    target_link_libraries(${TARGET} ray)
+endmacro(add_sample)
 
-link_libraries(
-    glfw
-    glad
-    ${OPENGL_gl_LIBRARY}    
-)
-
-add_executable(window window.cpp)
-add_executable(rectangle rectangle.cpp)
+add_sample(window)
+add_sample(rectangle)
 
