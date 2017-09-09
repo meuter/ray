@@ -41,10 +41,10 @@ using uvec4 = Vector4<u32>;
     }
 
 #define TEST_VECTOR4_COORDINATES(vec, scalar, coord1, coord2, coord3, coord4, s1, s2, s3, s4) \
-    TEST(vec, coord_##coord1##_IsScalar) { EXPECT_EQ(typeid(vec::coord1), typeid(scalar)); }\
-    TEST(vec, coord_##coord2##_IsScalar) { EXPECT_EQ(typeid(vec::coord2), typeid(scalar)); }\
-    TEST(vec, coord_##coord3##_IsScalar) { EXPECT_EQ(typeid(vec::coord3), typeid(scalar)); }\
-    TEST(vec, coord_##coord4##_IsScalar) { EXPECT_EQ(typeid(vec::coord4), typeid(scalar)); }\
+    TEST(vec, coord_##coord1##_IsScalar) { auto v = vec{s1, s2, s3, s4}; EXPECT_EQ(typeid(v.coord1), typeid(scalar)); }\
+    TEST(vec, coord_##coord2##_IsScalar) { auto v = vec{s1, s2, s3, s4}; EXPECT_EQ(typeid(v.coord2), typeid(scalar)); }\
+    TEST(vec, coord_##coord3##_IsScalar) { auto v = vec{s1, s2, s3, s4}; EXPECT_EQ(typeid(v.coord3), typeid(scalar)); }\
+    TEST(vec, coord_##coord4##_IsScalar) { auto v = vec{s1, s2, s3, s4}; EXPECT_EQ(typeid(v.coord4), typeid(scalar)); }\
     TEST(vec, coord_##coord1##_CanBeAccessed) { auto v = vec{s1,s2,s3,s4}; EXPECT_EQ(v.coord1,s1); }\
     TEST(vec, coord_##coord2##_CanBeAccessed) { auto v = vec{s1,s2,s3,s4}; EXPECT_EQ(v.coord2,s2); }\
     TEST(vec, coord_##coord3##_CanBeAccessed) { auto v = vec{s1,s2,s3,s4}; EXPECT_EQ(v.coord3,s3); }\
