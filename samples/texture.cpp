@@ -30,10 +30,11 @@ public:
     void draw() const
     {
         bind();
-        mTexture.bind(GL_TEXTURE0);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         unbind();
     }
+
+    const Texture &texture() const { return mTexture; }
 private:
     Texture mTexture;
 };
@@ -49,17 +50,19 @@ public:
         mShader.attach(VertexShader(VERTEX_SHADER));
         mShader.bind(ATTRIBUTE_POSITION, "vertPosition");
         mShader.bind(ATTRIBUTE_TEXCOORD, "vertTexCoord");
-        // FIXME: The texture is implicitely bound to sample2D 0  => need uniform binding
         mShader.link();       
+        mShader.bind(mQuadTexture, "quadTexture");
     }
 
     void render(const TexturedQuad &quad)
     {
         mShader.use();
+        mQuadTexture = quad.texture().bind(GL_TEXTURE0);;
         quad.draw();
     }
 private:
     ShaderProgram mShader;
+    Uniform<sampler2D> mQuadTexture;
 
     static constexpr auto VERTEX_SHADER = GLSL(330, 
         in  vec2 vertPosition;

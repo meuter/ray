@@ -88,10 +88,10 @@ namespace ray { namespace gl {
         return result;        
     }
 
-    sampler2D Texture::bind(GLuint slotIndex) const 
+    sampler2D Texture::bind(GLuint textureSlot) const 
     {
-        glActiveTexture(slotIndex);
+        glActiveTexture(textureSlot);
         glBindTexture(GL_TEXTURE_2D, mHandle); 
-        return sampler2D{slotIndex};
+        return sampler2D{GL_TEXTURE0-textureSlot};
     }
 }}
