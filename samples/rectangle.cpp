@@ -16,7 +16,7 @@ class Quad : public VertexArray
 public:
     Quad() : VertexArray()
     {
-        setVertexAttribute(ATTRIBUTE_POSITION2D, {
+        setVertexAttribute(ATTRIBUTE_2F_POSITION, {
             -0.5f, -0.5f,
             -0.5f,  0.5f,
              0.5f, -0.5f,
@@ -41,7 +41,7 @@ public:
     {
         mShader.attach(FragmentShader(FRAGMENT_SHADER));
         mShader.attach(VertexShader(VERTEX_SHADER));
-        mShader.bind(ATTRIBUTE_POSITION2D, "vertPosition");
+        mShader.bind(ATTRIBUTE_2F_POSITION, "vertPosition");
         mShader.link();       
     }
 

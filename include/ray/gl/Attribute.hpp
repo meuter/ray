@@ -3,6 +3,7 @@
 #include <ray/platform/OpenGL.hpp>
 #include <ray/platform/Panic.hpp>
 #include <ray/math/LinearAlgebra.hpp>
+#include <ray/gl/Type.hpp>
 
 namespace ray { namespace gl {
 
@@ -21,17 +22,18 @@ namespace ray { namespace gl {
         }
 
         auto size() const { return sizeof(T); }
+        auto type() const { return getType<T>(); }
 
     private:
         friend class ShaderProgram;
         GLint mLocation = 0;
     };
 
-    static constexpr auto ATTRIBUTE_POSITION2D = Attribute<math::vec2>{0};
-    static constexpr auto ATTRIBUTE_POSITION3D = Attribute<math::vec3>{1};
-    static constexpr auto ATTRIBUTE_TEXCOORD   = Attribute<math::vec2>{2};
-    static constexpr auto ATTRIBUTE_NORMAL     = Attribute<math::vec3>{3};
-    static constexpr auto ATTRIBUTE_COLOR4F    = Attribute<math::vec4>{4};
-    static constexpr auto ATTRIBUTE_COLORU32   = Attribute<math::u32>{4};
+    static constexpr auto ATTRIBUTE_2F_POSITION  = Attribute<math::vec2>{0};
+    static constexpr auto ATTRIBUTE_3F_POSITION  = Attribute<math::vec3>{1};
+    static constexpr auto ATTRIBUTE_2F_TEXCOORD  = Attribute<math::vec2>{2};
+    static constexpr auto ATTRIBUTE_3F_NORMAL    = Attribute<math::vec3>{3};
+    static constexpr auto ATTRIBUTE_4F_COLOR     = Attribute<math::vec4>{4};
+    static constexpr auto ATTRIBUTE_1I_COLORU_1I = Attribute<math::u32>{4};
     
 }}

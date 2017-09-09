@@ -1,8 +1,8 @@
 #pragma once
 
 #include <ray/gl/Texture.hpp>
+#include <ray/gl/Type.hpp>
 #include <ray/math/LinearAlgebra.hpp>
-
 
 namespace ray { namespace gl {
     
@@ -13,6 +13,8 @@ namespace ray { namespace gl {
         constexpr Uniform() : mLocation(0) {}
         void operator=(const T &t) const { set(mLocation, t); }
         void set(const T &t) const { set(mLocation, t); }
+
+        auto type() const { return getType<T>(); }
 
     private:
         static void set(GLint location, const math::f32 &f) { gl(Uniform1f(location, f)); }
