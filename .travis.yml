@@ -5,8 +5,12 @@ compiler:
   - clang
 
 env:
-  - BUILD_TYPE=Debug
-  - BUILD_TYPE=Release
+  global:
+    - GLFW_BUILD_EXAMPLES=0
+    - GLFW_BUILD_TESTS=0
+  matrix:
+    - BUILD_TYPE=Debug
+    - BUILD_TYPE=Release
 
 # necessary for GLFW
 addons:
