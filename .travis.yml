@@ -26,7 +26,7 @@ matrix:
     ## Linux(Trusty) - CLANG 5 - Release
     - os: linux
       dist: trusty
-      compiler: gcc
+      compiler: clang
       addons:
         apt:
           sources:
