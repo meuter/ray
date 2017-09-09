@@ -6,9 +6,6 @@ using namespace ray::platform;
 int main()
 {
     auto window = Window(1920, 1080, "Window Sample");
-    window.makeContextCurrent();
-    window.loadGLExtensions();    
-    window.swapInterval(0);
 
     gl(ClearColor(0.0f, 0.2f, 0.2f, 0.0f));
 

@@ -83,7 +83,12 @@ namespace ray { namespace platform {
         friend class Library;
         GLFWwindow *mHandle;
         bool mShouldBeDestroyed;
-        inline Window(GLFWwindow *handle, bool shouldBeDestroyed) : mHandle(handle), mShouldBeDestroyed(shouldBeDestroyed) { (void)mHandle; }
+        inline Window(GLFWwindow *handle, bool shouldBeDestroyed) : mHandle(handle), mShouldBeDestroyed(shouldBeDestroyed) 
+        {
+            makeContextCurrent();
+            gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+            swapInterval(0);
+        }            
     public:
         inline Window(int width, int height, const std::string &title, const Monitor &monitor, const Window &share);
         inline Window(int width, int height, const std::string &title, const Window &share);
@@ -136,7 +141,6 @@ namespace ray { namespace platform {
         inline void setCursorPosition(double x, double y) const { return glfwSetCursorPos(mHandle, x, y); }
         inline void setCursor(const Cursor &cursor) const { glfwSetCursor(mHandle, cursor.mHandle); }
         inline void makeContextCurrent() const { glfwMakeContextCurrent(mHandle); }
-        inline void loadGLExtensions() const { gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); }
         inline void swapBuffers() const { glfwSwapBuffers(mHandle); }
         inline std::string getClipboardString() const { return glfwGetClipboardString(mHandle); }
         inline void setClipboardString(const std::string &string) const { glfwSetClipboardString(mHandle, string.c_str()); }
@@ -235,10 +239,10 @@ namespace ray { namespace platform {
     }
     inline GLFWmonitorfun Monitor::setCallback(GLFWmonitorfun callback) { return Library::getInstance().setMonitorCallback(callback); }
 
-    inline Window::Window(int width, int height, const std::string &title, const Monitor &monitor, const Window &share) : mHandle(Library::getInstance().createWindow(width, height, title, monitor.mHandle, share.mHandle)), mShouldBeDestroyed(true) {}
-    inline Window::Window(int width, int height, const std::string &title, const Window &share) : mHandle(Library::getInstance().createWindow(width, height, title, nullptr, share.mHandle)), mShouldBeDestroyed(true) {}
-    inline Window::Window(int width, int height, const std::string &title, const Monitor &monitor) : mHandle(Library::getInstance().createWindow(width, height, title, monitor.mHandle, nullptr)), mShouldBeDestroyed(true) {}
-    inline Window::Window(int width, int height, const std::string &title) : mHandle(Library::getInstance().createWindow(width, height, title, nullptr, nullptr)), mShouldBeDestroyed(true) {}
+    inline Window::Window(int width, int height, const std::string &title, const Monitor &monitor, const Window &share) : Window(Library::getInstance().createWindow(width, height, title, monitor.mHandle, share.mHandle), true) {}
+    inline Window::Window(int width, int height, const std::string &title, const Window &share) : Window(Library::getInstance().createWindow(width, height, title, nullptr, share.mHandle), true) {}
+    inline Window::Window(int width, int height, const std::string &title, const Monitor &monitor) : Window(Library::getInstance().createWindow(width, height, title, monitor.mHandle, nullptr), true) {}
+    inline Window::Window(int width, int height, const std::string &title) : Window(Library::getInstance().createWindow(width, height, title, nullptr, nullptr), true) {}
     inline void Window::defaultHint() { Library::getInstance().defaultWindowHint(); }
     inline void Window::hint(int hint, int value) { Library::getInstance().windowHint(hint, value); }
     inline void Window::pollEvents() { Library::getInstance().pollEvents(); }

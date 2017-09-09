@@ -93,11 +93,7 @@ private:
 
 int main()
 {
-    auto window = Window(1920, 1080, "Texture Sample");
-    window.makeContextCurrent();
-    window.loadGLExtensions();
-    window.swapInterval(0);
-    
+    auto window   = Window(1920, 1080, "Texture Sample");
     auto quad     = TexturedQuad("res/images/awesomeface.png");
     auto renderer = QuadRenderer();
 

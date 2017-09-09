@@ -73,11 +73,7 @@ private:
 
 int main()
 {
-    auto window = Window(1920, 1080, "Rectangle Sample");
-    window.makeContextCurrent();
-    window.loadGLExtensions();
-    window.swapInterval(0);
-    
+    auto window   = Window(1920, 1080, "Rectangle Sample"); 
     auto quad     = Quad();
     auto renderer = QuadRenderer();
 
