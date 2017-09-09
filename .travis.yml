@@ -1,14 +1,11 @@
 language: cpp
 
-compiler:
-  - gcc
-  - clang
-
 # GLFW dependencies
 addons:
     apt:
         sources:
             - kubuntu-backports
+            - llvm-toolchain-trusty-5.0
         packages:
             - cmake
             - libxrandr-dev
@@ -18,10 +15,16 @@ addons:
             - libglu1-mesa-dev
             - freeglut3-dev
             - mesa-common-dev
+            - clang-5.0
 
 env:
   - BUILD_TYPE=Debug
   - BUILD_TYPE=Release
+  - TOOLCHAIN="CC=gcc && CXX=g++"
+  - TOOLCHAIN="CC=clang-5.0 && CXX=clang++-5.0"
+
+before_install:
+  - eval "${TOOLCHAIN}""
 
 before_script:
   - mkdir -p build
