@@ -1,6 +1,3 @@
-
-set(CMAKE_CXX_STANDARD 11)
-
 include_directories(
     ../include/
     ../contrib/glfw/include
@@ -13,4 +10,5 @@ link_libraries(
 )
 
 add_executable(window window.cpp)
+add_executable(rectangle rectangle.cpp)
 
