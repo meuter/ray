@@ -24,7 +24,7 @@ matrix:
             - libboost-dev
             - g++-4.9
       env:
-        - CC=gcc-4.9 && CXX=g++-4.9 && BUILD_TYPE=Release
+        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9 && BUILD_TYPE=Release"
 
     ## Linux(Trusty) - CLANG 5 - Release
     - os: linux
