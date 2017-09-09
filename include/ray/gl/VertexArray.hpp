@@ -17,11 +17,11 @@ namespace ray { namespace gl {
         template<typename V, typename F>
         void setVertexAttribute(Attribute<V, F> attribute, const std::initializer_list<F> &vertexData)
         {
-            setVertexAttribute(attribute, VertexBuffer<F>(vertexData), attribute.scalarCount(), 0);
+            setVertexAttribute(attribute, VertexBuffer<sizeof(V)/sizeof(F), F>(vertexData));
         }
 
-        template<typename V, typename F>
-        void setVertexAttribute(Attribute<V, F> attribute, const VertexBuffer<F> &vbo, GLuint stride, GLuint offset, GLboolean normalized=GL_FALSE)
+        template<typename V, typename F, size_t stride>
+        void setVertexAttribute(Attribute<V, F> attribute, const VertexBuffer<stride, F> &vbo, GLuint offset=0, GLboolean normalized=GL_FALSE)
         {
             bind();
             vbo.bind();

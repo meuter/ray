@@ -5,7 +5,7 @@
 
 namespace ray { namespace gl {
         
-    template<GLenum target, typename T=GLfloat>
+    template<GLenum target, size_t stride, typename T>
     class Buffer 
     {     
     public:   
@@ -56,8 +56,9 @@ namespace ray { namespace gl {
         gl::Handle<create, destroy> mHandle;
     };
 
-    template<typename T>
-    using VertexBuffer  = Buffer<GL_ARRAY_BUFFER, T>;
-    using ElementBuffer = Buffer<GL_ELEMENT_ARRAY_BUFFER, GLuint>;
+    template<size_t stride, typename T>
+    using VertexBuffer  = Buffer<GL_ARRAY_BUFFER, stride, T>;
+    
+    using ElementBuffer = Buffer<GL_ELEMENT_ARRAY_BUFFER, 1, GLuint>;
 
 }}

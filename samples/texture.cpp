@@ -16,15 +16,15 @@ class TexturedQuad : public VertexArray
 public:
     TexturedQuad(const std::string &textureFilename) : VertexArray(), mTexture(textureFilename)
     {
-        auto vbo = VertexBuffer<GLfloat>({
+        auto vbo = VertexBuffer<4, GLfloat>({
             // position     tex coord
             -0.5f, -0.5f,   0.0f, 1.0f, // bottom left
             -0.5f,  0.5f,   0.0f, 0.0f, // top left 
              0.5f, -0.5f,   1.0f, 1.0f, // bottom right
              0.5f,  0.5f,   1.0f, 0.0f, // top right
         });
-        setVertexAttribute(ATTRIBUTE_2F_POSITION, vbo, 4, 0);
-        setVertexAttribute(ATTRIBUTE_2F_TEXCOORD, vbo, 4, 2);
+        setVertexAttribute(ATTRIBUTE_2F_POSITION, vbo, 0);
+        setVertexAttribute(ATTRIBUTE_2F_TEXCOORD, vbo, 2);
     }
     
     void draw() const
