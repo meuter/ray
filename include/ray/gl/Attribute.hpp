@@ -17,9 +17,8 @@ namespace ray { namespace gl {
             glVertexAttribPointer(mLocation, count, type, normalized, stride, (GLvoid *)(offset));
         }
 
-        constexpr auto location() const { return mLocation; }
-
     private:
+        friend class ShaderProgram;
         GLint mLocation = 0;
     };
 

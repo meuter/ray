@@ -5,6 +5,7 @@
 #include <ray/gl/Attribute.hpp>
 #include <ray/gl/Shader.hpp>
 #include <ray/gl/Uniform.hpp>
+#include <ray/gl/Type.hpp>
 #include <unordered_map>
 
 namespace ray { namespace gl {
@@ -61,12 +62,21 @@ namespace ray { namespace gl {
             auto hit = mUniformLocationByName.find(name);
             panicif(hit == mUniformLocationByName.end(), "cannot find location of uniform '%s'", name);
             uniform.mLocation = hit->second;           
+            
+            auto dynamicType = mUniformTypesByLocation.at(uniform.mLocation);
+            auto staticType  = getType<T>();
+            if (dynamicType != staticType) 
+            {
+                auto staticName = getTypeName(staticType);
+                auto dynamicName = getTypeName(dynamicType);
+                panic("type mismatch: uniform '%s' is declared as '%s', but in shader code, it is declared as '%s'", name, staticName, dynamicName);
+            }
         }
 
         void bind(Attribute attribute, const std::string &name)
         {
             panicif(mLinked, "attrbiutes must be bound before the program has been linked");
-            glBindAttribLocation(mHandle, attribute.location(), name.c_str());
+            glBindAttribLocation(mHandle, attribute.mLocation, name.c_str());
         }
 
     private:
