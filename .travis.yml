@@ -8,6 +8,18 @@ env:
   - BUILD_TYPE=Debug
   - BUILD_TYPE=Release
 
+# necessary for GLFW
+addons:
+    apt:
+        sources:
+            - kubuntu-backports
+        packages:
+            - cmake
+            - libxrandr-dev
+            - libxinerama-dev
+            - libxcursor-dev
+            - libxi-dev
+
 before_script:
   - mkdir -p build
   - cd build  
