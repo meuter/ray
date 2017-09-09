@@ -15,6 +15,9 @@ addons:
             - libxinerama-dev
             - libxcursor-dev
             - libxi-dev
+            - libglu1-mesa-dev
+            - freeglut3-dev
+            - mesa-common-dev
 
 before_script:
   - mkdir -p build
