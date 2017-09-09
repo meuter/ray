@@ -11,6 +11,7 @@ matrix:
         apt:
           sources:
             - kubuntu-backports
+            - ubuntu-toolchain-r-test
           packages:
             - cmake
             - libxrandr-dev
@@ -21,8 +22,9 @@ matrix:
             - freeglut3-dev
             - mesa-common-dev
             - libboost-dev
+            - g++-4.9
       env:
-        - MATRIX_EVAL="BUILD_TYPE=Release"
+        - CC=gcc-4.9 && CXX=g++-4.9 && BUILD_TYPE=Release
 
     ## Linux(Trusty) - CLANG 5 - Release
     - os: linux
