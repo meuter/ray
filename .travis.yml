@@ -1,12 +1,15 @@
 language: cpp
 
-# GLFW dependencies
-addons:
-    apt:
-        sources:
+matrix:
+  include:  
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      addons:
+        apt:
+          sources:
             - kubuntu-backports
-            - llvm-toolchain-trusty-5.0
-        packages:
+          packages:
             - cmake
             - libxrandr-dev
             - libxinerama-dev
@@ -15,16 +18,12 @@ addons:
             - libglu1-mesa-dev
             - freeglut3-dev
             - mesa-common-dev
-            - clang-5.0
+      env:
+        - MATRIX_EVAL="BUILD_TYPE=Release"
 
-env:
-  - BUILD_TYPE=Debug
-  - BUILD_TYPE=Release
-  - TOOLCHAIN="CC=gcc && CXX=g++"
-  - TOOLCHAIN="CC=clang-5.0 && CXX=clang++-5.0"
 
 before_install:
-  - eval "${TOOLCHAIN}""
+  - eval "${MATRIX_EVAL}"
 
 before_script:
   - mkdir -p build
