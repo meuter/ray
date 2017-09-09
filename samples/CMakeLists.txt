@@ -5,4 +5,6 @@ endmacro(add_sample)
 
 add_sample(window)
 add_sample(rectangle)
+add_sample(texture)
+
 

@@ -6,5 +6,6 @@ macro(add_unit_test SUBDIR TARGET)
 endmacro(add_unit_test)
 
 add_unit_test(platform PrintTests)
+add_unit_test(assets   BitmapTests)
 
 

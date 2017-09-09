@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_CXX_STANDARD 14)
 
+###### Boost
+find_package(Boost REQUIRED)
+
 ###### OpenGL
 find_package(OpenGL REQUIRED)
 
@@ -15,10 +18,23 @@ add_subdirectory(contrib/glfw)
 add_library(glad contrib/glfw/deps/glad.c)
 target_include_directories(glad PUBLIC contrib/glfw/deps/)
 
+###### STB
+add_library(stb INTERFACE)
+target_include_directories(stb INTERFACE contrib/stb)
+
 ###### Ray
-add_library(ray INTERFACE)
-target_include_directories(ray INTERFACE include/)
-target_link_libraries(ray INTERFACE glfw glad)
+add_library(ray 
+    src/ray/assets/Bitmap.cpp
+    src/ray/gl/Texture.cpp
+)
+
+target_include_directories(ray
+    PUBLIC
+        include
+    PRIVATE
+        ${Boost_INCLUDE_DIRS}
+)
+target_link_libraries(ray PUBLIC stb glfw glad)
 
 ###### Samples
 add_subdirectory(samples)
