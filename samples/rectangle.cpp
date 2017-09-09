@@ -7,6 +7,7 @@
 
 using namespace ray::platform;
 using namespace ray::gl;
+using namespace ray::math;
 
 /******************************************************************************/
 
@@ -15,7 +16,7 @@ class Quad : public VertexArray
 public:
     Quad() : VertexArray()
     {
-        setVertexAttribute(ATTRIBUTE_POSITION, 2, {
+        setVertexAttribute(ATTRIBUTE_POSITION2D, {
             -0.5f, -0.5f,
             -0.5f,  0.5f,
              0.5f, -0.5f,
@@ -40,7 +41,7 @@ public:
     {
         mShader.attach(FragmentShader(FRAGMENT_SHADER));
         mShader.attach(VertexShader(VERTEX_SHADER));
-        mShader.bind(ATTRIBUTE_POSITION, "vertPosition");
+        mShader.bind(ATTRIBUTE_POSITION2D, "vertPosition");
         mShader.link();       
     }
 

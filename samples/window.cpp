@@ -10,11 +10,11 @@ int main()
     window.loadGLExtensions();    
     window.swapInterval(0);
 
-    glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
+    gl(ClearColor(0.0f, 0.2f, 0.2f, 0.0f));
 
     while (!window.shouldClose())
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        gl(Clear(GL_COLOR_BUFFER_BIT));
         window.pollEvents();
         window.swapBuffers();
     }

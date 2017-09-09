@@ -21,20 +21,20 @@ namespace ray { namespace gl {
         void load(const T *data, size_t count, GLuint usage=GL_STATIC_DRAW)
         {
             bind();
-            glBufferData(target, count * sizeof(T), data, usage);
+            gl(BufferData(target, count * sizeof(T), data, usage));
         }
 
         void loadAt(size_t countOffset, const T *data, size_t count)
         {
             bind();
-            glBufferSubData(target, countOffset*sizeof(T), count*sizeof(T), &data[0]);
+            gl(BufferSubData(target, countOffset*sizeof(T), count*sizeof(T), &data[0]));
         }
 
         size_t size() const
         {
             GLint result = 0;
             bind();
-            glGetBufferParameteriv(target, GL_BUFFER_SIZE, &result);
+            gl(GetBufferParameteriv(target, GL_BUFFER_SIZE, &result));
             return result / sizeof(T);
         }
 
@@ -46,13 +46,13 @@ namespace ray { namespace gl {
 
         T *map(GLenum access) { bind(); return reinterpret_cast<T*>(glMapBuffer(GL_ARRAY_BUFFER, access)); }
 
-        void unmap() { bind(); glUnmapBuffer(target); }
-        void bind() const  { glBindBuffer(target, mHandle); }
-        void unbind() const { glBindBuffer(target, 0); }
+        void unmap() { bind(); gl(UnmapBuffer(target)); }
+        void bind() const  { gl(BindBuffer(target, mHandle)); }
+        void unbind() const { gl(BindBuffer(target, 0)); }
 
     private:
-        static void create(GLuint &handle) { glGenBuffers(1, &handle); }
-        static void destroy(GLuint handle) { glDeleteBuffers(1, &handle); }
+        static void create(GLuint &handle) { gl(GenBuffers(1, &handle)); }
+        static void destroy(GLuint handle) { gl(DeleteBuffers(1, &handle)); }
         gl::Handle<create, destroy> mHandle;
     };
 

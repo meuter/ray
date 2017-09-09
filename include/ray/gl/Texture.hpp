@@ -51,8 +51,8 @@ namespace ray { namespace gl {
         sampler2D bind(GLuint slotIndex=GL_TEXTURE0) const;
 
     private:
-        static void destroy(GLuint handle) { glDeleteTextures(1, &handle); }
-        static void create(GLuint &handle) { glGenTextures(1, &handle); }
+        static void destroy(GLuint handle) { gl(DeleteTextures(1, &handle)); }
+        static void create(GLuint &handle) { gl(GenTextures(1, &handle)); }
         gl::Handle<create, destroy> mHandle;
     };
 

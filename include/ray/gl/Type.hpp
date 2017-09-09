@@ -2,6 +2,8 @@
 
 #include <ray/platform/OpenGL.hpp>
 #include <ray/platform/Print.hpp>
+#include <ray/gl/Texture.hpp>
+#include <ray/math/LinearAlgebra.hpp>
 
 namespace ray { namespace gl {
 
@@ -9,8 +11,12 @@ namespace ray { namespace gl {
     {
         template<typename U> struct OpenGLType { static constexpr GLenum result = 0; };
 
-        template<> struct OpenGLType<GLfloat> { static constexpr GLenum result = GL_FLOAT; }; 
-        template<> struct OpenGLType<sampler2D> { static constexpr GLenum result = GL_SAMPLER_2D; }; 
+        template<> struct OpenGLType<math::f32>  { static constexpr GLenum result = GL_FLOAT; }; 
+        template<> struct OpenGLType<math::vec2> { static constexpr GLenum result = GL_FLOAT_VEC2; }; 
+        template<> struct OpenGLType<math::vec3> { static constexpr GLenum result = GL_FLOAT_VEC3; }; 
+        template<> struct OpenGLType<math::vec4> { static constexpr GLenum result = GL_FLOAT_VEC4; }; 
+        template<> struct OpenGLType<math::mat4> { static constexpr GLenum result = GL_FLOAT_MAT4; }; 
+        template<> struct OpenGLType<sampler2D>  { static constexpr GLenum result = GL_SAMPLER_2D; }; 
     }
 
     std::string getTypeName(GLenum type) 

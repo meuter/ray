@@ -23,8 +23,8 @@ public:
              0.5f, -0.5f,   1.0f, 1.0f, // bottom right
              0.5f,  0.5f,   1.0f, 0.0f, // top right
         });
-        setVertexAttribute(ATTRIBUTE_POSITION, 2, vbo, 4, 0);
-        setVertexAttribute(ATTRIBUTE_TEXCOORD, 2, vbo, 4, 2);
+        setVertexAttribute(ATTRIBUTE_POSITION2D, vbo, 4, 0);
+        setVertexAttribute(ATTRIBUTE_TEXCOORD, vbo, 4, 2);
     }
     
     void draw() const
@@ -48,7 +48,7 @@ public:
     {
         mShader.attach(FragmentShader(FRAGMENT_SHADER));
         mShader.attach(VertexShader(VERTEX_SHADER));
-        mShader.bind(ATTRIBUTE_POSITION, "vertPosition");
+        mShader.bind(ATTRIBUTE_POSITION2D, "vertPosition");
         mShader.bind(ATTRIBUTE_TEXCOORD, "vertTexCoord");
         mShader.link();       
         mShader.bind(mQuadTexture, "quadTexture");

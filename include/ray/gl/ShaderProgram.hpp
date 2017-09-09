@@ -15,30 +15,30 @@ namespace ray { namespace gl {
     public:
         ShaderProgram() = default;
 
-        void use() const { glUseProgram(mHandle); }
+        void use() const { gl(UseProgram(mHandle)); }
 
         template<GLenum shaderType>
         void attach(const Shader<shaderType> &shader) const
         {
-            glAttachShader(mHandle, shader.mHandle); 
+            gl(AttachShader(mHandle, shader.mHandle)); 
         }
 
         void link()
         {
             GLint success;
             
-            glLinkProgram(mHandle);
-            glGetProgramiv(mHandle, GL_LINK_STATUS, &success);
+            gl(LinkProgram(mHandle));
+            gl(GetProgramiv(mHandle, GL_LINK_STATUS, &success));
     
             if (!success)
             {        
                 char errorMessage[1024];
-                glGetProgramInfoLog(mHandle, sizeof(errorMessage), NULL, errorMessage);
+                gl(GetProgramInfoLog(mHandle, sizeof(errorMessage), NULL, errorMessage));
                 panic("could not link shader program: %s", errorMessage);
             }
             
             GLint uniformCount = 0;
-            glGetProgramiv(mHandle, GL_ACTIVE_UNIFORMS, &uniformCount);
+            gl(GetProgramiv(mHandle, GL_ACTIVE_UNIFORMS, &uniformCount));
     
             for (GLint uniformIndex = 0; uniformIndex < uniformCount; uniformIndex++)
             {
@@ -46,7 +46,7 @@ namespace ray { namespace gl {
                 GLint uniformSize;
                 GLenum uniformType;
     
-                glGetActiveUniform(mHandle, (GLuint)uniformIndex, sizeof(uniformName), nullptr, &uniformSize, &uniformType, uniformName);
+                gl(GetActiveUniform(mHandle, (GLuint)uniformIndex, sizeof(uniformName), nullptr, &uniformSize, &uniformType, uniformName));
                 auto uniformLocation = glGetUniformLocation(mHandle, uniformName);
     
                 mUniformTypesByLocation[uniformLocation] = uniformType;
@@ -73,15 +73,16 @@ namespace ray { namespace gl {
             }
         }
 
-        void bind(Attribute attribute, const std::string &name)
+        template<typename T>
+        void bind(Attribute<T> attribute, const std::string &name)
         {
             panicif(mLinked, "attrbiutes must be bound before the program has been linked");
-            glBindAttribLocation(mHandle, attribute.mLocation, name.c_str());
+            gl(BindAttribLocation(mHandle, attribute.mLocation, name.c_str()));
         }
 
     private:
         static void create(GLuint &handle) { handle = glCreateProgram(); }
-        static void destroy(GLuint handle) { glDeleteProgram(handle); }
+        static void destroy(GLuint handle) { gl(DeleteProgram(handle)); }
         Handle<create, destroy> mHandle;
         std::unordered_map<GLint, GLenum> mUniformTypesByLocation;
         std::unordered_map<std::string, GLint> mUniformLocationByName;    

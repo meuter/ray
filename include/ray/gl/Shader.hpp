@@ -20,14 +20,14 @@ namespace ray { namespace gl {
             GLint success;
             const GLchar *sources[] = { shaderText.c_str() };
     
-            glShaderSource(mHandle, 1, sources, NULL);
-            glCompileShader(mHandle);
-            glGetShaderiv(mHandle, GL_COMPILE_STATUS, &success);
+            gl(ShaderSource(mHandle, 1, sources, NULL));
+            gl(CompileShader(mHandle));
+            gl(GetShaderiv(mHandle, GL_COMPILE_STATUS, &success));
     
             if (!success)
             {
                 char errorMessage[1024];
-                glGetShaderInfoLog(mHandle, sizeof(errorMessage), NULL, errorMessage);                
+                gl(GetShaderInfoLog(mHandle, sizeof(errorMessage), NULL, errorMessage));
                 panic(" could not compile %s shader\n%s", (shaderType == GL_VERTEX_SHADER) ? "vertex" : "fragment", errorMessage);
             }
         }
@@ -36,7 +36,7 @@ namespace ray { namespace gl {
         friend class ShaderProgram;
         
         static void create(GLuint &handle) { handle = glCreateShader(shaderType); }
-        static void destroy(GLuint handle) { glDeleteShader(handle); }
+        static void destroy(GLuint handle) { gl(DeleteShader(handle)); }
         Handle<create, destroy> mHandle;
     };
 
