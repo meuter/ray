@@ -3,7 +3,7 @@ language: cpp
 matrix:
   include:  
 
-    ## Linux(Trusty) - GCC-4.8 - Release
+    ## Linux(Trusty) - GCC-5 - Release
     - os: linux
       dist: trusty
       compiler: gcc
