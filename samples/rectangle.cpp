@@ -15,11 +15,11 @@ class Quad : public VertexArray
 public:
     Quad() : VertexArray()
     {
-        setVertexAttribute(ATTRIBUTE_POSITION, 3, {
-            -0.5f, -0.5f, 0,
-            -0.5f,  0.5f, 0,
-             0.5f, -0.5f, 0,
-             0.5f,  0.5f, 0,
+        setVertexAttribute(ATTRIBUTE_POSITION, 2, {
+            -0.5f, -0.5f,
+            -0.5f,  0.5f,
+             0.5f, -0.5f,
+             0.5f,  0.5f,
         });
     }
 
@@ -53,8 +53,8 @@ private:
     ShaderProgram mShader;
 
     static constexpr auto VERTEX_SHADER = GLSL(330, 
-        in  vec3 vertPosition;
-        void main() { gl_Position = vec4(vertPosition, 1.0); }
+        in  vec2 vertPosition;
+        void main() { gl_Position = vec4(vertPosition,0,1); }
     );
     
     static constexpr auto FRAGMENT_SHADER = GLSL(330,

@@ -1,5 +1,4 @@
 #include <ray/glfw/glfw3.hpp>
-#include <iostream>
 #include <cstdlib>
 
 using namespace ray::glfw;
