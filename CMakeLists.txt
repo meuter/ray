@@ -7,6 +7,6 @@ set(GLFW_BUILD_EXAMPLES false)
 set(GLFW_BUILD_TESTS false)
 add_subdirectory(contrib/glfw)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 add_subdirectory(samples)
