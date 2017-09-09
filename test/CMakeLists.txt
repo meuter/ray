@@ -7,5 +7,10 @@ endmacro(add_unit_test)
 
 add_unit_test(platform PrintTests)
 add_unit_test(assets   BitmapTests)
+add_unit_test(math     ScalarTests)
+add_unit_test(math     Vector2Tests)
+add_unit_test(math     Vector3Tests)
+add_unit_test(math     Vector4Tests)
+add_unit_test(math     MatrixTests)
 
 

@@ -57,7 +57,7 @@ public:
     void render(const TexturedQuad &quad)
     {
         mShader.use();
-        mQuadTexture = quad.texture().bind(GL_TEXTURE0);;
+        mQuadTexture.set(quad.texture().bind(GL_TEXTURE0));
         quad.draw();
     }
 private:

@@ -16,9 +16,13 @@ namespace ray { namespace gl {
     std::string getTypeName(GLenum type) 
     {
         switch(type) {
-        case GL_FLOAT: return "float";
-        case GL_SAMPLER_2D: return "sampler2D";
-        default: return platform::fmt("unknown(%d)", type);
+            case GL_FLOAT: return "float";
+            case GL_FLOAT_VEC2: return "vec2";
+            case GL_FLOAT_VEC3: return "vec3";
+            case GL_FLOAT_VEC4: return "vec4";
+            case GL_FLOAT_MAT4: return "mat4";
+            case GL_SAMPLER_2D: return "sampler2D";
+            default: return platform::fmt("unknown(%d)", type);
         }
     }
 
