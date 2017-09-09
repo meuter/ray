@@ -1,11 +1,11 @@
 #pragma once
 
-#include <glad/glad.h>
+#include <ray/platform/OpenGL.hpp>
 #include <GLFW/glfw3.h>
 #include <string>
 #include <vector>
 
-namespace ray { namespace glfw {
+namespace ray { namespace platform {
 
     class Version 
     {

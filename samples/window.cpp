@@ -1,7 +1,7 @@
-#include <ray/glfw/glfw3.hpp>
+#include <ray/platform/Window.hpp>
 #include <cstdlib>
 
-using namespace ray::glfw;
+using namespace ray::platform;
 
 int main()
 {

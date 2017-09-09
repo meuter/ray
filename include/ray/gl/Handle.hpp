@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ray/glfw/glad.hpp>
+#include <ray/platform/OpenGL.hpp>
 
 namespace ray { namespace gl {
 

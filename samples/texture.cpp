@@ -1,4 +1,4 @@
-#include <ray/glfw/glfw3.hpp>
+#include <ray/platform/Window.hpp>
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/Shader.hpp>
 #include <ray/gl/ShaderProgram.hpp>
@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cstdlib>
 
-using namespace ray::glfw;
+using namespace ray::platform;
 using namespace ray::gl;
 
 /******************************************************************************/
