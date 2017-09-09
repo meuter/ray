@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <string>
 #include <vector>
@@ -91,6 +92,7 @@ namespace ray { namespace glfw {
         inline Window(const Window &other) = delete;
         inline Window(Window &&other) { mHandle = other.mHandle; other.mHandle = nullptr; }
         inline virtual ~Window() { if (mShouldBeDestroyed) glfwDestroyWindow(mHandle); }
+        inline void swapInterval(int interval) const { return glfwSwapInterval(interval); }                
         inline bool shouldClose() const { return glfwWindowShouldClose(mHandle); }        
         inline void setShouldClose(bool value) const { return glfwSetWindowShouldClose(mHandle, value); }
         inline void setTitle(const std::string &title) const { glfwSetWindowTitle(mHandle, title.c_str()); }
@@ -134,6 +136,7 @@ namespace ray { namespace glfw {
         inline void setCursorPosition(double x, double y) const { return glfwSetCursorPos(mHandle, x, y); }
         inline void setCursor(const Cursor &cursor) const { glfwSetCursor(mHandle, cursor.mHandle); }
         inline void makeContextCurrent() const { glfwMakeContextCurrent(mHandle); }
+        inline void loadGLExtensions() const { gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); }
         inline void swapBuffers() const { glfwSwapBuffers(mHandle); }
         inline std::string getClipboardString() const { return glfwGetClipboardString(mHandle); }
         inline void setClipboardString(const std::string &string) const { glfwSetClipboardString(mHandle, string.c_str()); }

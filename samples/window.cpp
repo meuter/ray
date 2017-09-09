@@ -6,8 +6,10 @@ using namespace ray::glfw;
 
 int main()
 {
-    auto window = Window(1920, 1080, "Window Title");
+    auto window = Window(1920, 1080, "Window Sample");
     window.makeContextCurrent();
+    window.loadGLExtensions();    
+    window.swapInterval(0);
 
     glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
 
