@@ -14,6 +14,13 @@ namespace ray { namespace gl {
     {
     public:
         ShaderProgram() = default;
+        ShaderProgram(const char *vertexShader, const char *fragmentShader)
+        {
+            attach(VertexShader(vertexShader));
+            attach(FragmentShader(fragmentShader));
+            link();
+            use();
+        }
 
         void use() const { gl(UseProgram(mHandle)); }
 
@@ -37,10 +44,9 @@ namespace ray { namespace gl {
                 panic("could not link shader program: %s", errorMessage);
             }
             
-            // NOTE: collect info about uniforms for later binding        
             GLint uniformCount = 0;
             gl(GetProgramiv(mHandle, GL_ACTIVE_UNIFORMS, &uniformCount));
-    
+
             for (GLint uniformIndex = 0; uniformIndex < uniformCount; uniformIndex++)
             {
                 char uniformName[512];
@@ -54,27 +60,20 @@ namespace ray { namespace gl {
                 mUniformLocationByName[uniformName] = uniformLocation;
             }
 
-            // NOTE: typecheck bound attribute
             GLint attributeCount = 0;
             gl(GetProgramiv(mHandle, GL_ACTIVE_ATTRIBUTES, &attributeCount));
     
             for (GLint attributeIndex = 0; attributeIndex < attributeCount; attributeIndex++)
             {
                 char attributeName[512];
-                GLenum typeInShaderCode;
                 GLint attributeSize;
+                GLenum attributeType;
     
-                gl(GetActiveAttrib(mHandle, (GLuint)attributeIndex, sizeof(attributeName), nullptr, &attributeSize, &typeInShaderCode, attributeName));
+                gl(GetActiveAttrib(mHandle, (GLuint)attributeIndex, sizeof(attributeName), nullptr, &attributeSize, &attributeType, attributeName));
+                auto attributeLocation = glGetAttribLocation(mHandle, attributeName);
 
-                auto hit = mAttributeTypeByName.find(attributeName);
-                panicif(hit == mAttributeTypeByName.end(), "attribute '%s' was not bound before linking", attributeName);
-                auto typeInCPPCode = hit->second;
-                if (typeInCPPCode != typeInShaderCode)
-                {
-                    auto cppName = getTypeName(typeInCPPCode);
-                    auto shaderName = getTypeName(typeInShaderCode);
-                    panic("type mismatch: attribute '%s' is declared as '%s', but in shader code, it is declared as '%s'", attributeName, cppName, shaderName);
-                }
+                mAttributeTypesByLocation[attributeLocation] = attributeType;
+                mAttributeLocationByName[attributeName] = attributeLocation;
             }
 
             mLinked = true;                        
@@ -102,16 +101,34 @@ namespace ray { namespace gl {
         void bind(Attribute<V, T> attribute, const std::string &name)
         {
             panicif(mLinked, "attrbiutes must be bound before the program has been linked");
-            gl(BindAttribLocation(mHandle, attribute.mLocation, name.c_str()));
-            mAttributeTypeByName[name] = attribute.type();
+            gl(BindAttribLocation(mHandle, attribute.mLocation, name.c_str()));            
+        }
+
+        template<typename V, typename T>
+        Attribute<V,T> getAttribute(const std::string &name)
+        {            
+            panicif(!mLinked, "program should be linked before attempting to get an attribute");
+            auto hit = mAttributeLocationByName.find(name);
+            panicif(hit == mAttributeLocationByName.end(), "cannot find location of attribute '%s'", name);
+
+            auto typeInShaderCode = mAttributeTypesByLocation.at(hit->second);
+            auto typeInCPPCode    = getType<V>();
+            if (typeInShaderCode != typeInCPPCode) 
+            {
+                auto cppName = getTypeName(typeInCPPCode);
+                auto shaderName = getTypeName(typeInShaderCode);
+                panic("type mismatch: attribute '%s' is declared as '%s', but in shader code, it is declared as '%s'", name, cppName, shaderName);
+            }
+
+            return Attribute<V,T>{glGetAttribLocation(mHandle, name.c_str())};
         }
 
     private:
         static void create(GLuint &handle) { handle = glCreateProgram(); }
         static void destroy(GLuint handle) { gl(DeleteProgram(handle)); }
         Handle<create, destroy> mHandle;
-        std::unordered_map<GLint, GLenum> mUniformTypesByLocation;
-        std::unordered_map<std::string, GLint> mUniformLocationByName, mAttributeTypeByName;
+        std::unordered_map<GLint, GLenum> mUniformTypesByLocation, mAttributeTypesByLocation;
+        std::unordered_map<std::string, GLint> mUniformLocationByName, mAttributeLocationByName;
         bool mLinked=false, mUniformsCollected=false;
     };
 
