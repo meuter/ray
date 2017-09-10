@@ -6,18 +6,33 @@
 
 namespace ray { namespace gl {
 
-    template<typename V, typename F>
+    namespace details
+    {
+        template<typename T> struct ScalarType { };
+        template<> struct ScalarType<math::f32>  { using type = math::f32; }; 
+        template<> struct ScalarType<math::u8>   { using type = math::u8; }; 
+        template<> struct ScalarType<math::vec2> { using type = math::f32; }; 
+        template<> struct ScalarType<math::vec3> { using type = math::f32; }; 
+        template<> struct ScalarType<math::vec4> { using type = math::f32; }; 
+        template<> struct ScalarType<math::mat4> { using type = math::f32; }; 
+        template<> struct ScalarType<sampler2D>  { using type = math::u32; }; 
+    }
+
+    template<typename V>
     struct Attribute 
     {
+    private:
+        using F = typename details::ScalarType<V>::type;
+
+    public:
         constexpr Attribute() = default;
         constexpr Attribute(GLint location) : mLocation(location) {}
 
-        template<size_t stride, typename T>
-        void pointer(const VertexBuffer<stride, T> &vbo, bool normalized, size_t offset)
+        template<typename T, size_t stride>
+        void bind(const VertexBuffer<T, stride> &vbo, bool normalized, size_t offset)
         {
             vbo.bind();
             gl(EnableVertexAttribArray(mLocation));
-            //gl(VertexAttribPointer(mLocation, scalarCount(), scalarType(), normalized, stride*scalarSize(), (GLvoid *)(offset*scalarSize())));
             glVertexAttribPointer(mLocation, scalarCount(), getType<T>(), normalized ? GL_TRUE : GL_FALSE, stride * sizeof(T), (GLvoid *)(offset*sizeof(T)));
         }
 
@@ -32,11 +47,10 @@ namespace ray { namespace gl {
         GLint mLocation = 0;
     };
 
-    static constexpr auto ATTRIBUTE_2F_POSITION  = Attribute<math::vec2,math::f32>{0};
-    static constexpr auto ATTRIBUTE_3F_POSITION  = Attribute<math::vec3,math::f32>{1};
-    static constexpr auto ATTRIBUTE_2F_TEXCOORD  = Attribute<math::vec2,math::f32>{2};
-    static constexpr auto ATTRIBUTE_3F_NORMAL    = Attribute<math::vec3,math::f32>{3};
-    static constexpr auto ATTRIBUTE_4F_COLOR     = Attribute<math::vec4,math::f32>{4};
-    static constexpr auto ATTRIBUTE_1I_COLORU_1I = Attribute<math::u32,math::u32>{5};
+    static constexpr auto ATTRIBUTE_2F_POSITION  = Attribute<math::vec2>{0};
+    static constexpr auto ATTRIBUTE_3F_POSITION  = Attribute<math::vec3>{1};
+    static constexpr auto ATTRIBUTE_2F_TEXCOORD  = Attribute<math::vec2>{2};
+    static constexpr auto ATTRIBUTE_3F_NORMAL    = Attribute<math::vec3>{3};
+    static constexpr auto ATTRIBUTE_4F_COLOR     = Attribute<math::vec4>{4};
     
 }}

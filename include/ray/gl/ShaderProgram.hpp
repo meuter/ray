@@ -97,15 +97,15 @@ namespace ray { namespace gl {
             }
         }
 
-        template<typename V, typename T>
-        void bind(Attribute<V, T> attribute, const std::string &name)
+        template<typename V>
+        void bind(Attribute<V> attribute, const std::string &name)
         {
             panicif(mLinked, "attrbiutes must be bound before the program has been linked");
             gl(BindAttribLocation(mHandle, attribute.mLocation, name.c_str()));            
         }
 
-        template<typename V, typename T>
-        Attribute<V,T> getAttribute(const std::string &name)
+        template<typename V>
+        Attribute<V> getAttribute(const std::string &name)
         {            
             panicif(!mLinked, "program should be linked before attempting to get an attribute");
             auto hit = mAttributeLocationByName.find(name);
@@ -120,7 +120,7 @@ namespace ray { namespace gl {
                 panic("type mismatch: attribute '%s' is declared as '%s', but in shader code, it is declared as '%s'", name, cppName, shaderName);
             }
 
-            return Attribute<V,T>{glGetAttribLocation(mHandle, name.c_str())};
+            return Attribute<V>{glGetAttribLocation(mHandle, name.c_str())};
         }
 
     private:

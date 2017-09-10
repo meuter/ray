@@ -38,7 +38,7 @@ public:
 private:
     Texture mTexture;
     VertexArray mVertexArray;
-    VertexBuffer<4,GLfloat> mVertexBuffer;
+    VertexBuffer<GLfloat,4> mVertexBuffer;
 };
 
 /******************************************************************************/
