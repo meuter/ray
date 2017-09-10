@@ -1,71 +1,15 @@
 #include <ray/platform/Window.hpp>
 #include <ray/gl/VertexArray.hpp>
-#include <ray/gl/Shader.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
-#include <iostream>
 #include <cstdlib>
 
 using namespace ray::platform;
 using namespace ray::gl;
+using namespace ray::math;
 
-/******************************************************************************/
-
-class TexturedQuad 
+int main()
 {
-public:
-    TexturedQuad(const std::string &textureFilename) 
-    {
-        mTexture.load(textureFilename);
-        mVertexBuffer.load({
-            // position     tex coord
-            -0.5f, -0.5f,   0.0f, 1.0f, // bottom left
-            -0.5f,  0.5f,   0.0f, 0.0f, // top left 
-             0.5f, -0.5f,   1.0f, 1.0f, // bottom right
-             0.5f,  0.5f,   1.0f, 0.0f, // top right
-        });
-        mVertexArray.setAttributeAtOffset(0, ATTRIBUTE_2F_POSITION, mVertexBuffer);
-        mVertexArray.setAttributeAtOffset(2, ATTRIBUTE_2F_TEXCOORD, mVertexBuffer);
-    }
-    
-    void draw() const
-    {
-        mVertexArray.bind();
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, mVertexBuffer.vertexCount());
-    }
-
-    const Texture &texture() const { return mTexture; }
-private:
-    Texture mTexture;
-    VertexArray mVertexArray;
-    VertexBuffer<GLfloat,4> mVertexBuffer;
-};
-
-/******************************************************************************/
-
-class QuadRenderer
-{    
-public:
-    QuadRenderer()
-    {
-        mShader.attach(FragmentShader(FRAGMENT_SHADER));
-        mShader.attach(VertexShader(VERTEX_SHADER));
-        mShader.bind(ATTRIBUTE_2F_POSITION, "vertPosition");
-        mShader.bind(ATTRIBUTE_2F_TEXCOORD, "vertTexCoord");
-        mShader.link();       
-        mShader.bind(mQuadTexture, "quadTexture");
-    }
-
-    void render(const TexturedQuad &quad)
-    {
-        mShader.use();
-        mQuadTexture.set(quad.texture().bind(GL_TEXTURE0));
-        quad.draw();
-    }
-private:
-    ShaderProgram mShader;
-    Uniform<sampler2D> mQuadTexture;
-
     static constexpr auto VERTEX_SHADER = GLSL(330, 
         in  vec2 vertPosition;
         in  vec2 vertTexCoord;
@@ -87,23 +31,31 @@ private:
             color = texture(quadTexture, fragTexCoord);
         }
     );
-};
-
-/******************************************************************************/
-
-int main()
-{
-    auto window   = Window(1920, 1080, "Texture Sample");
-    auto quad     = TexturedQuad("res/images/awesomeface.png");
-    auto renderer = QuadRenderer();
-
+    
+    auto window  = Window(1920, 1080, "Texture Sample");
+    auto texture = Texture("res/images/awesomeface.png");
+    auto shader  = ShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER);
+    auto quad    = VertexArray();
+    auto vbo     = VertexBuffer<f32,4>({
+        // position     tex coord
+        -0.5f, -0.5f,   0.0f, 1.0f, // bottom left
+        -0.5f,  0.5f,   0.0f, 0.0f, // top left 
+         0.5f, -0.5f,   1.0f, 1.0f, // bottom right
+         0.5f,  0.5f,   1.0f, 0.0f, // top right
+    });
+    
+    quad.setAttributeAtOffset(0, shader.getAttribute<vec2>("vertPosition"), vbo);
+    quad.setAttributeAtOffset(2, shader.getAttribute<vec2>("vertTexCoord"), vbo);
+    shader.getUniform<sampler2D>("quadTexture").set(texture.bind(GL_TEXTURE0));
+    
     glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
 
     while (!window.shouldClose())
     {
         glClear(GL_COLOR_BUFFER_BIT);
 
-        renderer.render(quad);
+        quad.bind();
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, vbo.vertexCount());
 
         window.pollEvents();
         window.swapBuffers();

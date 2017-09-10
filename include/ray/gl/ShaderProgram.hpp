@@ -80,32 +80,26 @@ namespace ray { namespace gl {
         }
 
         template<typename T>
-        void bind(Uniform<T> &uniform, const std::string &name) 
-        {	
+        auto getUniform(const std::string &name)
+        {
             panicif(!mLinked, "uniforms must be bound after the program has been linked");
             auto hit = mUniformLocationByName.find(name);
             panicif(hit == mUniformLocationByName.end(), "cannot find location of uniform '%s'", name);
-            uniform.mLocation = hit->second;           
             
-            auto typeInShaderCode = mUniformTypesByLocation.at(uniform.mLocation);
-            auto typeInCPPCode    = uniform.type();
+            auto typeInShaderCode = mUniformTypesByLocation.at(hit->second);
+            auto typeInCPPCode    = getType<T>();
             if (typeInShaderCode != typeInCPPCode) 
             {
                 auto cppName = getTypeName(typeInCPPCode);
                 auto shaderName = getTypeName(typeInShaderCode);
                 panic("type mismatch: uniform '%s' is declared as '%s', but in shader code, it is declared as '%s'", name, cppName, shaderName);
             }
+
+            return Uniform<T>{hit->second};
         }
 
         template<typename V>
-        void bind(Attribute<V> attribute, const std::string &name)
-        {
-            panicif(mLinked, "attrbiutes must be bound before the program has been linked");
-            gl(BindAttribLocation(mHandle, attribute.mLocation, name.c_str()));            
-        }
-
-        template<typename V>
-        Attribute<V> getAttribute(const std::string &name)
+        auto getAttribute(const std::string &name)
         {            
             panicif(!mLinked, "program should be linked before attempting to get an attribute");
             auto hit = mAttributeLocationByName.find(name);
@@ -129,7 +123,7 @@ namespace ray { namespace gl {
         Handle<create, destroy> mHandle;
         std::unordered_map<GLint, GLenum> mUniformTypesByLocation, mAttributeTypesByLocation;
         std::unordered_map<std::string, GLint> mUniformLocationByName, mAttributeLocationByName;
-        bool mLinked=false, mUniformsCollected=false;
+        bool mLinked=false;
     };
 
 }}

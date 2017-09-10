@@ -10,7 +10,7 @@ namespace ray { namespace gl {
     class Uniform 
     {    
     public:
-        constexpr Uniform() : mLocation(0) {}
+        constexpr Uniform(GLint location) : mLocation(location) {}
         void operator=(const T &t) const { set(mLocation, t); }
         void set(const T &t) const { set(mLocation, t); }
 
