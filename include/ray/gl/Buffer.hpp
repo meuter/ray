@@ -38,7 +38,7 @@ namespace ray { namespace gl {
             return result / sizeof(T);
         }
 
-        size_t count() const
+        size_t vertexCount() const
         {
             return size() / stride;
         }

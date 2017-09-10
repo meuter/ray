@@ -31,7 +31,7 @@ public:
     void draw() const
     {
         mVertexArray.bind();
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, mVertexBuffer.count());
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, mVertexBuffer.vertexCount());
     }
 
     const Texture &texture() const { return mTexture; }
