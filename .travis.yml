@@ -49,6 +49,12 @@ matrix:
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0 && BUILT_TYPE=Release"
 
+    ## OSX - XCode 8 - Release
+    - os: osx
+      osx_image: xcode8
+      env:
+        - MATRIX_EVAL="BUILD_TYPE=Release"
+
 
 before_install:
   - eval "${MATRIX_EVAL}"
