@@ -12,10 +12,13 @@ namespace ray { namespace gl {
         constexpr Attribute() = default;
         constexpr Attribute(GLint location) : mLocation(location) {}
 
-        void pointer(GLboolean normalized, GLsizei stride, size_t offset)
+        template<size_t stride, typename T>
+        void pointer(const VertexBuffer<stride, T> &vbo, bool normalized, size_t offset)
         {
+            vbo.bind();
             gl(EnableVertexAttribArray(mLocation));
-            gl(VertexAttribPointer(mLocation, scalarCount(), scalarType(), normalized, stride*scalarSize(), (GLvoid *)(offset*scalarSize())));
+            //gl(VertexAttribPointer(mLocation, scalarCount(), scalarType(), normalized, stride*scalarSize(), (GLvoid *)(offset*scalarSize())));
+            glVertexAttribPointer(mLocation, scalarCount(), getType<T>(), normalized ? GL_TRUE : GL_FALSE, stride * sizeof(T), (GLvoid *)(offset*sizeof(T)));
         }
 
         constexpr auto type() const { return getType<V>(); }

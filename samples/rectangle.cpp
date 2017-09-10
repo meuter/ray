@@ -13,24 +13,34 @@ int main()
 {
     static constexpr auto VERTEX_SHADER = GLSL(330, 
         in  vec2 vertPosition;
-        void main() { gl_Position = vec4(vertPosition,0,1); }
+        in  vec4 vertColor;
+        out vec4 fragColor;
+        void main() { gl_Position = vec4(vertPosition,0,1); fragColor = vertColor; }
     );
     
     static constexpr auto FRAGMENT_SHADER = GLSL(330,
+        in  vec4 fragColor;
         out vec4 color;
-        void main() { color = vec4(1,1,1,1); }
+        void main() { color = fragColor; }
     );
     
     auto window = Window(1920, 1080, "Rectangle Sample"); 
     auto quad   = VertexArray();
     auto shader = ShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER);
     
-    quad.setAttribute(shader.getAttribute<vec2,float>("vertPosition"), VertexBuffer<2, float>{
-        -0.5f, -0.5f,
-        -0.5f,  0.5f,
-         0.5f, -0.5f,
-         0.5f,  0.5f
+    quad.setAttribute(shader.getAttribute<vec2,f32>("vertPosition"), VertexBuffer<2,f32>{
+        -0.5f, -0.5f, // bottom left
+        -0.5f,  0.5f, // top left
+         0.5f, -0.5f, // bottom right
+         0.5f,  0.5f  // top right
     });
+
+    quad.setAttribute(shader.getAttribute<vec4,f32>("vertColor"), VertexBuffer<4,u8>{
+        0xFF, 0x00, 0x00, 0xFF, // red
+        0x00, 0xFF, 0x00, 0xFF, // green
+        0x00, 0x00, 0xFF, 0xFF, // blue
+        0xFF, 0xFF, 0x00, 0xFF, // yellow
+    }, true);
 
     glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
 

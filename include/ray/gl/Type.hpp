@@ -12,6 +12,7 @@ namespace ray { namespace gl {
         template<typename U> struct OpenGLType { static constexpr GLenum result = 0; };
 
         template<> struct OpenGLType<math::f32>  { static constexpr GLenum result = GL_FLOAT; }; 
+        template<> struct OpenGLType<math::u8>  { static constexpr GLenum result = GL_UNSIGNED_BYTE; }; 
         template<> struct OpenGLType<math::vec2> { static constexpr GLenum result = GL_FLOAT_VEC2; }; 
         template<> struct OpenGLType<math::vec3> { static constexpr GLenum result = GL_FLOAT_VEC3; }; 
         template<> struct OpenGLType<math::vec4> { static constexpr GLenum result = GL_FLOAT_VEC4; }; 
@@ -23,11 +24,12 @@ namespace ray { namespace gl {
     {
         switch(type) {
             case GL_FLOAT: return "float";
+            case GL_UNSIGNED_BYTE: return "unsigned byte";
             case GL_FLOAT_VEC2: return "vec2";
             case GL_FLOAT_VEC3: return "vec3";
             case GL_FLOAT_VEC4: return "vec4";
             case GL_FLOAT_MAT4: return "mat4";
-            case GL_SAMPLER_2D: return "sampler2D";
+            case GL_SAMPLER_2D: return "sampler2D";            
             default: return platform::fmt("unknown(%d)", type);
         }
     }
