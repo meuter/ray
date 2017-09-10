@@ -15,7 +15,7 @@ namespace ray { namespace gl {
         inline void unbind() const { gl(BindVertexArray(0)); }
 
         template<typename V, typename F, size_t stride>
-        void setAttributeAtOffset(GLuint offset, Attribute<V> attribute, const VertexBuffer<F, stride> &vbo, GLboolean normalized=GL_FALSE)
+        void bindAttributeAtOffset(GLuint offset, Attribute<V> attribute, const VertexBuffer<F, stride> &vbo, GLboolean normalized=GL_FALSE) const
         {
             bind();
             attribute.bind(vbo, normalized, offset); 
@@ -23,12 +23,12 @@ namespace ray { namespace gl {
         }
 
         template<typename V, typename F, size_t stride>
-        void setAttribute(Attribute<V> attribute, const VertexBuffer<F, stride> &vbo, bool normalized=false)
+        void bindAttribute(Attribute<V> attribute, const VertexBuffer<F, stride> &vbo, bool normalized=false) const
         {
-            setAttributeAtOffset(0, attribute, vbo, normalized);
+            bindAttributeAtOffset(0, attribute, vbo, normalized);
         }
 
-        void setIndices(const ElementBuffer &ebo)
+        void bindIndices(const ElementBuffer &ebo) const 
         {
             bind();
             ebo.bind();

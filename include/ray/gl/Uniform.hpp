@@ -10,7 +10,9 @@ namespace ray { namespace gl {
     class Uniform 
     {    
     public:
+        constexpr Uniform() : mLocation(0) {}
         constexpr Uniform(GLint location) : mLocation(location) {}
+        constexpr Uniform(const Uniform<T> &other) = default;
         void operator=(const T &t) const { set(mLocation, t); }
         void set(const T &t) const { set(mLocation, t); }
 
@@ -25,7 +27,6 @@ namespace ray { namespace gl {
         static void set(GLint location, const math::mat4 &m) { gl(UniformMatrix4fv(location, 1, true, &m(0,0))); }
         static void set(GLint location, const math::mat3 &m) { gl(UniformMatrix3fv(location, 1, true, &m(0,0))); }
     
-        friend class ShaderProgram;        
         GLint mLocation;
     };
 

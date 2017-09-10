@@ -28,14 +28,14 @@ int main()
     auto quad   = VertexArray();
     auto shader = ShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER);
     
-    quad.setAttribute(shader.getAttribute<vec2>("vertPosition"), VertexBuffer<f32,2>{
+    quad.bindAttribute(shader.getAttribute<vec2>("vertPosition"), VertexBuffer<f32,2>{
         -0.5f, -0.5f, // bottom left
         -0.5f,  0.5f, // top left
          0.5f, -0.5f, // bottom right
          0.5f,  0.5f  // top right
     });
 
-    quad.setAttribute(shader.getAttribute<vec4>("vertColor"), VertexBuffer<u8,4>{
+    quad.bindAttribute(shader.getAttribute<vec4>("vertColor"), VertexBuffer<u8,4>{
         0xFF, 0x00, 0x00, 0xFF, // red
         0x00, 0xFF, 0x00, 0xFF, // green
         0x00, 0x00, 0xFF, 0xFF, // blue

@@ -43,7 +43,6 @@ namespace ray { namespace gl {
         constexpr auto scalarCount() const { return size()/scalarSize(); }
 
     private:
-        friend class ShaderProgram;
         GLint mLocation = 0;
     };
 

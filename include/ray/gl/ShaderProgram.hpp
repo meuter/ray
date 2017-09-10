@@ -14,7 +14,12 @@ namespace ray { namespace gl {
     {
     public:
         ShaderProgram() = default;
-        ShaderProgram(const char *vertexShader, const char *fragmentShader)
+        ShaderProgram(const char *vertexShader, const char *fragmentShader) 
+        {
+            load(vertexShader, fragmentShader);
+        }
+
+        void load(const char *vertexShader, const char *fragmentShader)
         {
             attach(VertexShader(vertexShader));
             attach(FragmentShader(fragmentShader));
@@ -80,7 +85,7 @@ namespace ray { namespace gl {
         }
 
         template<typename T>
-        auto getUniform(const std::string &name)
+        auto getUniform(const std::string &name) const
         {
             panicif(!mLinked, "uniforms must be bound after the program has been linked");
             auto hit = mUniformLocationByName.find(name);
@@ -99,7 +104,7 @@ namespace ray { namespace gl {
         }
 
         template<typename V>
-        auto getAttribute(const std::string &name)
+        auto getAttribute(const std::string &name) const
         {            
             panicif(!mLinked, "program should be linked before attempting to get an attribute");
             auto hit = mAttributeLocationByName.find(name);

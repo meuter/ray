@@ -44,8 +44,8 @@ int main()
          0.5f,  0.5f,   1.0f, 0.0f, // top right
     });
     
-    quad.setAttributeAtOffset(0, shader.getAttribute<vec2>("vertPosition"), vbo);
-    quad.setAttributeAtOffset(2, shader.getAttribute<vec2>("vertTexCoord"), vbo);
+    quad.bindAttributeAtOffset(0, shader.getAttribute<vec2>("vertPosition"), vbo);
+    quad.bindAttributeAtOffset(2, shader.getAttribute<vec2>("vertTexCoord"), vbo);
     shader.getUniform<sampler2D>("quadTexture").set(texture.bind(GL_TEXTURE0));
     
     glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
