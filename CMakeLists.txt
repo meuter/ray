@@ -39,7 +39,8 @@ target_include_directories(ray
     PRIVATE
         ${Boost_FILESYSTEM_INCLUDE_DIRS}
 )
-message("boost libraries = ${Boost_LIBRARIES}")
+message(" - boost fs libraries = ${Boost_FILESYSTEM_LIBRARY}")
+message(" - boost sys libraries = ${Boost_SYSTEM_LIBRARY}")
 target_link_libraries(ray 
     PUBLIC
         stb
