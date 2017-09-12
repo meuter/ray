@@ -22,6 +22,10 @@ target_include_directories(glad PUBLIC contrib/glfw/deps/)
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE contrib/stb)
 
+######
+add_subdirectory(contrib/tinyobjloader)
+
+
 ###### Ray
 add_library(ray 
     src/ray/assets/Bitmap.cpp
@@ -34,7 +38,7 @@ target_include_directories(ray
     PRIVATE
         ${Boost_INCLUDE_DIRS}
 )
-target_link_libraries(ray PUBLIC stb glfw glad)
+target_link_libraries(ray PUBLIC stb glfw glad tinyobjloader)
 
 ###### Samples
 add_subdirectory(samples)
