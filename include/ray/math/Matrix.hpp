@@ -98,7 +98,7 @@ namespace ray { namespace math {
     }
 
     template<typename scalar, size_t L, size_t C>
-    constexpr Matrix<scalar,C,L> transpose(const Matrix<scalar,L,C> &m)
+    auto transpose(const Matrix<scalar,L,C> &m)
     {
         Matrix<scalar,C,L> result;
         for (size_t l = 0; l < L; ++l)
@@ -121,7 +121,7 @@ namespace ray { namespace math {
     constexpr auto operator!=(const Matrix<T,L,C> &a, const Matrix<U,L,C> &b) { return !(a == b); }
 
     template<typename T, typename U, size_t L, size_t C> 
-    constexpr auto operator+(const Matrix<T,L,C> &a, const Matrix<U,L,C> &b) 
+    auto operator+(const Matrix<T,L,C> &a, const Matrix<U,L,C> &b) 
     {
         Matrix<widest<T,U>,L,C> result;
         for (size_t l = 0; l < L; ++l)
@@ -131,7 +131,7 @@ namespace ray { namespace math {
     }
 
     template<typename T, typename U, size_t L, size_t C> 
-    constexpr auto operator-(const Matrix<T,L,C> &a, const Matrix<U,L,C> &b) 
+    auto operator-(const Matrix<T,L,C> &a, const Matrix<U,L,C> &b) 
     {
         Matrix<widest<T,U>,L,C> result;
         for (size_t l = 0; l < L; ++l)
@@ -141,7 +141,7 @@ namespace ray { namespace math {
     }
 
     template<typename T, typename U, size_t L, size_t C> 
-    constexpr auto operator*(const Matrix<T,L,C> &a, const Scalar<U> &f) 
+    auto operator*(const Matrix<T,L,C> &a, const Scalar<U> &f) 
     {
         Matrix<widest<T,U>,L,C> result;
         for (size_t l = 0; l < L; ++l)
@@ -151,10 +151,10 @@ namespace ray { namespace math {
     }
 
     template<typename T, typename U, size_t L, size_t C> 
-    constexpr auto operator*(const Scalar<U> &f, const Matrix<T,L,C> &a) { return (a*f); }
+    auto operator*(const Scalar<U> &f, const Matrix<T,L,C> &a) { return (a*f); }
 
     template<typename T, typename U, size_t L, size_t C> 
-    constexpr auto operator/(const Matrix<T,L,C> &a, const Scalar<U> &d) 
+    auto operator/(const Matrix<T,L,C> &a, const Scalar<U> &d) 
     {
         Matrix<widest<T,U>,L,C> result;
         for (size_t l = 0; l < L; ++l)
@@ -164,7 +164,7 @@ namespace ray { namespace math {
     }
 
     template<typename T, typename U, size_t L, size_t C> 
-    constexpr auto operator/(const Scalar<T> &d, const Matrix<U,L,C> &a) 
+    auto operator/(const Scalar<T> &d, const Matrix<U,L,C> &a) 
     {
         Matrix<widest<T,U>,L,C> result;
         for (size_t l = 0; l < L; ++l)
@@ -175,7 +175,7 @@ namespace ray { namespace math {
 
 
     template<typename T, typename U, size_t L, size_t M, size_t C>
-    constexpr auto operator*(const Matrix<T,L,M> &a, const Matrix<U,M,C> &b)
+    auto operator*(const Matrix<T,L,M> &a, const Matrix<U,M,C> &b)
     {
         Matrix<widest<T,U>,L,C> result;
         for (size_t l = 0; l < L; ++l)
