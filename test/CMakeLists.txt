@@ -13,5 +13,6 @@ add_unit_test(math Vector3Tests)
 add_unit_test(math Vector4Tests)
 add_unit_test(math MatrixTests)
 add_unit_test(math QuaternionTests)
+add_unit_test(math TransformableTests)
 
 
