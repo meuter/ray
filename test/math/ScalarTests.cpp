@@ -46,3 +46,24 @@ TEST(floating_only_and_integral_only, Works)
     EXPECT_EQ(2, someFunction(10));
     EXPECT_EQ(2, someFunction(10u));
 }
+
+TEST(scalar_equal, canBeUsedToCompareTwoIntegralType)
+{
+    EXPECT_TRUE(scalar_equal(1,1));
+    EXPECT_TRUE(scalar_equal(1u,1));
+    EXPECT_TRUE(scalar_equal(1u,1l));
+}
+
+TEST(scalar_equal, canBeUsedToCompareTwoFloatingPointType)
+{
+    EXPECT_TRUE(scalar_equal(1.0f,1.0f));
+    EXPECT_TRUE(scalar_equal(1.0,1.0));
+    EXPECT_TRUE(scalar_equal(1.0f,1.0));    
+}
+
+
+TEST(scalar_equal, canBeUsedToCompareIntegralAndFloatingPointType)
+{
+    EXPECT_TRUE(scalar_equal(1.0,1l));
+    EXPECT_TRUE(scalar_equal(1u,1.0f));
+}
