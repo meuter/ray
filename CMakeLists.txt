@@ -5,6 +5,13 @@ set(CMAKE_CXX_STANDARD 14)
 
 ###### Boost
 find_package(Boost COMPONENTS system filesystem REQUIRED)
+add_library(boost INTERFACE)
+target_include_directories(boost INTERFACE ${Boost_FILESYSTEM_INCLUDE_DIRS})
+target_link_libraries(boost
+INTERFACE
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+)
 
 ###### OpenGL
 find_package(OpenGL REQUIRED)
@@ -32,24 +39,8 @@ add_library(ray
     src/ray/gl/Texture.cpp
     src/ray/platform/FileSystem.cpp
 )
-
-target_include_directories(ray
-    PUBLIC
-        include
-    PRIVATE
-        ${Boost_FILESYSTEM_INCLUDE_DIRS}
-)
-message(" - boost fs libraries = ${Boost_FILESYSTEM_LIBRARY}")
-message(" - boost sys libraries = ${Boost_SYSTEM_LIBRARY}")
-target_link_libraries(ray 
-    PUBLIC
-        stb
-        glfw
-        glad 
-        tinyobjloader
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-)
+target_include_directories(ray PUBLIC include)
+target_link_libraries(ray PUBLIC stb glfw glad tinyobjloader boost)
 
 ###### Samples
 add_subdirectory(samples)

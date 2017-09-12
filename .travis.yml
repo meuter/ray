@@ -3,15 +3,16 @@ language: cpp
 matrix:
   include:  
 
-    ## Linux(Trusty) - GCC-5 - Release
+    ## Linux(Trusty) - GCC-5 - Debug
     - os: linux
       dist: trusty
       compiler: gcc
-      addons:
+      addons: &1
         apt:
           sources:
             - kubuntu-backports
             - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-5.0            
           packages:
             - cmake
             - libxrandr-dev
@@ -24,39 +25,39 @@ matrix:
             - libboost-dev
             - libboost-filesystem-dev
             - g++-5
-      env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && BUILD_TYPE=Release"
+            - clang-5.0
+      env: MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && BUILD_TYPE=Debug"
 
-    ## Linux(Trusty) - CLANG 5 - Release
+    ## Linux(Trusty) - GCC-5 - Release
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      addons: *1
+      env: MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && BUILD_TYPE=Release"
+
+    ## Linux(Trusty) - CLANG-5 - Release
     - os: linux
       dist: trusty
       compiler: clang
-      addons:
-        apt:
-          sources:
-            - kubuntu-backports
-            - llvm-toolchain-trusty-5.0            
-          packages:
-            - cmake
-            - libxrandr-dev
-            - libxinerama-dev
-            - libxcursor-dev
-            - libxi-dev
-            - libglu1-mesa-dev
-            - freeglut3-dev
-            - mesa-common-dev
-            - clang-5.0
-            - libboost-filesystem-dev
-            - libboost-dev
-      env:
-        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0 && BUILT_TYPE=Release"
+      addons: *1
+      env: MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0 && BUILT_TYPE=Release"
+
+    ## Linux(Trusty) - CLANG-5 - Debug
+    - os: linux
+      dist: trusty
+      compiler: clang
+      addons: *1
+      env: MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0 && BUILT_TYPE=Debug"
 
     ## OSX - XCode 8 - Release
     - os: osx
       osx_image: xcode8
-      env:
-        - MATRIX_EVAL="BUILD_TYPE=Release"
+      env: MATRIX_EVAL="BUILD_TYPE=Release"
 
+    ## OSX - XCode 8 - Debug
+    - os: osx
+      osx_image: xcode8
+      env: MATRIX_EVAL="BUILD_TYPE=Debug"
 
 before_install:
   - eval "${MATRIX_EVAL}"
