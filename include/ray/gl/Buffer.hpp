@@ -2,6 +2,7 @@
 
 #include <ray/gl/Handle.hpp>
 #include <initializer_list>
+#include <vector>
 
 namespace ray { namespace gl {
         
@@ -12,7 +13,13 @@ namespace ray { namespace gl {
         Buffer() = default;              
         Buffer(const size_t size, GLuint usage=GL_STATIC_DRAW) { load(nullptr, size, usage); }
         Buffer(const std::initializer_list<T> &data, GLuint usage=GL_STATIC_DRAW) { load(data, usage); }
+        Buffer(const std::vector<T> &data, GLuint usage=GL_STATIC_DRAW) { load(data, usage); }
 
+        void load(const std::vector<T> &data, GLuint usage=GL_STATIC_DRAW)
+        {
+            load(&data[0], data.size(), usage);
+        }
+        
         void load(const std::initializer_list<T> &data, GLuint usage=GL_STATIC_DRAW) 
         {
             load(data.begin(), data.size(), usage); 

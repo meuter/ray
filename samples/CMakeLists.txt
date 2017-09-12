@@ -7,4 +7,5 @@ add_sample(window)
 add_sample(rectangle)
 add_sample(texture)
 add_sample(cube)
+add_sample(teapot)
 

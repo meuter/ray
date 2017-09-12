@@ -71,13 +71,12 @@ struct Cube : public VertexArray, public Transformable
 
     void bindPosition(Attribute<vec3> position) const { bindAttributeAtOffset(0, position, vbo);  }
     void bindTexCoord(Attribute<vec2> texCoord) const { bindAttributeAtOffset(3, texCoord, vbo);  }
-    void bindNormal(Attribute<vec3> normal)     const { bindAttributeAtOffset(3, normal, vbo);    }
+    void bindNormal(Attribute<vec3> normal)     const { bindAttributeAtOffset(5, normal, vbo);    }
     const Texture &texture() const { return mTexture; }
     
     void draw() const
     {
         bind();
-        // TODO(cme): move to a drawElements system
         glDrawArrays(GL_TRIANGLES, 0, vbo.vertexCount());
         unbind();
     }

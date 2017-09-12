@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.0)
 set(CMAKE_CXX_STANDARD 14)
 
 ###### Boost
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED filesystem)
 
 ###### OpenGL
 find_package(OpenGL REQUIRED)
@@ -30,6 +30,7 @@ add_subdirectory(contrib/tinyobjloader)
 add_library(ray 
     src/ray/assets/Bitmap.cpp
     src/ray/gl/Texture.cpp
+    src/ray/platform/FileSystem.cpp
 )
 
 target_include_directories(ray
@@ -38,7 +39,15 @@ target_include_directories(ray
     PRIVATE
         ${Boost_INCLUDE_DIRS}
 )
-target_link_libraries(ray PUBLIC stb glfw glad tinyobjloader)
+message("boost libraries = ${Boost_LIBRARIES}")
+target_link_libraries(ray 
+    PUBLIC
+        stb
+        glfw
+        glad 
+        tinyobjloader
+        ${Boost_LIBRARIES}
+)
 
 ###### Samples
 add_subdirectory(samples)
