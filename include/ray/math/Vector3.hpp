@@ -62,6 +62,6 @@ namespace ray { namespace math {
 
     template<typename T> auto &operator<<(std::ostream &out, const Vector3<T> &v) { return (out << "(" << v.x << "," << v.y << "," << v.z << ")"); }
 
-    template<typename T, typename U> constexpr auto dot(const Vector3<T> &a, const Vector3<U> &b) { return a.x*b.x + a.y*b.y + a.z*b.z; }        
+    template<typename T, typename U> constexpr auto dot(const Vector3<T> &a, const Vector3<U> &b) { return widest<T,U>(a.x*b.x + a.y*b.y + a.z*b.z); }
     template<typename T, typename U> constexpr auto cross(const Vector3<T> &l, const Vector3<U> &r) { return Vector3<widest<T,U>>{ (l.y*r.z)-(r.y*l.z), (l.z*r.x)-(r.z*l.x), (l.x*r.y)-(r.x*l.y) }; }
 }}

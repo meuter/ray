@@ -50,5 +50,5 @@ namespace ray { namespace math {
     
     template<typename T> auto &operator<<(std::ostream &out, const Vector2<T> &v) { return (out << "(" << v.x << "," << v.y << ")"); }
 
-    template<typename T, typename U> constexpr auto dot(const Vector2<T> &a, const Vector2<U> &b) { return a.x*b.x + a.y*b.y; }
+    template<typename T, typename U> constexpr auto dot(const Vector2<T> &a, const Vector2<U> &b) { return widest<T,U>(a.x*b.x + a.y*b.y); }
 }}

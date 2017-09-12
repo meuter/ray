@@ -1,12 +1,14 @@
 #pragma once
 
 #include <cmath>
-#include <ray/platform/Print.hpp>
+#include <ray/math/Vector2.hpp>
+#include <ray/math/Vector3.hpp>
+#include <ray/math/Vector4.hpp>
 
 namespace ray { namespace math {
 
-    template<typename T> constexpr auto length(const T &v) { return std::sqrt(dot(v,v)); }
-    template<typename T> constexpr auto normalize(const T &v) { return v/length(v); }
+    template<template<typename U> class Vector, typename T> constexpr auto length(const Vector<T> &v) { return std::sqrt(dot(v,v)); }
+    template<template<typename U> class Vector, typename T> constexpr auto normalize(const Vector<T> &v) { return v/length(v); }
 
     template<typename T> constexpr auto clamp(const T &lower, const T &value, const T &upper) { return std::max(lower, std::min(upper, value)); }
     template<typename T> constexpr auto clamp01(const T &value) { return clamp(T{0}, value, T{1}); }
