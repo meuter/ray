@@ -67,7 +67,7 @@ before_script:
   - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DGLFW_BUILD_EXAMPLES=0 -DGLFW_BUILD_TESTS=0 ..
 
 script:
-  - cmake --build . -- -j10
+  - cmake --build . -- -j10 VERBOSE=1
   - ctest -j10 -C ${BUILD_TYPE} --output-on-failure
 
 notifications:
