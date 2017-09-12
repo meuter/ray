@@ -75,10 +75,12 @@ struct Mesh : public VertexArray, public Transformable
         }
 
         vbo.load(vertexData);
+
+        // TODO(cme): load material
         mTexture.load(texFilename);
 
         scale(0.02f);
-        moveTo(0,-0.6f,+3);
+        moveTo(0,-0.7f,+3);
         rotate(vec3(1,0,0), 10_deg);
     }
 
@@ -183,7 +185,7 @@ private:
 
 int main()
 {    
-    auto window   = Window(1920, 1080, "Texture Sample");
+    auto window   = Window(1920, 1080, "Teapot Sample");
     auto renderer = MeshRenderer(window);
     auto mesh     = Mesh("res/mesh/teapot.obj", "res/images/grid.png");
 

@@ -171,7 +171,7 @@ private:
 
 int main()
 {    
-    auto window   = Window(1920, 1080, "Texture Sample");
+    auto window   = Window(1920, 1080, "Cube Sample");
     auto renderer = CubeRenderer(window);
     auto cube     = Cube("res/images/awesomeface.png");
 
