@@ -7,3 +7,6 @@
 [submodule "contrib/stb"]
 	path = contrib/stb
 	url = https://github.com/nothings/stb.git
+[submodule "contrib/tinyobjloader"]
+	path = contrib/tinyobjloader
+	url = https://github.com/syoyo/tinyobjloader.git
