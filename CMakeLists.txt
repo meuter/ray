@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.0)
 set(CMAKE_CXX_STANDARD 14)
 
 ###### Boost
-find_package(Boost REQUIRED filesystem)
+find_package(Boost COMPONENTS system filesystem REQUIRED)
 
 ###### OpenGL
 find_package(OpenGL REQUIRED)
@@ -37,7 +37,7 @@ target_include_directories(ray
     PUBLIC
         include
     PRIVATE
-        ${Boost_INCLUDE_DIRS}
+        ${Boost_FILESYSTEM_INCLUDE_DIRS}
 )
 message("boost libraries = ${Boost_LIBRARIES}")
 target_link_libraries(ray 
@@ -46,7 +46,8 @@ target_link_libraries(ray
         glfw
         glad 
         tinyobjloader
-        ${Boost_LIBRARIES}
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
 )
 
 ###### Samples
