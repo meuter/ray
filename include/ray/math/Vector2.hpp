@@ -33,7 +33,6 @@ namespace ray { namespace math {
         constexpr auto operator-() const { return vector2{-x,-y}; }
     };
 
-    // TODO(cme): test me
     template<typename U, typename T> constexpr auto vector_cast(const Vector2<T> &a) { return Vector2<U>{ static_cast<U>(a.x), static_cast<U>(a.y) }; }
         
     template<typename T, typename U> constexpr auto operator+(const Vector2<T> &a, const Vector2<U> &b) { return Vector2<widest<T,U>>{a.x+b.x, a.y+b.y}; }
@@ -51,5 +50,5 @@ namespace ray { namespace math {
     
     template<typename T> auto &operator<<(std::ostream &out, const Vector2<T> &v) { return (out << "(" << v.x << "," << v.y << ")"); }
 
-    template<typename T> constexpr auto dot(const Vector2<T> &a, const Vector2<T> &b) { return a.x*b.x + a.y*b.y; }
+    template<typename T, typename U> constexpr auto dot(const Vector2<T> &a, const Vector2<U> &b) { return a.x*b.x + a.y*b.y; }
 }}

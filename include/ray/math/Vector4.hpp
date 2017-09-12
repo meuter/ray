@@ -70,6 +70,5 @@ namespace ray { namespace math {
 
     template<typename T> auto &operator<<(std::ostream &out, const Vector4<T> &v) { return (out << "(" << v.x << "," << v.y << "," << v.z << "," << v.w << ")"); }
 
-    // TODO(cme): test me
-    template<typename T> constexpr auto dot(const Vector4<T> &a, const Vector4<T> &b) { return a.x*b.x+a.y*b.y+a.z*b.z+a.w*b.w; }        
+    template<typename T, typename U> constexpr auto dot(const Vector4<T> &a, const Vector4<U> &b) { return a.x*b.x+a.y*b.y+a.z*b.z+a.w*b.w; }        
 }}
