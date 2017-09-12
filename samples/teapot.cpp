@@ -2,6 +2,7 @@
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
+#include <ray/platform/GameLoop.hpp>
 #include <ray/platform/FileSystem.hpp>
 #include <cstdlib>
 
@@ -186,22 +187,20 @@ private:
 int main()
 {    
     auto window   = Window(1920, 1080, "Teapot Sample");
+    auto loop     = GameLoop(window, 60);
     auto renderer = MeshRenderer(window);
     auto mesh     = Mesh("res/mesh/teapot.obj", "res/images/grid.png");
 
     mesh.bindPosition(renderer.position());
     mesh.bindTexCoord(renderer.texCoord());
 
-    window.swapInterval(1);
-
-    while (!window.shouldClose())
+    loop.run([&]() 
     {
         renderer.render(mesh);
         mesh.update();
-
-        window.pollEvents();
-        window.swapBuffers();
-    }
+        if (loop.frameCount()%60 == 0)
+            fprintln("average frame time = %1%msec", 1000*loop.averageFrameTime().count());
+    });
 
     return EXIT_SUCCESS;
 }
