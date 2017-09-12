@@ -12,74 +12,61 @@ using namespace ray::platform;
 using namespace ray::gl;
 using namespace ray::math;
 
+struct TimedBlock
+{
+    TimedBlock(const char *description, const char *file, int line, const char *function) : mDescription(description), mFile(file), mLine(line), mFunction(function) {}
+    ~TimedBlock() 
+    {
+        fprintln("%s:%d:%s: %fms elapsed for %s", mFile, mLine, mFunction, 1000*mStopwatch.lap().count(), mDescription);
+    }
+    const char *mFile, *mFunction, *mDescription;
+    int mLine;
+    Stopwatch mStopwatch;
+};
+
+#define TIMED(x) auto __timedBlock__ ## __COUNTER__ = TimedBlock(x, __FILE__, __LINE__, __FUNCTION__)
+
 struct Mesh : public VertexArray, public Transformable
 {
     Mesh(const std::string &objFilename, const std::string texFilename) 
     {
+        TIMED("Constructor");
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
         
         std::string error;
         std::string basepath = fs::parent(objFilename);
-        bool success = tinyobj::LoadObj(&attrib, &shapes, &materials, &error, objFilename.c_str(), basepath.c_str());
+        bool success;
 
+        success = tinyobj::LoadObj(&attrib, &shapes, &materials, &error, objFilename.c_str(), basepath.c_str());
         panicif(!success, "could not load '%s': %s", objFilename, error);
         
-        auto &mesh = shapes[0].mesh;
+        int totalIndices = 0;
+        for (auto &shape: shapes)
+            totalIndices += shape.mesh.indices.size();
 
-        // TODO(cme): load directly in mapped VBO
-        std::vector<float> vertexData;
-
+        vbo.reserve(5*totalIndices);
+        auto mapped = vbo.map(GL_WRITE_ONLY);
         for (auto &shape: shapes)
         {
-            auto &mesh = shape.mesh;
-            for (auto i = 0u; i < mesh.indices.size(); i+=3)
+            auto &indices = shape.mesh.indices;
+            for (auto i = 0u; i < indices.size(); i+=3)                
             {
-                auto index1 = mesh.indices[i+0];
-                auto index2 = mesh.indices[i+1];
-                auto index3 = mesh.indices[i+2];
-    
-                auto x1 = attrib.vertices[3*index1.vertex_index+0];
-                auto y1 = attrib.vertices[3*index1.vertex_index+1];
-                auto z1 = attrib.vertices[3*index1.vertex_index+2];
-                auto u1 = attrib.texcoords[2*index1.texcoord_index+0];
-                auto v1 = attrib.texcoords[2*index1.texcoord_index+1];
-                vertexData.push_back(x1);
-                vertexData.push_back(y1);
-                vertexData.push_back(z1);
-                vertexData.push_back(u1);
-                vertexData.push_back(v1);
-    
-                auto x2 = attrib.vertices[3*index2.vertex_index+0];
-                auto y2 = attrib.vertices[3*index2.vertex_index+1];
-                auto z2 = attrib.vertices[3*index2.vertex_index+2];
-                auto u2 = attrib.texcoords[2*index2.texcoord_index+0];
-                auto v2 = attrib.texcoords[2*index2.texcoord_index+1];
-                vertexData.push_back(x2);
-                vertexData.push_back(y2);
-                vertexData.push_back(z2);
-                vertexData.push_back(u2);
-                vertexData.push_back(v2);
-                
-                auto x3 = attrib.vertices[3*index3.vertex_index+0];
-                auto y3 = attrib.vertices[3*index3.vertex_index+1];
-                auto z3 = attrib.vertices[3*index3.vertex_index+2];
-                auto u3 = attrib.texcoords[2*index3.texcoord_index+0];
-                auto v3 = attrib.texcoords[2*index3.texcoord_index+1];
-                vertexData.push_back(x3);
-                vertexData.push_back(y3);
-                vertexData.push_back(z3);
-                vertexData.push_back(u3);
-                vertexData.push_back(v3);
+                for (auto j = 0; j < 3; ++j)
+                {
+                    (*mapped++) = attrib.vertices[3*indices[i+j].vertex_index+0];
+                    (*mapped++) = attrib.vertices[3*indices[i+j].vertex_index+1];
+                    (*mapped++) = attrib.vertices[3*indices[i+j].vertex_index+2];
+                    (*mapped++) = attrib.texcoords[2*indices[i+j].texcoord_index+0];
+                    (*mapped++) = attrib.texcoords[2*indices[i+j].texcoord_index+1];
+                }
             }
         }
+        vbo.unmap();
 
-        vbo.load(vertexData);
-
-        // TODO(cme): load material
+        // TODO(cme): load texture from mtl file
         mTexture.load(texFilename);
-
         scale(0.02f);
         moveTo(0,-0.7f,+3);
         rotate(vec3(1,0,0), 10_deg);

@@ -11,7 +11,7 @@ namespace ray { namespace gl {
     {     
     public:   
         Buffer() = default;              
-        Buffer(const size_t size, GLuint usage=GL_STATIC_DRAW) { load(nullptr, size, usage); }
+        Buffer(const size_t size, GLuint usage=GL_STATIC_DRAW) { reserve(size, usage); }
         Buffer(const std::initializer_list<T> &data, GLuint usage=GL_STATIC_DRAW) { load(data, usage); }
         Buffer(const std::vector<T> &data, GLuint usage=GL_STATIC_DRAW) { load(data, usage); }
 
@@ -35,6 +35,11 @@ namespace ray { namespace gl {
         {
             bind();
             gl(BufferSubData(target, countOffset*sizeof(T), count*sizeof(T), &data[0]));
+        }
+
+        void reserve(size_t size, GLuint usage=GL_STATIC_DRAW)
+        {
+            load(nullptr, size, usage);
         }
 
         size_t size() const
