@@ -18,7 +18,7 @@ namespace ray { namespace platform { namespace fs {
 
     std::string parent(const std::string &path)
     {
-        return boostfs::path(path).parent_path().string();
+        return boostfs::path(path).parent_path().string() + "/";
     }
 
     std::string filename(const std::string &path)

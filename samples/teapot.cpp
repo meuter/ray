@@ -1,9 +1,9 @@
 #include <ray/platform/Window.hpp>
+#include <ray/platform/GameLoop.hpp>
+#include <ray/platform/FileSystem.hpp>
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
-#include <ray/platform/GameLoop.hpp>
-#include <ray/platform/FileSystem.hpp>
 #include <cstdlib>
 
 #include <tiny_obj_loader.h>
@@ -12,25 +12,10 @@ using namespace ray::platform;
 using namespace ray::gl;
 using namespace ray::math;
 
-struct TimedBlock
-{
-    TimedBlock(const char *description, const char *file, int line, const char *function) : mDescription(description), mFile(file), mLine(line), mFunction(function) {}
-    ~TimedBlock() 
-    {
-        fprintln("%s:%d:%s: %fms elapsed for %s", mFile, mLine, mFunction, 1000*mStopwatch.lap().count(), mDescription);
-    }
-    const char *mFile, *mFunction, *mDescription;
-    int mLine;
-    Stopwatch mStopwatch;
-};
-
-#define TIMED(x) auto __timedBlock__ ## __COUNTER__ = TimedBlock(x, __FILE__, __LINE__, __FUNCTION__)
-
 struct Mesh : public VertexArray, public Transformable
 {
-    Mesh(const std::string &objFilename, const std::string texFilename) 
+    Mesh(const std::string &objFilename) 
     {
-        TIMED("Constructor");
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
@@ -39,7 +24,7 @@ struct Mesh : public VertexArray, public Transformable
         std::string basepath = fs::parent(objFilename);
         bool success;
 
-        success = tinyobj::LoadObj(&attrib, &shapes, &materials, &error, objFilename.c_str(), basepath.c_str());
+        success = tinyobj::LoadObj(&attrib, &shapes, &materials, &error, objFilename.c_str(), basepath.c_str());        
         panicif(!success, "could not load '%s': %s", objFilename, error);
         
         int totalIndices = 0;
@@ -51,6 +36,7 @@ struct Mesh : public VertexArray, public Transformable
         for (auto &shape: shapes)
         {
             auto &indices = shape.mesh.indices;
+
             for (auto i = 0u; i < indices.size(); i+=3)                
             {
                 for (auto j = 0; j < 3; ++j)
@@ -65,8 +51,9 @@ struct Mesh : public VertexArray, public Transformable
         }
         vbo.unmap();
 
-        // TODO(cme): load texture from mtl file
-        mTexture.load(texFilename);
+        for (auto material: materials)
+            mTexture.load(fs::join(basepath, material.diffuse_texname));
+
         scale(0.02f);
         moveTo(0,-0.7f,+3);
         rotate(vec3(1,0,0), 10_deg);
@@ -176,7 +163,7 @@ int main()
     auto window   = Window(1920, 1080, "Teapot Sample");
     auto loop     = GameLoop(window, 60);
     auto renderer = MeshRenderer(window);
-    auto mesh     = Mesh("res/mesh/teapot.obj", "res/images/grid.png");
+    auto mesh     = Mesh("res/mesh/teapot.obj");
 
     mesh.bindPosition(renderer.position());
     mesh.bindTexCoord(renderer.texCoord());
