@@ -1,8 +1,10 @@
+#include <ray/math/Transformable.hpp>
 #include <ray/math/Scalar.hpp>
 #include <ray/math/Vector2.hpp>
 #include <ray/math/Vector3.hpp>
 #include <ray/math/Vector4.hpp>
 #include <ray/math/Matrix.hpp>
+#include <ray/math/Quaternion.hpp>
 #include <ray/math/Trigonometry.hpp>
 #include <ray/math/Utils.hpp>
 
@@ -51,4 +53,7 @@ namespace ray { namespace math {
     using imat4 = Matrix<i32, 4, 4>;
     using umat4 = Matrix<u32, 4, 4>;
     using dmat4 = Matrix<f64, 4, 4>;
+
+    using quat  = Quaternion<f32>;
+    using dquat = Quaternion<f64>;
 }}

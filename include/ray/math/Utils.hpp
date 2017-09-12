@@ -4,7 +4,6 @@
 
 namespace ray { namespace math {
 
-    // TODO(cme): test all of these function
     template<typename T> constexpr auto length(const T &v) { return std::sqrt(math::dot(v,v)); }
     template<typename T> constexpr auto normalize(const T &v) { return v/math::length(v); }
 
