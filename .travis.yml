@@ -49,15 +49,15 @@ matrix:
       addons: *1
       env: MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0 && BUILT_TYPE=Debug"
 
-    ## OSX - XCode 8 - Release
-    - os: osx
-      osx_image: xcode8
-      env: MATRIX_EVAL="BUILD_TYPE=Release"
+    # ## OSX - XCode 8 - Release => too slow
+    # - os: osx
+    #   osx_image: xcode8
+    #   env: MATRIX_EVAL="BUILD_TYPE=Release"
 
-    ## OSX - XCode 8 - Debug
-    - os: osx
-      osx_image: xcode8
-      env: MATRIX_EVAL="BUILD_TYPE=Debug"
+    # ## OSX - XCode 8 - Debug => too slow
+    # - os: osx
+    #   osx_image: xcode8
+    #   env: MATRIX_EVAL="BUILD_TYPE=Debug"
 
 before_install:
   - eval "${MATRIX_EVAL}"
