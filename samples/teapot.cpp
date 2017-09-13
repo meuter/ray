@@ -1,3 +1,4 @@
+#include <ray/rendering/Mesh.hpp>
 #include <ray/platform/Window.hpp>
 #include <ray/platform/GameLoop.hpp>
 #include <ray/platform/FileSystem.hpp>
@@ -6,79 +7,11 @@
 #include <ray/gl/Texture.hpp>
 #include <cstdlib>
 
-#include <tiny_obj_loader.h>
-
 using namespace ray::platform;
 using namespace ray::gl;
 using namespace ray::math;
-
-struct Mesh : public VertexArray, public Transformable
-{
-    Mesh(const std::string &objFilename) 
-    {
-        tinyobj::attrib_t attrib;
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> materials;
-        
-        std::string error;
-        std::string basepath = fs::parent(objFilename);
-        bool success;
-
-        success = tinyobj::LoadObj(&attrib, &shapes, &materials, &error, objFilename.c_str(), basepath.c_str());        
-        panicif(!success, "could not load '%s': %s", objFilename, error);
-        
-        int totalIndices = 0;
-        for (auto &shape: shapes)
-            totalIndices += shape.mesh.indices.size();
-
-        vbo.reserve(5*totalIndices);
-        auto mapped = vbo.map(GL_WRITE_ONLY);
-        for (auto &shape: shapes)
-        {
-            auto &indices = shape.mesh.indices;
-
-            for (auto i = 0u; i < indices.size(); i+=3)                
-            {
-                for (auto j = 0; j < 3; ++j)
-                {
-                    (*mapped++) = attrib.vertices[3*indices[i+j].vertex_index+0];
-                    (*mapped++) = attrib.vertices[3*indices[i+j].vertex_index+1];
-                    (*mapped++) = attrib.vertices[3*indices[i+j].vertex_index+2];
-                    (*mapped++) = attrib.texcoords[2*indices[i+j].texcoord_index+0];
-                    (*mapped++) = attrib.texcoords[2*indices[i+j].texcoord_index+1];
-                }
-            }
-        }
-        vbo.unmap();
-
-        for (auto material: materials)
-            mTexture.load(fs::join(basepath, material.diffuse_texname));
-
-        scale(0.02f);
-        moveTo(0,-0.7f,+3);
-        rotate(vec3(1,0,0), 10_deg);
-    }
-
-    void bindPosition(Attribute<vec3> position) const { bindAttributeAtOffset(0, position, vbo);  }
-    void bindTexCoord(Attribute<vec2> texCoord) const { bindAttributeAtOffset(3, texCoord, vbo);  }
-    const Texture &texture() const { return mTexture; }
-    
-    void draw() const
-    {
-        bind();
-        glDrawArrays(GL_TRIANGLES, 0, vbo.vertexCount());
-        unbind();
-    }
-
-    void update() 
-    {
-        rotate(vec3(0,1,0), 2_deg);
-    }
-
-private:    
-    VertexBuffer<f32,5> vbo;
-    Texture mTexture;    
-};
+using namespace ray::assets;
+using namespace ray::rendering;
 
 class MeshRenderer
 {
@@ -136,17 +69,23 @@ public:
         };
     }
 
-    Attribute<vec3> position() { return shader.getAttribute<vec3>("vertPosition"); }
-    Attribute<vec2> texCoord() { return shader.getAttribute<vec2>("vertTexCoord"); }
+    Attribute<vec3> position() const
+    { 
+        return shader.getAttribute<vec3>("vertPosition"); 
+    }
 
-    
-    void render(const Mesh &mesh)
+    Attribute<vec2> texCoord() const
+    { 
+        return shader.getAttribute<vec2>("vertTexCoord"); 
+    }
+
+    void render(const Mesh &mesh) const
     {
         glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader.use();
         glEnable(GL_DEPTH_TEST);
-        texture.set(mesh.texture().bind(GL_TEXTURE0));
+        texture.set(mesh.diffuseTexture().bind(GL_TEXTURE0));
         modelMatrix.set(mesh.modelMatrix());
         mesh.draw();
         glDisable(GL_DEPTH_TEST);
@@ -165,13 +104,17 @@ int main()
     auto renderer = MeshRenderer(window);
     auto mesh     = Mesh("res/mesh/teapot.obj");
 
+
+    mesh.scale(0.02f);
+    mesh.moveTo(0,-0.7f,+3);
+    mesh.rotate(vec3(1,0,0), 10_deg);
     mesh.bindPosition(renderer.position());
     mesh.bindTexCoord(renderer.texCoord());
 
     loop.run([&]() 
     {
         renderer.render(mesh);
-        mesh.update();
+        mesh.rotate(vec3(0,1,0), 2_deg);
         if (loop.frameCount()%60 == 0)
             fprintln("average frame time = %1%msec", 1000*loop.averageFrameTime().count());
     });
