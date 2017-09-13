@@ -102,6 +102,7 @@ int main()
     mesh.rotate(vec3(1,0,0), 10_deg);
 
     renderer.bind(mesh);
+
     loop.run([&]() 
     {
         renderer.render(mesh);

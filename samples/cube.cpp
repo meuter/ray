@@ -144,10 +144,11 @@ public:
         };
     }
 
-
-    Attribute<vec3> position() { return shader.getAttribute<vec3>("vertPosition"); }
-    Attribute<vec2> texCoord() { return shader.getAttribute<vec2>("vertTexCoord"); }
-
+    void bind(const Cube &cube)
+    {
+        cube.bindPosition(shader.getAttribute<vec3>("vertPosition"));
+        cube.bindTexCoord(shader.getAttribute<vec2>("vertTexCoord"));
+    }
     
     void render(const Cube &cube)
     {
@@ -173,8 +174,7 @@ int main()
     auto renderer = CubeRenderer(window);
     auto cube     = Cube("res/images/awesomeface.png");
 
-    cube.bindPosition(renderer.position());
-    cube.bindTexCoord(renderer.texCoord());
+    renderer.bind(cube);
 
     window.swapInterval(1);
 

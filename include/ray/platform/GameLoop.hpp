@@ -18,16 +18,15 @@ namespace ray { namespace platform {
         using f32 = float;
     public:
 
-        GameLoop(Window &window, fps targetFPS) 
+        GameLoop(Window &window, fps targetFPS, bool vSync=true) 
             : mWindow(window), mFrameTimesSum(1_sec), mTargetFPS(targetFPS), mFrameCount(0), mLastFrameTimeIndex(0)
         {
+            window.swapInterval(vSync ? 1 : 0);
             mFrameTimes.resize(targetFPS, 1_sec/mTargetFPS);            
         }
 
         void run(std::function<void(void)> doOneFrame)
         {
-            mWindow.swapInterval(0);
-
             while ( !mWindow.shouldClose() )
             {
                 mStopwatch.lap();            
