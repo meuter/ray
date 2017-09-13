@@ -65,8 +65,8 @@ struct Cube : public VertexArray, public Transformable
             -0.5f,  0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  -1.0f,  0.0f,
             -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  -1.0f,  0.0f
         });
-
-        moveTo(0,0,-1.5f);
+        
+        moveTo(0,0,-2);
     }
 
     void bindPosition(Attribute<vec3> position) const { bindAttributeAtOffset(0, position, vbo);  }
@@ -125,13 +125,13 @@ public:
         modelMatrix = shader.getUniform<mat4>("modelMatrix");
         projectionMatrix = shader.getUniform<mat4>("projectionMatrix");    
 
-        projectionMatrix = getProjectionMatrix(window, 60_deg, 0.01f, 1000.0f);
+        projectionMatrix = getProjectionMatrix(window, 120_deg, 0.01f, 1000.0f);
     }
 
     mat4 getProjectionMatrix(const Window &window, float fov, float zNear, float zFar) const
     {
         auto zm = zFar - zNear;
-        float yScale = tan(fov/2);
+        float yScale = tan(fov * 0.5f);
         float xScale = yScale / window.aspectRatio();
         float zScale = -( (zFar + zNear) / zm );
         float zTranslate = -(2*zFar*zNear/zm);
@@ -173,6 +173,8 @@ int main()
     auto window   = Window(1920, 1080, "Cube Sample");
     auto renderer = CubeRenderer(window);
     auto cube     = Cube("res/images/awesomeface.png");
+
+    panicif(180_deg != PI, "oops");
 
     renderer.bind(cube);
 
