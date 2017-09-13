@@ -130,9 +130,7 @@ public:
 
     mat4 getProjectionMatrix(const Window &window, float fov, float zNear, float zFar) const
     {
-        ivec2 windowSize;
-        window.getSize(windowSize.w, windowSize.h);
-        float aspectRatio = (float)windowSize.w / windowSize.h;
+        float aspectRatio = window.aspectRatio();
         float zRange = zNear - zFar;
         float yScale = -1.0f / tan(fov/2.0f);
         float xScale = -1 * yScale / aspectRatio;

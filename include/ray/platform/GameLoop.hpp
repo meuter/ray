@@ -18,7 +18,7 @@ namespace ray { namespace platform {
         using f32 = float;
     public:
 
-        GameLoop(const Window &window, fps targetFPS) 
+        GameLoop(Window &window, fps targetFPS) 
             : mWindow(window), mFrameTimesSum(1_sec), mTargetFPS(targetFPS), mFrameCount(0), mLastFrameTimeIndex(0)
         {
             mFrameTimes.resize(targetFPS, 1_sec/mTargetFPS);            
@@ -62,7 +62,7 @@ namespace ray { namespace platform {
         sec dt()                      const { return targetFrameTime(); }
 
     private:
-        const Window &mWindow;
+        Window &mWindow;
         platform::Stopwatch mStopwatch;
         sec mFrameTime, mFrameTimesSum;
         u64 mFrameCount;        

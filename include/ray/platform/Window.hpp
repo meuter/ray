@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ray/platform/Inputs.hpp>
 #include <ray/platform/OpenGL.hpp>
 #include <GLFW/glfw3.h>
 #include <string>
@@ -39,7 +40,7 @@ namespace ray { namespace platform {
     class Monitor
     {
         friend class Library;
-        friend class Window;
+        friend class RawWindow;
         GLFWmonitor *mHandle;
         Monitor(GLFWmonitor *handle) : mHandle(handle) { }
     public:
@@ -67,7 +68,7 @@ namespace ray { namespace platform {
     class Cursor
     {
         friend class Library;
-        friend class Window;
+        friend class RawWindow;
         GLFWcursor *mHandle;
         inline Cursor(GLFWcursor *handle) : mHandle(handle) {}
     public:
@@ -78,25 +79,20 @@ namespace ray { namespace platform {
         inline ~Cursor() { glfwDestroyCursor(mHandle); }
     };
 
-    class Window 
+    class RawWindow 
     {    
         friend class Library;
         GLFWwindow *mHandle;
         bool mShouldBeDestroyed;
-        inline Window(GLFWwindow *handle, bool shouldBeDestroyed) : mHandle(handle), mShouldBeDestroyed(shouldBeDestroyed) 
-        {
-            makeContextCurrent();
-            gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
-            swapInterval(0);
-        }            
+        inline RawWindow(GLFWwindow *handle, bool shouldBeDestroyed) : mHandle(handle), mShouldBeDestroyed(shouldBeDestroyed) {}
     public:
-        inline Window(int width, int height, const std::string &title, const Monitor &monitor, const Window &share);
-        inline Window(int width, int height, const std::string &title, const Window &share);
-        inline Window(int width, int height, const std::string &title, const Monitor &monitor);
-        inline Window(int width, int height, const std::string &title);
-        inline Window(const Window &other) = delete;
-        inline Window(Window &&other) { mHandle = other.mHandle; other.mHandle = nullptr; }
-        inline virtual ~Window() { if (mShouldBeDestroyed) glfwDestroyWindow(mHandle); }
+        inline RawWindow(int width, int height, const std::string &title, const Monitor &monitor, const RawWindow &share);
+        inline RawWindow(int width, int height, const std::string &title, const RawWindow &share);
+        inline RawWindow(int width, int height, const std::string &title, const Monitor &monitor);
+        inline RawWindow(int width, int height, const std::string &title);
+        inline RawWindow(const RawWindow &other) = delete;
+        inline RawWindow(RawWindow &&other) { mHandle = other.mHandle; other.mHandle = nullptr; }
+        inline virtual ~RawWindow() { if (mShouldBeDestroyed) glfwDestroyWindow(mHandle); }
         inline void swapInterval(int interval) const { return glfwSwapInterval(interval); }                
         inline bool shouldClose() const { return glfwWindowShouldClose(mHandle); }        
         inline void setShouldClose(bool value) const { return glfwSetWindowShouldClose(mHandle, value); }
@@ -160,7 +156,7 @@ namespace ray { namespace platform {
         static inline void waitEvents(); 
         static inline void waitEventsTimeout(double timeout); 
         static inline void postEmptyEvent(); 
-        static Window getCurrentContext();
+        static RawWindow getCurrentContext();
     };
 
     class Joystick
@@ -183,7 +179,7 @@ namespace ray { namespace platform {
 
     class Library 
     {
-        friend class Window;
+        friend class RawWindow;
         friend class Monitor;    
         friend class Cursor;
         inline Library() 
@@ -239,18 +235,105 @@ namespace ray { namespace platform {
     }
     inline GLFWmonitorfun Monitor::setCallback(GLFWmonitorfun callback) { return Library::getInstance().setMonitorCallback(callback); }
 
-    inline Window::Window(int width, int height, const std::string &title, const Monitor &monitor, const Window &share) : Window(Library::getInstance().createWindow(width, height, title, monitor.mHandle, share.mHandle), true) {}
-    inline Window::Window(int width, int height, const std::string &title, const Window &share) : Window(Library::getInstance().createWindow(width, height, title, nullptr, share.mHandle), true) {}
-    inline Window::Window(int width, int height, const std::string &title, const Monitor &monitor) : Window(Library::getInstance().createWindow(width, height, title, monitor.mHandle, nullptr), true) {}
-    inline Window::Window(int width, int height, const std::string &title) : Window(Library::getInstance().createWindow(width, height, title, nullptr, nullptr), true) {}
-    inline void Window::defaultHint() { Library::getInstance().defaultWindowHint(); }
-    inline void Window::hint(int hint, int value) { Library::getInstance().windowHint(hint, value); }
-    inline void Window::pollEvents() { Library::getInstance().pollEvents(); }
-    inline void Window::waitEvents() { Library::getInstance().waitEvents(); }
-    inline void Window::waitEventsTimeout(double timeout) { Library::getInstance().waitEventsTimeout(timeout); }
-    inline void Window::postEmptyEvent() { Library::getInstance().postEmptyEvent(); }
-    inline Window Window::getCurrentContext() { return Window(Library::getInstance().getCurrentContext(), false); }
+    inline RawWindow::RawWindow(int width, int height, const std::string &title, const Monitor &monitor, const RawWindow &share) : RawWindow(Library::getInstance().createWindow(width, height, title, monitor.mHandle, share.mHandle), true) {}
+    inline RawWindow::RawWindow(int width, int height, const std::string &title, const RawWindow &share) : RawWindow(Library::getInstance().createWindow(width, height, title, nullptr, share.mHandle), true) {}
+    inline RawWindow::RawWindow(int width, int height, const std::string &title, const Monitor &monitor) : RawWindow(Library::getInstance().createWindow(width, height, title, monitor.mHandle, nullptr), true) {}
+    inline RawWindow::RawWindow(int width, int height, const std::string &title) : RawWindow(Library::getInstance().createWindow(width, height, title, nullptr, nullptr), true) {}
+    inline void RawWindow::defaultHint() { Library::getInstance().defaultWindowHint(); }
+    inline void RawWindow::hint(int hint, int value) { Library::getInstance().windowHint(hint, value); }
+    inline void RawWindow::pollEvents() { Library::getInstance().pollEvents(); }
+    inline void RawWindow::waitEvents() { Library::getInstance().waitEvents(); }
+    inline void RawWindow::waitEventsTimeout(double timeout) { Library::getInstance().waitEventsTimeout(timeout); }
+    inline void RawWindow::postEmptyEvent() { Library::getInstance().postEmptyEvent(); }
+    inline RawWindow RawWindow::getCurrentContext() { return RawWindow(Library::getInstance().getCurrentContext(), false); }
 
     inline Cursor::Cursor(const GLFWimage &image, int xhot, int yhot) : mHandle(Library::getInstance().createCursor(image, xhot, yhot)) { }
     inline Cursor::Cursor(int shape) : mHandle(Library::getInstance().createStandardCursor(shape)) {}
+
+    class Window: public RawWindow
+    {
+        static Window &self(GLFWwindow *glfwWindow) { return *reinterpret_cast<ray::platform::Window *>(glfwGetWindowUserPointer(glfwWindow)); };        
+
+    public:
+        inline Window(int width, int height, const std::string &title) : RawWindow(width, height, title) 
+        {
+            makeContextCurrent();
+            gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+            swapInterval(0);
+            setUserPointer<Window>(*this);                    
+
+            setKeyCallback([](GLFWwindow *w, int key, int, int action, int) {
+                auto &window = self(w);
+                if (action == GLFW_PRESS) 
+                {
+                    window.mIsKeyPressed[key] = true;
+                    window.mIsKeyHeld[key] = true;
+                }
+                if (action == GLFW_RELEASE)
+                {
+                    window.mIsKeyReleased[key] = true;
+                    window.mIsKeyHeld[key] = false;
+                }
+            });
+        
+            setMouseButtonCallback([](GLFWwindow *w, int button, int action, int) {
+                auto &window = self(w);
+                if (action == GLFW_PRESS)
+                {
+                    window.mIsMouseButtonPressed[button] = true;
+                    window.mIsMouseButtonHeld[button] = true;
+                }
+                else if (action == GLFW_RELEASE)
+                {
+                    window.mIsMouseButtonReleased[button] = true;
+                    window.mIsMouseButtonHeld[button] = false;
+                }
+            });
+            fixFrameBufferSizeForRetinaDisplay(width, height);
+
+        }
+        inline Window(const RawWindow &other) = delete;
+        inline Window(Window &&other) = default;
+
+        inline bool  isVisible() const { return getAttribute(GLFW_VISIBLE); }
+        inline bool  hasFocus() const { return getAttribute(GLFW_FOCUSED); }
+        inline int   width() const { int width, height; getSize(width, height); return width; }
+        inline int   height() const { int width, height; getSize(width, height); return height; }
+        inline float aspectRatio() const  { int width, height; getSize(width, height); return ((GLfloat)width) / ((GLfloat)height); }
+        inline bool  isKeyPressed(const Key &key) const { return mIsKeyPressed[static_cast<int>(key)]; }
+        inline bool  isKeyReleased(const Key &key) const { return mIsKeyReleased[static_cast<int>(key)]; }
+        inline bool  isKeyHeld(const Key &key) const { return mIsKeyHeld[static_cast<int>(key)]; }
+        inline bool  isMouseButtonPressed(const MouseButton &button) const { return mIsMouseButtonPressed[static_cast<int>(button)]; }
+        inline bool  isMouseButtonReleased(const MouseButton &button) const { return mIsMouseButtonReleased[static_cast<int>(button)]; }
+        inline bool  isMouseButtonHeld(const MouseButton &button) const { return mIsMouseButtonHeld[static_cast<int>(button)]; }
+        inline void  showMouseCursor() const { setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
+        inline void  hideMouseCursor() const { setInputMode(GLFW_CURSOR, GLFW_CURSOR_HIDDEN); }
+        inline void  disableMouseCursor() const { setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED); }
+
+        void pollEvents()
+        {
+            mIsKeyPressed.reset();
+            mIsKeyReleased.reset();
+            mIsMouseButtonPressed.reset();
+            mIsMouseButtonReleased.reset();
+            RawWindow::pollEvents();
+        }
+
+    private:
+
+        void fixFrameBufferSizeForRetinaDisplay(int width, int height)
+        {
+            int frameBufferWidth, frameBufferHeight;
+            int winWidth, winHeight;
+            getSize(winWidth, winHeight);
+            getFrameBufferSize(frameBufferWidth, frameBufferHeight);
+            float xScale = (float)frameBufferHeight/winHeight;
+            float yScale = (float)frameBufferWidth/winWidth;
+            setSize(width/xScale,height/yScale);
+            glViewport(0, 0, width, height);    
+        }
+        
+        std::bitset<static_cast<size_t>(Key::KEY_LAST)> mIsKeyPressed, mIsKeyReleased, mIsKeyHeld;
+        std::bitset<static_cast<size_t>(MouseButton::BUTTON_LAST)> mIsMouseButtonPressed, mIsMouseButtonReleased, mIsMouseButtonHeld;
+    };
 }}
