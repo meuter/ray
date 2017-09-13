@@ -18,44 +18,44 @@ struct Cube : public VertexArray, public Transformable
             // Position             TexCoord        Normal    
             ////////////////////////////////////////////////////////////
             // Front face
-            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     0.0f,  0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,    1.0f, 0.0f,     0.0f,  0.0f, 1.0f,
-             0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f, 1.0f,
-             0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f, 1.0f,
-            -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     0.0f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     0.0f,  0.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     0.0f,  0.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,    0.0f, 1.0f,     0.0f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f, 1.0f,
 
             // Back face
-            -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f, -1.0f,
-             0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f, -1.0f,
-             0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     0.0f,  0.0f, -1.0f,
-             0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     0.0f,  0.0f, -1.0f,
-            -0.5f,  0.5f,  0.5f,    0.0f, 1.0f,     0.0f,  0.0f, -1.0f,
-            -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     0.0f,  0.0f, -1.0f,
+             0.5f, -0.5f, -0.5f,    1.0f, 0.0f,     0.0f,  0.0f, -1.0f,
+             0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f, -1.0f,
+             0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f, -1.0f,
+            -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     0.0f,  0.0f, -1.0f,
 
             // Left face
-            -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.0f,  0.0f,
-            -0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.0f,  0.0f,
-            -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,    1.0f, 0.0f,     1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f,    0.0f, 1.0f,     1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f,    0.0f, 1.0f,     1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,    1.0f, 0.0f,     1.0f,  0.0f,  0.0f,
 
             // Right face 
-            0.5f,  0.5f,  0.5f,     1.0f, 0.0f,     -1.0f,  0.0f,  0.0f,
-            0.5f,  0.5f, -0.5f,     1.0f, 1.0f,     -1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f, -0.5f,     0.0f, 1.0f,     -1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f, -0.5f,     0.0f, 1.0f,     -1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f,  0.5f,     0.0f, 0.0f,     -1.0f,  0.0f,  0.0f,
-            0.5f,  0.5f,  0.5f,     1.0f, 0.0f,     -1.0f,  0.0f,  0.0f,
+            0.5f,  0.5f, -0.5f,     1.0f, 0.0f,     -1.0f,  0.0f,  0.0f,
+            0.5f,  0.5f, +0.5f,     1.0f, 1.0f,     -1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f, +0.5f,     0.0f, 1.0f,     -1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f, +0.5f,     0.0f, 1.0f,     -1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f, -0.5f,     0.0f, 0.0f,     -1.0f,  0.0f,  0.0f,
+            0.5f,  0.5f, -0.5f,     1.0f, 0.0f,     -1.0f,  0.0f,  0.0f,
 
             // Bottom face
-            -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     0.0f, 1.0f,  0.0f,
-             0.5f, -0.5f, -0.5f,    1.0f, 1.0f,     0.0f, 1.0f,  0.0f,
-             0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     0.0f, 1.0f,  0.0f,
-             0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     0.0f, 1.0f,  0.0f,
-            -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f, 1.0f,  0.0f,
-            -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     0.0f, 1.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f,    0.0f, 1.0f,     0.0f, 1.0f,  0.0f,
+             0.5f, -0.5f,  0.5f,    1.0f, 1.0f,     0.0f, 1.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,    1.0f, 0.0f,     0.0f, 1.0f,  0.0f,
+             0.5f, -0.5f, -0.5f,    1.0f, 0.0f,     0.0f, 1.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     0.0f, 1.0f,  0.0f,
+            -0.5f, -0.5f, +0.5f,    0.0f, 1.0f,     0.0f, 1.0f,  0.0f,
 
             // Top face
             -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  -1.0f,  0.0f,
@@ -66,7 +66,7 @@ struct Cube : public VertexArray, public Transformable
             -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  -1.0f,  0.0f
         });
 
-        moveTo(0,0,+3);
+        moveTo(0,0,-1.5f);
     }
 
     void bindPosition(Attribute<vec3> position) const { bindAttributeAtOffset(0, position, vbo);  }
@@ -125,25 +125,25 @@ public:
         modelMatrix = shader.getUniform<mat4>("modelMatrix");
         projectionMatrix = shader.getUniform<mat4>("projectionMatrix");    
 
-        projectionMatrix = getProjectionMatrix(window, 43.0f, 0.001f, 1000.0f);
+        projectionMatrix = getProjectionMatrix(window, 60_deg, 0.01f, 1000.0f);
     }
 
     mat4 getProjectionMatrix(const Window &window, float fov, float zNear, float zFar) const
     {
-        float aspectRatio = window.aspectRatio();
-        float zRange = zNear - zFar;
-        float yScale = -1.0f / tan(fov/2.0f);
-        float xScale = -1 * yScale / aspectRatio;
-        float zScale = -1 * (zNear+zFar)/zRange;
-        float zTranslate = 2.0f*zFar*zNear/zRange;
-    
+        auto zm = zFar - zNear;
+        float yScale = tan(fov/2);
+        float xScale = yScale / window.aspectRatio();
+        float zScale = -( (zFar + zNear) / zm );
+        float zTranslate = -(2*zFar*zNear/zm);
+
         return mat4{
             xScale, 0.0f,   0.0f,    0.0f,
             0.0f,   yScale, 0.0f,    0.0f,
             0.0f,   0.0f,   zScale,  zTranslate,
-            0.0f,   0.0f,   1.0f,    0.0f
+            0.0f,   0.0f,   -1.0f,    0.0f
         };
     }
+
 
     Attribute<vec3> position() { return shader.getAttribute<vec3>("vertPosition"); }
     Attribute<vec2> texCoord() { return shader.getAttribute<vec2>("vertTexCoord"); }

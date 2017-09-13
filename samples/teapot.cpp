@@ -47,23 +47,22 @@ public:
         modelMatrix = shader.getUniform<mat4>("modelMatrix");
         projectionMatrix = shader.getUniform<mat4>("projectionMatrix");    
 
-        projectionMatrix = getProjectionMatrix(window, 43.0f, 0.001f, 1000.0f);
+        projectionMatrix = getProjectionMatrix(window, 60_deg, 0.01f, 1000.0f);
     }
 
     mat4 getProjectionMatrix(const Window &window, float fov, float zNear, float zFar) const
     {
-        float aspectRatio = window.aspectRatio();
-        float zRange = zNear - zFar;
-        float yScale = -1.0f / tan(fov/2.0f);
-        float xScale = -1 * yScale / aspectRatio;
-        float zScale = -1 * (zNear+zFar)/zRange;
-        float zTranslate = 2.0f*zFar*zNear/zRange;
-    
+        auto zm = zFar - zNear;
+        float yScale = tan(fov/2);
+        float xScale = yScale / window.aspectRatio();
+        float zScale = -( (zFar + zNear) / zm );
+        float zTranslate = -(2*zFar*zNear/zm);
+
         return mat4{
             xScale, 0.0f,   0.0f,    0.0f,
             0.0f,   yScale, 0.0f,    0.0f,
             0.0f,   0.0f,   zScale,  zTranslate,
-            0.0f,   0.0f,   1.0f,    0.0f
+            0.0f,   0.0f,   -1.0f,    0.0f
         };
     }
 
@@ -98,8 +97,8 @@ int main()
     auto renderer = MeshRenderer(window);
     auto mesh     = Mesh("res/mesh/teapot.obj");
 
-    mesh.scale(0.02f);
-    mesh.moveTo(0,-0.7f,+3);
+    mesh.scale(0.1f);
+    mesh.moveTo(0,-3.0f,-10);
     mesh.rotate(vec3(1,0,0), 10_deg);
 
     renderer.bind(mesh);
