@@ -13,7 +13,7 @@ namespace ray { namespace math {
         using quat = Quaternion<float>;
         using mat4 = Matrix<float,4,4>;
 
-        Transformable() : mScaling{1,1,1}, mPosition{0,0,0}, mRotation{0,0,0,1} {}
+        Transformable() : mScaling{1,1,1}, mPosition{0,0,0}, mOrientation{0,0,0,1} {}
         Transformable(const Transformable &other) = default;
         Transformable(Transformable &&other) = default;
 
@@ -22,16 +22,16 @@ namespace ray { namespace math {
         Transformable &operator=(const Transformable &other) = default;
         Transformable &operator=(Transformable &&other) = default;
 
-        vec3 left()            const                                   { return math::rotate( vec3(1,0,0), mRotation); }
-        vec3 right()           const                                   { return math::rotate(-vec3(1,0,0), mRotation); }
-        vec3 up()              const                                   { return math::rotate( vec3(0,1,0), mRotation); }
-        vec3 down()            const                                   { return math::rotate(-vec3(0,1,0), mRotation); }
-        vec3 front()           const                                   { return math::rotate( vec3(0,0,1), mRotation); }
-        vec3 back()            const                                   { return math::rotate(-vec3(0,0,1), mRotation); }
+        vec3 left()            const                                   { return mOrientation.left(); }
+        vec3 right()           const                                   { return mOrientation.right(); }
+        vec3 up()              const                                   { return mOrientation.up(); }
+        vec3 down()            const                                   { return mOrientation.down(); }
+        vec3 front()           const                                   { return mOrientation.front(); }
+        vec3 back()            const                                   { return mOrientation.back(); }
 
         vec3 position()        const                                   { return mPosition; }
         vec3 scaling()         const                                   { return mScaling; }
-        quat rotation()        const                                   { return mRotation; }
+        quat orientation()     const                                   { return mOrientation; }
 
         Transformable &move(const vec3 &direction, float amount)       { mPosition += amount * direction; return (*this); } 
         Transformable &moveBy(float x, float y, float z)               { mPosition += vec3{x,y,z}; return (*this); } 
@@ -39,9 +39,9 @@ namespace ray { namespace math {
         Transformable &moveTo(float x, float y, float z)               { mPosition = vec3{x,y,z}; return (*this); } 
 
         Transformable &rotate(const vec3 axis, const double &angle)    { return rotate(quat(axis, angle));  } 
-        Transformable &rotate(const quat &rotation)                    { mRotation = normalize(rotation * mRotation); return (*this); } 
+        Transformable &rotate(const quat &rotation)                    { mOrientation = normalize(rotation * mOrientation); return (*this); } 
         Transformable &rotateTo(const vec3 axis, const double &angle)  { return rotateTo(quat(axis, angle)); } 
-        Transformable &rotateTo(const quat &rotation)                  { mRotation = normalize(rotation); return (*this); } 
+        Transformable &rotateTo(const quat &rotation)                  { mOrientation = normalize(rotation); return (*this); } 
 
         Transformable &scale(float factor)                             { return scale(factor, factor, factor); } 
         Transformable &scale(const vec3 &factors)                      { return scale(factors.x, factors.y, factors.z); } 
@@ -90,7 +90,7 @@ namespace ray { namespace math {
 
     private:
         vec3 mScaling, mPosition;
-        quat mRotation;
+        quat mOrientation;
     };
 
 }}

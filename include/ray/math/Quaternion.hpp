@@ -30,28 +30,36 @@ namespace ray { namespace math {
             auto c = (S)cos(angle/2);
             (*this)= normalize(vec4(axis * s, c));
         }
+
+        constexpr auto operator*=(const quat &r) 
+        { 
+            auto nx = w*r.x + x*r.w + y*r.z - z*r.y;
+            auto ny = w*r.y + y*r.w + z*r.x - x*r.z;
+            auto nz = w*r.z + z*r.w + x*r.y - y*r.x;
+            auto nw = w*r.w - x*r.x - y*r.y - z*r.z;
+            this->x = nx; this->y = ny; this->z = nz; this->w = nw;
+            return (*this);
+        }
+
+        vec3 left()  const { return  vec3(1,0,0)*(*this); }
+        vec3 right() const { return -vec3(1,0,0)*(*this); }
+        vec3 up()    const { return  vec3(0,1,0)*(*this); }
+        vec3 down()  const { return -vec3(0,1,0)*(*this); }
+        vec3 front() const { return  vec3(0,0,1)*(*this); }
+        vec3 back()  const { return -vec3(0,0,1)*(*this); }
     };
     
     template<typename S> constexpr auto conjugate(const Quaternion<S> &q) { return Quaternion<S>{-q.x,-q.y,-q.z,q.w}; }
 
     template<typename S, typename T> constexpr auto operator*(const Quaternion<S> &l, const Quaternion<T> &r) 
-    {
-        return Quaternion<widest<S,T>>{
-            l.w * r.x + l.x * r.w + l.y * r.z - l.z * r.y,
-            l.w * r.y + l.y * r.w + l.z * r.x - l.x * r.z,
-            l.w * r.z + l.z * r.w + l.x * r.y - l.y * r.x,
-            l.w * r.w - l.x * r.x - l.y * r.y - l.z * r.z
-        };
+    { 
+        Quaternion<widest<S,T>> result{l}; return (result*=r); 
     }
 
-    template<typename S, typename T> constexpr auto rotate(const Vector3<S> &v, const Quaternion<T> &q) 
+    template<typename S, typename T> constexpr auto operator*(const Vector3<S> &v, const Quaternion<T> &q) 
     {
         return (q * Quaternion<S>(v.x, v.y, v.z, 0) * conjugate(q)).xyz;
     }
 
-    template<typename S, typename T> constexpr auto rotate(const Vector3<S> &v, const Vector3<T> &axis, const rad &angle)
-    {
-        return rotate(v, Quaternion<T>(axis, angle));
-    }
 }}
 

@@ -72,14 +72,9 @@ TEST(quat, canBeUsedToRotateVector3)
     auto yAxis = vec3(0,1,0);
     auto zAxis = vec3(0,0,1);
 
-    EXPECT_EQ(-xAxis,   rotate(xAxis,   quat(yAxis, 180_deg)));
-	EXPECT_EQ(-3*xAxis, rotate(3*xAxis, quat(yAxis, 180_deg)));
-	EXPECT_EQ(yAxis,    rotate(xAxis,   quat(zAxis, 90_deg)));
-    EXPECT_EQ(-xAxis,   rotate(zAxis,   quat(yAxis, -90_deg)));
-    
-    EXPECT_EQ(-xAxis,   rotate(xAxis,   yAxis, 180_deg));
-	EXPECT_EQ(-3*xAxis, rotate(3*xAxis, yAxis, 180_deg));
-	EXPECT_EQ(yAxis,    rotate(xAxis,   zAxis, 90_deg));
-	EXPECT_EQ(-xAxis,   rotate(zAxis,   yAxis, -90_deg));
+    EXPECT_EQ(-xAxis,   xAxis  * quat(yAxis, 180_deg));
+	EXPECT_EQ(-3*xAxis, 3*xAxis * quat(yAxis, 180_deg));
+	EXPECT_EQ(yAxis,    xAxis  * quat(zAxis, 90_deg));
+    EXPECT_EQ(-xAxis,   zAxis * quat(yAxis, -90_deg));
 }
 
