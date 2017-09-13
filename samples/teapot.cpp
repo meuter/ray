@@ -69,14 +69,10 @@ public:
         };
     }
 
-    Attribute<vec3> position() const
-    { 
-        return shader.getAttribute<vec3>("vertPosition"); 
-    }
-
-    Attribute<vec2> texCoord() const
-    { 
-        return shader.getAttribute<vec2>("vertTexCoord"); 
+    void bind(const Mesh &mesh) const
+    {
+        mesh.bindPosition(shader.getAttribute<vec3>("vertPosition"));
+        mesh.bindTexCoord(shader.getAttribute<vec2>("vertTexCoord"));            
     }
 
     void render(const Mesh &mesh) const
@@ -104,13 +100,11 @@ int main()
     auto renderer = MeshRenderer(window);
     auto mesh     = Mesh("res/mesh/teapot.obj");
 
-
     mesh.scale(0.02f);
     mesh.moveTo(0,-0.7f,+3);
     mesh.rotate(vec3(1,0,0), 10_deg);
-    mesh.bindPosition(renderer.position());
-    mesh.bindTexCoord(renderer.texCoord());
 
+    renderer.bind(mesh);
     loop.run([&]() 
     {
         renderer.render(mesh);
