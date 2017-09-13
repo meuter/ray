@@ -8,254 +8,35 @@
 
 namespace ray { namespace platform {
 
-    class Version 
-    {
-        friend class Library;
-        int mMajor, mMinor, mRevision;
-    public:
-        Version() = default;
-        Version(const Version &other) = default;
-        Version(Version &&other) = default;
-        inline int major() const { return mMajor; }
-        inline int minor() const { return mMinor; }
-        inline int revision() const { return mRevision; }
-    };
-
-    class VideoMode
-    {
-        friend class Monitor;
-        const GLFWvidmode *mHandle;
-        VideoMode(const GLFWvidmode *handle) : mHandle(handle) {}
-    public:
-        VideoMode(const VideoMode &other) = delete;
-        VideoMode(VideoMode &&other) { mHandle = other.mHandle; other.mHandle = nullptr; }
-        inline int width() const { return mHandle->width; }
-        inline int height() const { return mHandle->height; }
-        inline int redBits() const { return mHandle->redBits; }
-        inline int greenBits() const { return mHandle->greenBits; }
-        inline int blueBits() const { return mHandle->blueBits; }
-        inline int refreshRate() const { return mHandle->refreshRate; }
-    };
-
-    class Monitor
-    {
-        friend class Library;
-        friend class RawWindow;
-        GLFWmonitor *mHandle;
-        Monitor(GLFWmonitor *handle) : mHandle(handle) { }
-    public:
-        Monitor(const Monitor &other) = delete;
-        Monitor(Monitor &&other) { mHandle = other.mHandle; other.mHandle = nullptr; }
-        inline void getPosition(int &x, int &y) const { glfwGetMonitorPos(mHandle, &x, &y); }
-        inline void getPhysicalSize(int &x, int &y) const { glfwGetMonitorPhysicalSize(mHandle, &x, &y); }
-        inline std::string getName() const { return glfwGetMonitorName(mHandle); }
-        inline VideoMode getVideoMode() const { return VideoMode(glfwGetVideoMode(mHandle)); }
-        inline std::vector<VideoMode> getVideoModes() const { 
-            std::vector<VideoMode> result;
-            int count = 0;
-            auto allVideoMode = glfwGetVideoModes(mHandle, &count);
-            for (int i = 0; i < count; ++i) result.push_back(VideoMode(&allVideoMode[i]));
-            return result;
-        }
-        inline void setGamma(float gamma) const { glfwSetGamma(mHandle, gamma); }
-        inline const GLFWgammaramp &getGammaRamp() const { return *glfwGetGammaRamp(mHandle); } // @TODO: create proper GammaRamp class
-        inline void setGammaRamp(const GLFWgammaramp &ramp) const { glfwSetGammaRamp(mHandle, &ramp); } // @TODO: create proper GammaRamp class
-        static inline Monitor getPrimary();
-        static inline std::vector<Monitor> getInstances();
-        static inline GLFWmonitorfun setCallback(GLFWmonitorfun callback);
-    };
-
-    class Cursor
-    {
-        friend class Library;
-        friend class RawWindow;
-        GLFWcursor *mHandle;
-        inline Cursor(GLFWcursor *handle) : mHandle(handle) {}
-    public:
-        inline Cursor(int shape);
-        inline Cursor(const GLFWimage &image, int xhot, int yhot);
-        inline Cursor(const Cursor &other) = delete;
-        inline Cursor(Cursor &&other) { mHandle = other.mHandle; other.mHandle = nullptr; }
-        inline ~Cursor() { glfwDestroyCursor(mHandle); }
-    };
-
-    class RawWindow 
+    class Window 
     {    
-        friend class Library;
+        class GLFW 
+        {
+            friend class Window;
+            inline GLFW() 
+            { 
+                glfwInit();
+                windowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+                windowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+                windowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+                windowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            
+            }
+        public:
+            static inline const GLFW &getInstance() { static GLFW instance; return instance; }
+            inline ~GLFW() { glfwTerminate(); }
+        private:
+            inline void defaultWindowHint() const { glfwDefaultWindowHints(); }
+            inline void windowHint(int hint, int value) const { glfwWindowHint(hint, value); }
+            inline GLFWwindow *createWindow(int width, int height, std::string title, GLFWmonitor *monitor, GLFWwindow *share) const { return glfwCreateWindow(width, height, title.c_str(), monitor, share); }
+            inline GLFWwindow *getCurrentContext() const { return glfwGetCurrentContext(); }
+            inline void pollEvents() const { glfwPollEvents(); }
+        };
+
+
+        friend class GLFW;
         GLFWwindow *mHandle;
         bool mShouldBeDestroyed;
-        inline RawWindow(GLFWwindow *handle, bool shouldBeDestroyed) : mHandle(handle), mShouldBeDestroyed(shouldBeDestroyed) {}
-    public:
-        inline RawWindow(int width, int height, const std::string &title, const Monitor &monitor, const RawWindow &share);
-        inline RawWindow(int width, int height, const std::string &title, const RawWindow &share);
-        inline RawWindow(int width, int height, const std::string &title, const Monitor &monitor);
-        inline RawWindow(int width, int height, const std::string &title);
-        inline RawWindow(const RawWindow &other) = delete;
-        inline RawWindow(RawWindow &&other) { mHandle = other.mHandle; other.mHandle = nullptr; }
-        inline virtual ~RawWindow() { if (mShouldBeDestroyed) glfwDestroyWindow(mHandle); }
-        inline void swapInterval(int interval) const { return glfwSwapInterval(interval); }                
-        inline bool shouldClose() const { return glfwWindowShouldClose(mHandle); }        
-        inline void setShouldClose(bool value) const { return glfwSetWindowShouldClose(mHandle, value); }
-        inline void setTitle(const std::string &title) const { glfwSetWindowTitle(mHandle, title.c_str()); }
-        inline void setIcon(const std::vector<GLFWimage> &images) const { glfwSetWindowIcon(mHandle, images.size(), &images[0]); } // @TODO: create proper Image class
-        inline void getPosition(int &x, int &y) const { glfwGetWindowPos(mHandle, &x, &y); }
-        inline void setPosition(int x, int y) const { glfwSetWindowPos(mHandle, x, y); }
-        inline void getSize(int &w, int &h) const { glfwGetWindowSize(mHandle, &w, &h); }
-        inline void setSizeLimites(int minWidth, int minHeight, int maxWidth, int maxHeight) const { glfwSetWindowSizeLimits(mHandle, minWidth, minHeight, maxWidth, maxHeight); }
-        inline void setAspectRatio(int numerator, int denominator) const { glfwSetWindowAspectRatio(mHandle, numerator, denominator); }
-        inline void setSize(int w, int h) const { glfwSetWindowSize(mHandle, w, h); }
-        inline void getFrameBufferSize(int &w, int &h) const { glfwGetFramebufferSize(mHandle, &w, &h); }
-        inline void getFrameSize(int &left, int &top, int &right, int &bottom) const { glfwGetWindowFrameSize(mHandle, &left, &top, &right, &bottom); }
-        inline void iconify() const { glfwIconifyWindow(mHandle); }
-        inline void restore() const { glfwRestoreWindow(mHandle); }
-        inline void maximize() const { glfwMaximizeWindow(mHandle); }
-        inline void show() const { glfwShowWindow(mHandle); }
-        inline void hide() const { glfwHideWindow(mHandle); }
-        inline void focus() const { glfwFocusWindow(mHandle); }
-        inline Monitor getMonitor() const { return Monitor(glfwGetWindowMonitor(mHandle)); }
-        inline void setMonitor(const Monitor &monitor, int x, int y, int w, int h, int refreshRate) const { glfwSetWindowMonitor(mHandle, monitor.mHandle, x, y, w, h, refreshRate); }
-        inline void setFullScreen(const Monitor &monitor, int w, int h, int refreshRate) const { glfwSetWindowMonitor(mHandle, monitor.mHandle, 0, 0, w, h, refreshRate); }
-        inline void setWindowed(int x, int y, int w, int h) const { glfwSetWindowMonitor(mHandle, nullptr, x, y, w, h, 0); }
-        inline int getAttribute(int attribute) const { return glfwGetWindowAttrib(mHandle, attribute); }
-        inline void setUserPointer(void *userPointer) const { glfwSetWindowUserPointer(mHandle, userPointer); }
-        inline void *getUserPointer() const { return glfwGetWindowUserPointer(mHandle); }
-        template<typename T> inline void setUserPointer(T &userPointer) const { glfwSetWindowUserPointer(mHandle, reinterpret_cast<void*>(&userPointer)); }
-        template<typename T> inline T &getUserPointer() const { return *reinterpret_cast<T*>(glfwGetWindowUserPointer(mHandle)); }
-        inline GLFWwindowposfun setPositionCallback(GLFWwindowposfun callback) const { return glfwSetWindowPosCallback(mHandle, callback); }
-        inline GLFWwindowsizefun setSizeCallback(GLFWwindowsizefun callback) const { return glfwSetWindowSizeCallback(mHandle, callback); }
-        inline GLFWwindowclosefun setCloseCallback(GLFWwindowclosefun callback) const { return glfwSetWindowCloseCallback(mHandle, callback); }
-        inline GLFWwindowrefreshfun setRefreshCallback(GLFWwindowrefreshfun callback) const { return glfwSetWindowRefreshCallback(mHandle, callback); }
-        inline GLFWwindowfocusfun setFocusCallback(GLFWwindowfocusfun callback) const { return glfwSetWindowFocusCallback(mHandle, callback); }
-        inline GLFWwindowiconifyfun	setIconfigyCallback(GLFWwindowiconifyfun callback) const { return glfwSetWindowIconifyCallback(mHandle, callback); }
-        inline GLFWframebuffersizefun setFramebufferSizeCallback(GLFWframebuffersizefun callback) const { return glfwSetFramebufferSizeCallback(mHandle, callback); }    
-        inline int getInputMode(int mode) const { return glfwGetInputMode(mHandle, mode); }
-        inline void setInputMode(int mode, int value) const { glfwSetInputMode(mHandle, mode, value); }
-        inline std::string getKeyName(int key, int scancode) const { return glfwGetKeyName(key, scancode); }
-        inline int getKey(int key) const { return glfwGetKey(mHandle, key); }
-        inline int getMouseButton(int button) const { return glfwGetMouseButton(mHandle, button); }
-        inline void getCursorPosition(double &x, double &y) const { return glfwGetCursorPos(mHandle, &x, &y); }
-        inline void setCursorPosition(double x, double y) const { return glfwSetCursorPos(mHandle, x, y); }
-        inline void setCursor(const Cursor &cursor) const { glfwSetCursor(mHandle, cursor.mHandle); }
-        inline void makeContextCurrent() const { glfwMakeContextCurrent(mHandle); }
-        inline void swapBuffers() const { glfwSwapBuffers(mHandle); }
-        inline std::string getClipboardString() const { return glfwGetClipboardString(mHandle); }
-        inline void setClipboardString(const std::string &string) const { glfwSetClipboardString(mHandle, string.c_str()); }
-        inline GLFWkeyfun setKeyCallback(GLFWkeyfun callback) const { return glfwSetKeyCallback(mHandle, callback); }
-        inline GLFWcharfun setCharCallback(GLFWcharfun callback) const { return glfwSetCharCallback(mHandle, callback); }
-        inline GLFWcharmodsfun setCharModsCallback(GLFWcharmodsfun callback) const { return glfwSetCharModsCallback(mHandle, callback); }
-        inline GLFWmousebuttonfun setMouseButtonCallback(GLFWmousebuttonfun callback) const { return glfwSetMouseButtonCallback(mHandle, callback); }
-        inline GLFWcursorposfun setCursorPosCallback(GLFWcursorposfun callback) const { return glfwSetCursorPosCallback(mHandle, callback); }
-        inline GLFWcursorenterfun setCursorEnterCallback(GLFWcursorenterfun callback) const { return glfwSetCursorEnterCallback(mHandle, callback); }
-        inline GLFWscrollfun setScrollbackCallback(GLFWscrollfun callback) const { return glfwSetScrollCallback(mHandle, callback); }
-        inline GLFWdropfun setDropCallback(GLFWdropfun callback ) const { return glfwSetDropCallback(mHandle, callback); }
-        inline GLFWwindow *handle() const { return mHandle; }
-
-        static inline void defaultHint();
-        static inline void hint(int hint, int value);
-        static inline void pollEvents();
-        static inline void waitEvents(); 
-        static inline void waitEventsTimeout(double timeout); 
-        static inline void postEmptyEvent(); 
-        static RawWindow getCurrentContext();
-    };
-
-    class Joystick
-    {
-        friend class Library;
-        int mHandle;
-        Joystick(int handle) : mHandle(handle) {}
-    public:
-        Joystick(const Joystick &other) = default;
-        Joystick(Joystick &&other) = default;
-        virtual ~Joystick() = default;
-
-        inline bool isPresent() const { return glfwJoystickPresent(mHandle); }
-        inline std::vector<float> getAxes() const { int count; auto axes = glfwGetJoystickAxes(mHandle, &count); return std::vector<float>(*axes, count); }
-        inline std::vector<uint8_t> getButtons() const { int count; auto buttons = glfwGetJoystickButtons(mHandle, &count ); return std::vector<uint8_t>(*buttons, count); }
-        inline std::string getName() const { return glfwGetJoystickName(mHandle); }
-
-        static inline GLFWjoystickfun setJoystickCallback(GLFWjoystickfun cbfun) { return glfwSetJoystickCallback(cbfun); }
-    };
-
-    class Library 
-    {
-        friend class RawWindow;
-        friend class Monitor;    
-        friend class Cursor;
-        inline Library() 
-        { 
-            glfwInit();
-            windowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-            windowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-            windowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-            windowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            
-        }
-    public:
-        static inline const Library &getInstance() { static Library instance;return instance; }
-        inline ~Library() { glfwTerminate(); }
-        inline Library(const Library &other) = delete; 
-        inline Library(Library &other) = delete;
-        inline void getVersion(int &major, int &minor, int &rev) const { glfwGetVersion(&major, &minor, &rev); }
-        inline Version getVersion() const { Version version; getVersion(version.mMajor, version.mMinor, version.mRevision); return version; }
-        inline std::string  getVersionString() const { return glfwGetVersionString(); }
-        inline GLFWerrorfun setErrorCallback(GLFWerrorfun callback) const { return glfwSetErrorCallback(callback); } 
-        inline double getTime(void) const { return glfwGetTime(); }
-        inline void setTime(double time) { return glfwSetTime(time); }
-        inline uint64_t getTimerValue() const { return glfwGetTimerValue(); }
-        inline uint64_t getTimerFrequency() const { return glfwGetTimerFrequency(); }
-        inline void swapInterval(int interval) const { return glfwSwapInterval(interval); }
-        inline int extensionSupported(const std::string &extension) const { return glfwExtensionSupported(extension.c_str()); }
-        inline GLFWglproc getProcAddress(const std::string &proc) const {  return glfwGetProcAddress(proc.c_str()); }
-
-    private:
-        inline GLFWmonitor *getPrimaryMonitor() const { return glfwGetPrimaryMonitor(); }
-        inline GLFWmonitor **getMonitors(int &count) const { return glfwGetMonitors(&count); }
-        inline GLFWmonitorfun setMonitorCallback(GLFWmonitorfun callback) const { return glfwSetMonitorCallback(callback); }
-        inline void defaultWindowHint() const { glfwDefaultWindowHints(); }
-        inline void windowHint(int hint, int value) const { glfwWindowHint(hint, value); }
-        inline GLFWwindow *createWindow(int width, int height, std::string title, GLFWmonitor *monitor, GLFWwindow *share) const { return glfwCreateWindow(width, height, title.c_str(), monitor, share); }
-        inline GLFWwindow *getCurrentContext() const { return glfwGetCurrentContext(); }
-
-        inline void pollEvents() const { glfwPollEvents(); }
-        inline void waitEvents() const { glfwWaitEvents(); }
-        inline void waitEventsTimeout(double timeout) const { glfwWaitEventsTimeout(timeout); }
-        inline void postEmptyEvent() const { glfwPostEmptyEvent(); }
-        inline GLFWcursor *createCursor(const GLFWimage &image, int xhot, int yhot) const { return glfwCreateCursor(&image, xhot, yhot); }
-        inline GLFWcursor *createStandardCursor(int shape) const { return glfwCreateStandardCursor(shape); }
-    };
-
-    inline Monitor Monitor::getPrimary() { return Library::getInstance().getPrimaryMonitor(); }
-    inline std::vector<Monitor> Monitor::getInstances() 
-    {            
-            int count = 0;
-            std::vector<Monitor> result;
-            auto monitors = Library::getInstance().getMonitors(count);
-            for (int i = 0; i < count; ++i) result.push_back(Monitor(monitors[i]));
-            return result;
-    }
-    inline GLFWmonitorfun Monitor::setCallback(GLFWmonitorfun callback) { return Library::getInstance().setMonitorCallback(callback); }
-
-    inline RawWindow::RawWindow(int width, int height, const std::string &title, const Monitor &monitor, const RawWindow &share) : RawWindow(Library::getInstance().createWindow(width, height, title, monitor.mHandle, share.mHandle), true) {}
-    inline RawWindow::RawWindow(int width, int height, const std::string &title, const RawWindow &share) : RawWindow(Library::getInstance().createWindow(width, height, title, nullptr, share.mHandle), true) {}
-    inline RawWindow::RawWindow(int width, int height, const std::string &title, const Monitor &monitor) : RawWindow(Library::getInstance().createWindow(width, height, title, monitor.mHandle, nullptr), true) {}
-    inline RawWindow::RawWindow(int width, int height, const std::string &title) : RawWindow(Library::getInstance().createWindow(width, height, title, nullptr, nullptr), true) {}
-    inline void RawWindow::defaultHint() { Library::getInstance().defaultWindowHint(); }
-    inline void RawWindow::hint(int hint, int value) { Library::getInstance().windowHint(hint, value); }
-    inline void RawWindow::pollEvents() { Library::getInstance().pollEvents(); }
-    inline void RawWindow::waitEvents() { Library::getInstance().waitEvents(); }
-    inline void RawWindow::waitEventsTimeout(double timeout) { Library::getInstance().waitEventsTimeout(timeout); }
-    inline void RawWindow::postEmptyEvent() { Library::getInstance().postEmptyEvent(); }
-    inline RawWindow RawWindow::getCurrentContext() { return RawWindow(Library::getInstance().getCurrentContext(), false); }
-
-    inline Cursor::Cursor(const GLFWimage &image, int xhot, int yhot) : mHandle(Library::getInstance().createCursor(image, xhot, yhot)) { }
-    inline Cursor::Cursor(int shape) : mHandle(Library::getInstance().createStandardCursor(shape)) {}
-
-    class Window: public RawWindow
-    {
-        static Window &self(GLFWwindow *glfwWindow) { return *reinterpret_cast<ray::platform::Window *>(glfwGetWindowUserPointer(glfwWindow)); };        
-
-    public:
-        inline Window(int width, int height, const std::string &title) : RawWindow(width, height, title) 
+        inline Window(GLFWwindow *handle, bool shouldBeDestroyed) : mHandle(handle), mShouldBeDestroyed(shouldBeDestroyed) 
         {
             makeContextCurrent();
             gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
@@ -289,11 +70,77 @@ namespace ray { namespace platform {
                     window.mIsMouseButtonHeld[button] = false;
                 }
             });
-            fixFrameBufferSizeForRetinaDisplay(width, height);
 
+            int width, height;
+            glfwGetWindowSize(mHandle, &width, &height);
+            int frameBufferWidth, frameBufferHeight;
+            int winWidth, winHeight;
+            getSize(winWidth, winHeight);
+            getFrameBufferSize(frameBufferWidth, frameBufferHeight);
+            float xScale = (float)frameBufferHeight/winHeight;
+            float yScale = (float)frameBufferWidth/winWidth;
+            setSize(width/xScale,height/yScale);
+            glViewport(0, 0, width, height); 
         }
-        inline Window(const RawWindow &other) = delete;
-        inline Window(Window &&other) = default;
+    public:
+        inline Window(int width, int height, const std::string &title, const Window &share) : Window(GLFW::getInstance().createWindow(width, height, title, nullptr, share.mHandle), true) {}
+        inline Window(int width, int height, const std::string &title) : Window(GLFW::getInstance().createWindow(width, height, title, nullptr, nullptr), true) {}
+        inline Window(const Window &other) = delete;
+        inline Window(Window &&other) { mHandle = other.mHandle; other.mHandle = nullptr; }
+        inline virtual ~Window() { if (mShouldBeDestroyed) glfwDestroyWindow(mHandle); }
+        inline void swapInterval(int interval) const { return glfwSwapInterval(interval); }                
+        inline bool shouldClose() const { return glfwWindowShouldClose(mHandle); }        
+        inline void setShouldClose(bool value) const { return glfwSetWindowShouldClose(mHandle, value); }
+        inline void setTitle(const std::string &title) const { glfwSetWindowTitle(mHandle, title.c_str()); }
+        inline void setIcon(const std::vector<GLFWimage> &images) const { glfwSetWindowIcon(mHandle, images.size(), &images[0]); } // @TODO: create proper Image class
+        inline void getPosition(int &x, int &y) const { glfwGetWindowPos(mHandle, &x, &y); }
+        inline void setPosition(int x, int y) const { glfwSetWindowPos(mHandle, x, y); }
+        inline void getSize(int &w, int &h) const { glfwGetWindowSize(mHandle, &w, &h); }
+        inline void setSizeLimites(int minWidth, int minHeight, int maxWidth, int maxHeight) const { glfwSetWindowSizeLimits(mHandle, minWidth, minHeight, maxWidth, maxHeight); }
+        inline void setAspectRatio(int numerator, int denominator) const { glfwSetWindowAspectRatio(mHandle, numerator, denominator); }
+        inline void setSize(int w, int h) const { glfwSetWindowSize(mHandle, w, h); }
+        inline void getFrameBufferSize(int &w, int &h) const { glfwGetFramebufferSize(mHandle, &w, &h); }
+        inline void getFrameSize(int &left, int &top, int &right, int &bottom) const { glfwGetWindowFrameSize(mHandle, &left, &top, &right, &bottom); }
+        inline void iconify() const { glfwIconifyWindow(mHandle); }
+        inline void restore() const { glfwRestoreWindow(mHandle); }
+        inline void maximize() const { glfwMaximizeWindow(mHandle); }
+        inline void show() const { glfwShowWindow(mHandle); }
+        inline void hide() const { glfwHideWindow(mHandle); }
+        inline void focus() const { glfwFocusWindow(mHandle); }
+        inline void setWindowed(int x, int y, int w, int h) const { glfwSetWindowMonitor(mHandle, nullptr, x, y, w, h, 0); }
+        inline int  getAttribute(int attribute) const { return glfwGetWindowAttrib(mHandle, attribute); }
+        inline void setUserPointer(void *userPointer) const { glfwSetWindowUserPointer(mHandle, userPointer); }
+        inline void *getUserPointer() const { return glfwGetWindowUserPointer(mHandle); }
+        template<typename T> inline void setUserPointer(T &userPointer) const { glfwSetWindowUserPointer(mHandle, reinterpret_cast<void*>(&userPointer)); }
+        template<typename T> inline T &getUserPointer() const { return *reinterpret_cast<T*>(glfwGetWindowUserPointer(mHandle)); }
+        inline int getInputMode(int mode) const { return glfwGetInputMode(mHandle, mode); }
+        inline void setInputMode(int mode, int value) const { glfwSetInputMode(mHandle, mode, value); }
+        inline void getCursorPosition(double &x, double &y) const { return glfwGetCursorPos(mHandle, &x, &y); }
+        inline void setCursorPosition(double x, double y) const { return glfwSetCursorPos(mHandle, x, y); }
+        inline void makeContextCurrent() const { glfwMakeContextCurrent(mHandle); }
+        inline void swapBuffers() const { glfwSwapBuffers(mHandle); }
+        
+        inline GLFWwindowposfun setPositionCallback(GLFWwindowposfun callback) const { return glfwSetWindowPosCallback(mHandle, callback); }
+        inline GLFWwindowsizefun setSizeCallback(GLFWwindowsizefun callback) const { return glfwSetWindowSizeCallback(mHandle, callback); }
+        inline GLFWwindowclosefun setCloseCallback(GLFWwindowclosefun callback) const { return glfwSetWindowCloseCallback(mHandle, callback); }
+        inline GLFWwindowrefreshfun setRefreshCallback(GLFWwindowrefreshfun callback) const { return glfwSetWindowRefreshCallback(mHandle, callback); }
+        inline GLFWwindowfocusfun setFocusCallback(GLFWwindowfocusfun callback) const { return glfwSetWindowFocusCallback(mHandle, callback); }
+        inline GLFWwindowiconifyfun	setIconfigyCallback(GLFWwindowiconifyfun callback) const { return glfwSetWindowIconifyCallback(mHandle, callback); }
+        inline GLFWframebuffersizefun setFramebufferSizeCallback(GLFWframebuffersizefun callback) const { return glfwSetFramebufferSizeCallback(mHandle, callback); }    
+        inline GLFWkeyfun setKeyCallback(GLFWkeyfun callback) const { return glfwSetKeyCallback(mHandle, callback); }
+        inline GLFWcharfun setCharCallback(GLFWcharfun callback) const { return glfwSetCharCallback(mHandle, callback); }
+        inline GLFWcharmodsfun setCharModsCallback(GLFWcharmodsfun callback) const { return glfwSetCharModsCallback(mHandle, callback); }
+        inline GLFWmousebuttonfun setMouseButtonCallback(GLFWmousebuttonfun callback) const { return glfwSetMouseButtonCallback(mHandle, callback); }
+        inline GLFWcursorposfun setCursorPosCallback(GLFWcursorposfun callback) const { return glfwSetCursorPosCallback(mHandle, callback); }
+        inline GLFWcursorenterfun setCursorEnterCallback(GLFWcursorenterfun callback) const { return glfwSetCursorEnterCallback(mHandle, callback); }
+        inline GLFWscrollfun setScrollbackCallback(GLFWscrollfun callback) const { return glfwSetScrollCallback(mHandle, callback); }
+        inline GLFWdropfun setDropCallback(GLFWdropfun callback ) const { return glfwSetDropCallback(mHandle, callback); }
+        inline GLFWwindow *handle() const { return mHandle; }
+
+        static inline void defaultHint() { GLFW::getInstance().defaultWindowHint(); }
+        static inline void hint(int hint, int value) { GLFW::getInstance().windowHint(hint, value); }
+        static inline Window getCurrentContext() { return Window(GLFW::getInstance().getCurrentContext(), false); }
+        static Window &self(GLFWwindow *glfwWindow) { return *reinterpret_cast<ray::platform::Window *>(glfwGetWindowUserPointer(glfwWindow)); };                
 
         inline bool  isVisible() const { return getAttribute(GLFW_VISIBLE); }
         inline bool  hasFocus() const { return getAttribute(GLFW_FOCUSED); }
@@ -316,24 +163,11 @@ namespace ray { namespace platform {
             mIsKeyReleased.reset();
             mIsMouseButtonPressed.reset();
             mIsMouseButtonReleased.reset();
-            RawWindow::pollEvents();
+            GLFW::getInstance().pollEvents();
         }
-
     private:
-
-        void fixFrameBufferSizeForRetinaDisplay(int width, int height)
-        {
-            int frameBufferWidth, frameBufferHeight;
-            int winWidth, winHeight;
-            getSize(winWidth, winHeight);
-            getFrameBufferSize(frameBufferWidth, frameBufferHeight);
-            float xScale = (float)frameBufferHeight/winHeight;
-            float yScale = (float)frameBufferWidth/winWidth;
-            setSize(width/xScale,height/yScale);
-            glViewport(0, 0, width, height);    
-        }
-        
         std::bitset<static_cast<size_t>(Key::KEY_LAST)> mIsKeyPressed, mIsKeyReleased, mIsKeyHeld;
         std::bitset<static_cast<size_t>(MouseButton::BUTTON_LAST)> mIsMouseButtonPressed, mIsMouseButtonReleased, mIsMouseButtonHeld;
     };
+
 }}
