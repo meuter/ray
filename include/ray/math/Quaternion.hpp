@@ -49,20 +49,6 @@ namespace ray { namespace math {
         vec3 down()  const { return -vec3(0,1,0)*(*this); }
         vec3 front() const { return  vec3(0,0,1)*(*this); }
         vec3 back()  const { return -vec3(0,0,1)*(*this); }
-
-        mat4 toMatrix() const
-        {
-            auto l = left();
-            auto u = up();
-            auto f = front();
-    
-            return mat4{
-                l.x,  u.x,  f.x,  0.0f,
-                l.y,  u.y,  f.y,  0.0f,
-                l.z,  u.z,  f.z,  0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-            };
-        }
     };
     
     template<typename S> constexpr auto conjugate(const Quaternion<S> &q) { return Quaternion<S>{-q.x,-q.y,-q.z,q.w}; }

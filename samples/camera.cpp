@@ -16,43 +16,21 @@ using namespace ray::rendering;
 class Camera 
 {
 public:
-    Camera(float fovy, float aspect, float n, float f) : mPosition{0,0,0}, mOrientation{0,1,0,0} 
+    Camera(rad fovy, float aspect, float n, float f) : mProjectionMatrix(projection(fovy, aspect, n, f)), mPosition{0,0,0}, mOrientation{0,1,0,0} 
     {
         // NOTE(cme): from "Real-Time Renderingf 3rd Edition", Figure 4,19: the perspective projection matrix
         //             maps the view frustum (pointed towards the negative z-axis) to the canonical view volume 
         //             positive z gets out of the screen => we need to orient the camera so that the front 
         //             points towards the screen, otherwise the front(), back(), left() and right() will be 
         //             reversed => this is achieved by setting the orientation to (0,1,0,0)
-
-        float sy = 1/(tan(fovy*0.5f));
-        float sx = sy/aspect;
-        float sz = -(f+n)/(f-n);
-        float dz = -2*f*n/(f-n);
-
-        mProjectionMatrix = {
-            sx,   0.0f,  0.0f, 0.0f,
-            0.0f, sy,    0.0f, 0.0f, 
-            0.0f, 0.0f,  sz,  dz,
-            0.0f, 0.0f, -1.0f, 0.0f
-        };
     }
 
-    mat4 projectionMatrix() const
-    {
-        return mProjectionMatrix;
-    }
+    mat4 projectionMatrix() const  { return mProjectionMatrix; }
 
     mat4 viewMatrix() const 
     {
-        auto inverseTranslation = mat4
-        {
-            1.0f, 0.0f, 0.0f, -mPosition.x,
-            0.0f, 1.0f, 0.0f, -mPosition.y,
-            0.0f, 0.0f, 1.0f, -mPosition.z,
-            0.0f, 0.0f, 0.0f, 1.0f,
-        };
-
-        auto inverseRotation = conjugate(mOrientation).toMatrix();
+        auto inverseTranslation = translation(-mPosition);
+        auto inverseRotation = rotation(conjugate(mOrientation));
 
         return inverseTranslation * inverseRotation;
     }
@@ -83,9 +61,9 @@ public:
     }
 
 private:
+    mat4 mProjectionMatrix;
     vec3 mPosition;
     quat mOrientation;
-    mat4 mProjectionMatrix;
 };
 
 class MeshRenderer

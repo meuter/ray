@@ -2,6 +2,7 @@
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
+#include <ray/math/Transform.hpp>
 #include <cstdlib>
 
 using namespace ray::platform;
@@ -124,23 +125,7 @@ public:
         modelMatrix = shader.getUniform<mat4>("modelMatrix");
         projectionMatrix = shader.getUniform<mat4>("projectionMatrix");    
 
-        projectionMatrix = getProjectionMatrix(43_deg, window.aspectRatio(), 0.01f, 1000.0f);        
-    }
-
-    mat4 getProjectionMatrix(float fovy, float aspect, float near, float far) const
-	{
-        float rz = far-near;
-        float sy = 1/(tan(fovy*0.5f));
-        float sx = sy/aspect;
-        float sz = -(far+near)/rz;
-        float dz = -2*far*near/rz;
-
-        return mat4 {
-            sx,   0.0f,  0.0f, 0.0f,
-            0.0f, sy,    0.0f, 0.0f, 
-            0.0f, 0.0f,  sz,   dz,
-            0.0f, 0.0f, -1.0f, 0.0f
-        };
+        projectionMatrix = projection(43_deg, window.aspectRatio(), 0.01f, 1000.0f);        
     }
 
     void bind(const Cube &cube)

@@ -3,6 +3,7 @@
 #include <ray/math/Vector3.hpp>
 #include <ray/math/Quaternion.hpp>
 #include <ray/math/Matrix.hpp>
+#include <ray/math/Transform.hpp>
 
 namespace ray { namespace math {
 
@@ -13,7 +14,7 @@ namespace ray { namespace math {
         using quat = Quaternion<float>;
         using mat4 = Matrix<float,4,4>;
 
-        Transformable() : mScaling{1,1,1}, mPosition{0,0,0}, mOrientation{0,0,0,1} {}
+        Transformable() : mScale{1,1,1}, mPosition{0,0,0}, mOrientation{0,0,0,1} {}
         Transformable(const Transformable &other) = default;
         Transformable(Transformable &&other) = default;
 
@@ -30,7 +31,7 @@ namespace ray { namespace math {
         vec3 back()            const                                   { return mOrientation.back(); }
 
         vec3 position()        const                                   { return mPosition; }
-        vec3 scaling()         const                                   { return mScaling; }
+        vec3 scale()           const                                     { return mScale; }
         quat orientation()     const                                   { return mOrientation; }
 
         Transformable &move(const vec3 &direction, float amount)       { mPosition += amount * direction; return (*this); } 
@@ -45,39 +46,18 @@ namespace ray { namespace math {
 
         Transformable &scale(float factor)                             { return scale(factor, factor, factor); } 
         Transformable &scale(const vec3 &factors)                      { return scale(factors.x, factors.y, factors.z); } 
-        Transformable &scale(float fx, float fy, float fz)             { mScaling.x *= fx; mScaling.y *= fy; mScaling.z *= fz; return (*this); } 
-        Transformable &scaleTo(const vec3 &scale)                      { mScaling = scale; return (*this); } 
-        Transformable &scaleTo(float sx, float sy, float sz)           { mScaling = vec3{sx, sy, sz}; return (*this); } 
+        Transformable &scale(float fx, float fy, float fz)             { mScale.x *= fx; mScale.y *= fy; mScale.z *= fz; return (*this); } 
+        Transformable &scaleTo(const vec3 &scale)                      { mScale = scale; return (*this); } 
+        Transformable &scaleTo(float sx, float sy, float sz)           { mScale = vec3{sx, sy, sz}; return (*this); } 
 
 
         mat4 modelMatrix() const { return translationMatrix() * rotationMatrix() * scalingMatrix(); }
+        mat4 translationMatrix() const { return translation(mPosition); }
+        mat4 scalingMatrix() const { return scaling(mScale); }
+        mat4 rotationMatrix() const { return rotation(mOrientation); }
 
-        mat4 translationMatrix() const
-        {
-            return mat4
-            {
-                1.0f, 0.0f, 0.0f, mPosition.x,
-                0.0f, 1.0f, 0.0f, mPosition.y,
-                0.0f, 0.0f, 1.0f, mPosition.z,
-                0.0f, 0.0f, 0.0f, 1.0f,
-            };
-        }
-    
-        mat4 scalingMatrix() const
-        {
-            return mat4
-            {
-                mScaling.x, 0.0f,       0.0f,       0.0f,
-                0.0f,       mScaling.y, 0.0f,       0.0f,
-                0.0f,       0.0f,       mScaling.z, 0.0f,
-                0.0f,       0.0f,       0.0f,       1.0f
-            };
-        }
-    
-        mat4 rotationMatrix() const { return mOrientation.toMatrix(); }
-
-    //private:
-        vec3 mScaling, mPosition;
+    private:
+        vec3 mScale, mPosition;
         quat mOrientation;
     };
 
