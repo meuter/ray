@@ -9,4 +9,5 @@ add_sample(02_texture)
 add_sample(03_cube)
 add_sample(04_teapot)
 add_sample(05_camera)
+add_sample(06_font)
 

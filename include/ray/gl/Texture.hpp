@@ -13,13 +13,18 @@ namespace ray { namespace gl {
     {
     protected:
         using Bitmap = assets::Bitmap;
+        using PackedColor = assets::PackedColor;
+        using UnpackedColor = assets::UnpackedColor;
         using u8 = unsigned char;
 
     public:
         Texture() { setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE); setFilter(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR); }
         Texture(int width, int height, int depth, u8* pixels=nullptr) : Texture() { load(width, height, depth, pixels); }
+        Texture(int width, int height, int depth, const PackedColor &color) : Texture() { load(width, height, depth, color); }        
         Texture(const char *filename) : Texture() { load(filename); }
         Texture(const Bitmap &bitmap) : Texture() { load(bitmap); }
+        Texture(const PackedColor &color)   : Texture() { load(color); }
+        Texture(const UnpackedColor &color)   : Texture() { load(color); }
         Texture(const Texture &other) = delete;
         Texture(Texture &&other) = default;
 
@@ -28,6 +33,10 @@ namespace ray { namespace gl {
 
         void load(const std::string &filename) const { load(Bitmap(filename)); }
         void load(const Bitmap &bitmap)        const { load(bitmap.width(), bitmap.height(), bitmap.depth(), bitmap.pixels()); }
+        void load(const PackedColor &color)    const { load(Bitmap(1, 1, 4, color)); }
+        void load(const UnpackedColor &color)  const { load(Bitmap(1, 1, 4, color)); }
+        void load(int width, int height, int depth, const PackedColor &color)    const { load(Bitmap(width, height, depth, color)); }        
+        void load(int width, int height, int depth, const UnpackedColor &color)    const { load(Bitmap(width, height, depth, color)); }        
         void load(int width, int height, int depth, const GLubyte *pixels) const;
         
         void loadAt(int x, int y, const std::string &filename) const { loadAt(x, y, Bitmap(filename)); }

@@ -36,6 +36,7 @@ add_subdirectory(contrib/tinyobjloader)
 ###### Ray
 add_library(ray 
     src/ray/assets/Bitmap.cpp
+    src/ray/assets/Font.cpp
     src/ray/gl/Texture.cpp
     src/ray/platform/FileSystem.cpp
 )

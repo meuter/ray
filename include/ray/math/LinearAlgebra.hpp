@@ -7,6 +7,7 @@
 #include <ray/math/Trigonometry.hpp>
 #include <ray/math/Utils.hpp>
 #include <ray/math/Transform.hpp>
+#include <ray/math/Rectangle.hpp>
 
 namespace ray { namespace math {
 
@@ -39,6 +40,21 @@ namespace ray { namespace math {
     using ivec4 = Vector4<i32>;
     using uvec4 = Vector4<u32>;
 
+    using rect2  = Rectangle<Vector2,f32>;
+    using irect2 = Rectangle<Vector2,i32>;
+    using urect2 = Rectangle<Vector2,u32>;
+    using drect2 = Rectangle<Vector2,f64>;
+
+    using rect3  = Rectangle<Vector3,f32>;
+    using irect3 = Rectangle<Vector3,i32>;
+    using urect3 = Rectangle<Vector3,u32>;
+    using drect3 = Rectangle<Vector3,f64>;
+
+    using rect4  = Rectangle<Vector4,f32>;
+    using irect4 = Rectangle<Vector4,i32>;
+    using urect4 = Rectangle<Vector4,u32>;
+    using drect4 = Rectangle<Vector4,f64>;
+    
     using mat2  = Matrix<f32, 2, 2>;
     using imat2 = Matrix<i32, 2, 2>;
     using umat2 = Matrix<u32, 2, 2>;
