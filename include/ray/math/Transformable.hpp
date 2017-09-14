@@ -74,21 +74,9 @@ namespace ray { namespace math {
             };
         }
     
-        mat4 rotationMatrix() const
-        {
-            auto l = left();
-            auto u = up();
-            auto f = front();
-    
-            return mat4 {
-                l.x,  u.x,  f.x,  0.0f,
-                l.y,  u.y,  f.y,  0.0f,
-                l.z,  u.z,  f.z,  0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-            };
-        }
+        mat4 rotationMatrix() const { return mOrientation.toMatrix(); }
 
-    private:
+    //private:
         vec3 mScaling, mPosition;
         quat mOrientation;
     };

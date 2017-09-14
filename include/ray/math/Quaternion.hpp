@@ -2,6 +2,7 @@
 
 #include <ray/math/Vector3.hpp>
 #include <ray/math/Vector4.hpp>
+#include <ray/math/Matrix.hpp>
 #include <ray/math/Trigonometry.hpp>
 #include <ray/math/Utils.hpp>
 
@@ -12,7 +13,8 @@ namespace ray { namespace math {
 	{
         using vec4 = Vector4<S>;
 		using vec3 = Vector3<S>;
-		using quat = Quaternion<S>;
+        using quat = Quaternion<S>;
+        using mat4 = Matrix<S,4,4>;
 
     public:
 		using Vector4<S>::x;
@@ -47,6 +49,20 @@ namespace ray { namespace math {
         vec3 down()  const { return -vec3(0,1,0)*(*this); }
         vec3 front() const { return  vec3(0,0,1)*(*this); }
         vec3 back()  const { return -vec3(0,0,1)*(*this); }
+
+        mat4 toMatrix() const
+        {
+            auto l = left();
+            auto u = up();
+            auto f = front();
+    
+            return mat4{
+                l.x,  u.x,  f.x,  0.0f,
+                l.y,  u.y,  f.y,  0.0f,
+                l.z,  u.z,  f.z,  0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+            };
+        }
     };
     
     template<typename S> constexpr auto conjugate(const Quaternion<S> &q) { return Quaternion<S>{-q.x,-q.y,-q.z,q.w}; }

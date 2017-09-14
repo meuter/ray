@@ -13,11 +13,17 @@ using namespace ray::math;
 using namespace ray::assets;
 using namespace ray::rendering;
 
-class Camera : public Transformable
+class Camera 
 {
 public:
-    Camera(float fovy, float aspect, float n, float f) 
+    Camera(float fovy, float aspect, float n, float f) : mPosition{0,0,0}, mOrientation{0,1,0,0} 
     {
+        // NOTE(cme): from "Real-Time Renderingf 3rd Edition", Figure 4,19: the perspective projection matrix
+        //             maps the view frustum (pointed towards the negative z-axis) to the canonical view volume 
+        //             positive z gets out of the screen => we need to orient the camera so that the front 
+        //             points towards the screen, otherwise the front(), back(), left() and right() will be 
+        //             reversed => this is achieved by setting the orientation to (0,1,0,0)
+
         float sy = 1/(tan(fovy*0.5f));
         float sx = sy/aspect;
         float sz = -(f+n)/(f-n);
@@ -29,13 +35,6 @@ public:
             0.0f, 0.0f,  sz,  dz,
             0.0f, 0.0f, -1.0f, 0.0f
         };
-
-        // NOTE(cme): from "Real-Time Renderingf 3rd Edition", Figure 4,19: the perspective projection matrix
-        //             maps the view frustum (pointed towards the negative z-axis) to the canonical view volume 
-        //             positive z gets out of the screen => we need to orient the camera so that the front 
-        //             points towards the screen, otherwise the front(), back(), left() and right() will be 
-        //             reversed;
-        rotate(up(), 180_deg);        
     }
 
     mat4 projectionMatrix() const
@@ -45,22 +44,47 @@ public:
 
     mat4 viewMatrix() const 
     {
-        Transformable reverse;
-        reverse.moveTo(-position());
-        return reverse.translationMatrix();
+        auto inverseTranslation = mat4
+        {
+            1.0f, 0.0f, 0.0f, -mPosition.x,
+            0.0f, 1.0f, 0.0f, -mPosition.y,
+            0.0f, 0.0f, 1.0f, -mPosition.z,
+            0.0f, 0.0f, 0.0f, 1.0f,
+        };
+
+        auto inverseRotation = conjugate(mOrientation).toMatrix();
+
+        return inverseTranslation * inverseRotation;
     }
 
     void update(const Window &window, float speed=0.1f)
     {
-        if (window.isKeyHeld(Key::KEY_UP)) move(front(), speed);
-        if (window.isKeyHeld(Key::KEY_DOWN)) move(back(), speed);
-        if (window.isKeyHeld(Key::KEY_LEFT)) move(left(), speed);
-        if (window.isKeyHeld(Key::KEY_RIGHT)) move(right(), speed);
-        if (window.isKeyHeld(Key::KEY_PAGE_UP)) move(up(), speed);
-        if (window.isKeyHeld(Key::KEY_PAGE_DOWN)) move(down(), speed);
+        if (window.isKeyHeld(Key::KEY_UP))        move(mOrientation.front(), speed);
+        if (window.isKeyHeld(Key::KEY_DOWN))      move(mOrientation.back(), speed);
+        if (window.isKeyHeld(Key::KEY_LEFT))      move(mOrientation.left(), speed);
+        if (window.isKeyHeld(Key::KEY_RIGHT))     move(mOrientation.right(), speed);
+        if (window.isKeyHeld(Key::KEY_PAGE_UP))   move(mOrientation.up(), speed);
+        if (window.isKeyHeld(Key::KEY_PAGE_DOWN)) move(mOrientation.down(), speed);
+    }
+
+    vec3 left()            const                                   { return mOrientation.left(); }
+    vec3 right()           const                                   { return mOrientation.right(); }
+    vec3 up()              const                                   { return mOrientation.up(); }
+    vec3 down()            const                                   { return mOrientation.down(); }
+    vec3 front()           const                                   { return mOrientation.front(); }
+    vec3 back()            const                                   { return mOrientation.back(); }
+
+    vec3 position()        const                                   { return mPosition; }
+    quat orientation()     const                                   { return mOrientation; }
+
+    void move(const vec3 &direction, float amount)
+    {
+        mPosition += amount * direction;
     }
 
 private:
+    vec3 mPosition;
+    quat mOrientation;
     mat4 mProjectionMatrix;
 };
 
@@ -138,7 +162,6 @@ int main()
     
     mesh.scale(0.05f);
     mesh.moveBy(0,-2,0);
-    mesh.rotate(vec3(1,0,0), 10_deg);
 
     camera.move(camera.back(), 10);
     renderer.bind(mesh);
@@ -146,6 +169,7 @@ int main()
     loop.run([&]() 
     {   
         camera.update(window);
+        fprintln("camera pos %1% / front = %2% / orientation = %3%", camera.position(), camera.front(), camera.orientation());
         renderer.render(camera, mesh);
         if (loop.frameCount()%60 == 0)
             fprintln("average frame time = %1%msec", 1000*loop.averageFrameTime().count());
