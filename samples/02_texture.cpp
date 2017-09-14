@@ -22,7 +22,6 @@ int main()
     );
     
     static constexpr auto FRAGMENT_SHADER = GLSL(330,
-        in  vec3 fragColor;
         in  vec2 fragTexCoord;
         out vec4 color;
         uniform sampler2D quadTexture;
