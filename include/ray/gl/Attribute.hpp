@@ -45,11 +45,5 @@ namespace ray { namespace gl {
     private:
         GLint mLocation = 0;
     };
-
-    static constexpr auto ATTRIBUTE_2F_POSITION  = Attribute<math::vec2>{0};
-    static constexpr auto ATTRIBUTE_3F_POSITION  = Attribute<math::vec3>{1};
-    static constexpr auto ATTRIBUTE_2F_TEXCOORD  = Attribute<math::vec2>{2};
-    static constexpr auto ATTRIBUTE_3F_NORMAL    = Attribute<math::vec3>{3};
-    static constexpr auto ATTRIBUTE_4F_COLOR     = Attribute<math::vec4>{4};
     
 }}

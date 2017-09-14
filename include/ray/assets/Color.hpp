@@ -15,6 +15,8 @@ namespace ray { namespace assets {
         u8 r,g,b,a;
     };
 
+    #define SPREAD_COLOR(c) c.r, c.g, c.b, c.a
+
     static const auto RED    = Color(0xFF,0x00,0x00,0xFF);
     static const auto GREEN  = Color(0x00,0xFF,0x00,0xFF);
     static const auto BLUE   = Color(0x00,0x00,0xFF,0xFF);

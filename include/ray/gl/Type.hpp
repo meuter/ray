@@ -4,19 +4,21 @@
 #include <ray/platform/Print.hpp>
 #include <ray/gl/Texture.hpp>
 #include <ray/math/LinearAlgebra.hpp>
+#include <ray/assets/Color.hpp>
 
 namespace ray { namespace gl {
 
     namespace details 
     {
-        template<typename U> struct OpenGLType   { };
-        template<> struct OpenGLType<math::f32>  { static constexpr GLenum value = GL_FLOAT; }; 
-        template<> struct OpenGLType<math::u8>   { static constexpr GLenum value = GL_UNSIGNED_BYTE; }; 
-        template<> struct OpenGLType<math::vec2> { static constexpr GLenum value = GL_FLOAT_VEC2; }; 
-        template<> struct OpenGLType<math::vec3> { static constexpr GLenum value = GL_FLOAT_VEC3; }; 
-        template<> struct OpenGLType<math::vec4> { static constexpr GLenum value = GL_FLOAT_VEC4; }; 
-        template<> struct OpenGLType<math::mat4> { static constexpr GLenum value = GL_FLOAT_MAT4; }; 
-        template<> struct OpenGLType<sampler2D>  { static constexpr GLenum value = GL_SAMPLER_2D; }; 
+        template<typename U> struct OpenGLType      { };
+        template<> struct OpenGLType<math::f32>     { static constexpr GLenum value = GL_FLOAT; }; 
+        template<> struct OpenGLType<math::u8>      { static constexpr GLenum value = GL_UNSIGNED_BYTE; }; 
+        template<> struct OpenGLType<math::vec2>    { static constexpr GLenum value = GL_FLOAT_VEC2; }; 
+        template<> struct OpenGLType<math::vec3>    { static constexpr GLenum value = GL_FLOAT_VEC3; }; 
+        template<> struct OpenGLType<math::vec4>    { static constexpr GLenum value = GL_FLOAT_VEC4; }; 
+        template<> struct OpenGLType<math::mat4>    { static constexpr GLenum value = GL_FLOAT_MAT4; }; 
+        template<> struct OpenGLType<sampler2D>     { static constexpr GLenum value = GL_SAMPLER_2D; }; 
+        template<> struct OpenGLType<assets::Color> { static constexpr GLenum value = GL_UNSIGNED_BYTE; }; 
     }
 
     std::string getTypeName(GLenum type) 

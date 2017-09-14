@@ -1,4 +1,5 @@
 #include <ray/platform/Window.hpp>
+#include <ray/assets/Color.hpp>
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/Shader.hpp>
 #include <ray/gl/ShaderProgram.hpp>
@@ -8,6 +9,7 @@
 using namespace ray::platform;
 using namespace ray::gl;
 using namespace ray::math;
+using namespace ray::assets;
 
 int main()
 {
@@ -35,12 +37,7 @@ int main()
          0.5f,  0.5f  // top right
     });
 
-    quad.bindAttribute(shader.getAttribute<vec4>("vertColor"), VertexBuffer<u8,4>{
-        0xFF, 0x00, 0x00, 0xFF, // red
-        0x00, 0xFF, 0x00, 0xFF, // green
-        0x00, 0x00, 0xFF, 0xFF, // blue
-        0xFF, 0xFF, 0x00, 0xFF, // yellow
-    }, true);
+    quad.bindAttribute(shader.getAttribute<vec4>("vertColor"), VertexBuffer<Color,1>{ RED, GREEN, BLUE, YELLOW }, true);
 
     glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
 
