@@ -1,4 +1,3 @@
-#include <ray/math/Transformable.hpp>
 #include <ray/math/Scalar.hpp>
 #include <ray/math/Vector2.hpp>
 #include <ray/math/Vector3.hpp>
@@ -7,6 +6,7 @@
 #include <ray/math/Quaternion.hpp>
 #include <ray/math/Trigonometry.hpp>
 #include <ray/math/Utils.hpp>
+#include <ray/math/Transform.hpp>
 
 namespace ray { namespace math {
 

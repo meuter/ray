@@ -5,6 +5,7 @@
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
+#include <ray/math/Transform.hpp>
 #include <cstdlib>
 
 using namespace ray::platform;

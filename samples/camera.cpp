@@ -1,3 +1,6 @@
+#include <ray/components/Movable.hpp>
+#include <ray/components/Orientable.hpp>
+#include <ray/math/Transform.hpp>
 #include <ray/rendering/Mesh.hpp>
 #include <ray/platform/Window.hpp>
 #include <ray/platform/GameLoop.hpp>
@@ -12,24 +15,26 @@ using namespace ray::gl;
 using namespace ray::math;
 using namespace ray::assets;
 using namespace ray::rendering;
+using namespace ray::components;
 
-class Camera 
+
+class Camera : public Movable, public Orientable
 {
 public:
-    Camera(rad fovy, float aspect, float n, float f) : mProjectionMatrix(projection(fovy, aspect, n, f)), mPosition{0,0,0}, mOrientation{0,1,0,0} {}
+    Camera(rad fovy, float aspect, float n, float f) : Orientable(0,0,-1), mProjectionMatrix(projection(fovy, aspect, n, f)) {}
 
     mat4 projectionMatrix() const  { return mProjectionMatrix; }
 
     mat4 viewMatrix() const 
     {
         // NOTE(cme): HACK!! This does what I want, by I cannot understand why from a math pov
-        auto displacement = mPosition;
+        auto displacement = position();
         displacement.y = -displacement.y;
         // should be displacement = -mPosition;
         // END HACK 
 
         auto inverseTranslation = translation(displacement);
-        auto inverseRotation = rotation(conjugate(mOrientation));
+        auto inverseRotation = rotation(conjugate(orientation()));
 
         return  inverseRotation * inverseTranslation;
     }
@@ -73,23 +78,8 @@ public:
         if (window.isKeyHeld(Key::KEY_PAGE_DOWN)) move(down(), speed);
     }
 
-    vec3 left()  const { return mOrientation.left(); }
-    vec3 right() const { return mOrientation.right(); }
-    vec3 up()    const { return mOrientation.up(); }
-    vec3 down()  const { return mOrientation.down(); }
-    vec3 front() const { return mOrientation.front(); }
-    vec3 back()  const { return mOrientation.back(); }
-
-    vec3 position()    const { return mPosition; }
-    quat orientation() const { return mOrientation; }
-
-    void move(const vec3 &direction, float amount)  { mPosition += amount * direction; }
-    void rotate(const vec3 &axis, const rad &angle) { mOrientation = normalize(quat(axis, angle) * mOrientation); }
-
 private:
     mat4 mProjectionMatrix;
-    vec3 mPosition;
-    quat mOrientation;
 };
 
 class MeshRenderer
@@ -165,7 +155,7 @@ int main()
     auto mesh     = Mesh("res/mesh/teapot.obj");
     
     mesh.scale(0.05f);
-    mesh.moveBy(0,-2,0);
+    mesh.move(vec3(0,-1,0), 2);
 
     camera.move(camera.back(), 10);
     renderer.bind(mesh);
@@ -176,10 +166,6 @@ int main()
         renderer.render(camera, mesh);
         if (loop.frameCount()%60 == 0)
             fprintln("average frame time = %1%msec", 1000*loop.averageFrameTime().count());
-
-        if (loop.frameCount()%20 == 0)
-            fprintln("camera pos %1% / front = %2% / orientation = %3%", camera.position(), camera.front(), camera.orientation());
-    
     });
 
     return EXIT_SUCCESS;

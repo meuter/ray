@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
-#include <ray/math/Transformable.hpp>
+#include <ray/components/Transformable.hpp>
 #include <ray/math/Vector3.hpp>
 
 using namespace ray::math;
+using namespace ray::components;
 
 using vec3 = Vector3<float>;
 using mat4 = Matrix<float,4,4>;

@@ -8,40 +8,36 @@
 namespace ray { namespace math {
 
     template<typename S>
-    constexpr auto translation(const Vector3<S> &displacement)
+    constexpr auto translation(const Scalar<S> &dx, const Scalar<S> &dy, const Scalar<S> &dz)
     {
         return Matrix<S,4,4>{
-            1.0f, 0.0f, 0.0f, displacement.x,
-            0.0f, 1.0f, 0.0f, displacement.y,
-            0.0f, 0.0f, 1.0f, displacement.z,
+            1.0f, 0.0f, 0.0f, dx,
+            0.0f, 1.0f, 0.0f, dy,
+            0.0f, 0.0f, 1.0f, dz,
             0.0f, 0.0f, 0.0f, 1.0f,
         };
     }
 
     template<typename S>
-    constexpr auto scaling(const Vector3<S> &scaleFactor)
+    constexpr auto scaling(const Scalar<S> &sx, const Scalar<S> &sy, const Scalar<S> &sz)
     {
         return Matrix<S,4,4>
         {
-            scaleFactor.x, 0.0f,          0.0f,          0.0f,
-            0.0f,          scaleFactor.y, 0.0f,          0.0f,
-            0.0f,          0.0f,          scaleFactor.z, 0.0f,
-            0.0f,          0.0f,          0.0f,          1.0f
+            sx,   0.0f, 0.0f, 0.0f,
+            0.0f, sy,   0.0f, 0.0f,
+            0.0f, 0.0f, sz,   0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
         };
     }
 
     template<typename S>
-    constexpr auto rotation(const Quaternion<S> orientation)
+    constexpr auto rotation(const Vector3<S> &left, const Vector3<S> &up, const Vector3<S> &front)
     {
-        auto l = orientation.left();
-        auto u = orientation.up();
-        auto f = orientation.front();
-
         return Matrix<S,4,4>{
-            l.x,  u.x,  f.x,  0.0f,
-            l.y,  u.y,  f.y,  0.0f,
-            l.z,  u.z,  f.z,  0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
+            left.x,  up.x,  front.x,  0.0f,
+            left.y,  up.y,  front.y,  0.0f,
+            left.z,  up.z,  front.z,  0.0f,
+            0.0f,    0.0f,  0.0f,     1.0f
         };
     }
 
@@ -61,5 +57,11 @@ namespace ray { namespace math {
             0.0f, 0.0f, -1.0f, 0.0f
         };
     }
+
+    template<typename S> constexpr auto translation(const Vector3<S> &displacement) { return translation(displacement.x, displacement.y, displacement.z); }
+    template<typename S> constexpr auto scaling(const Vector3<S> &scaleFactor)      { return scaling(scaleFactor.x, scaleFactor.y, scaleFactor.z); }
+    template<typename S> constexpr auto rotation(const Quaternion<S> &orientation)  { return rotation(orientation.left(), orientation.up(), orientation.front()); }
+    template<typename S> constexpr auto rotation(const Vector3<S> axis, rad angle)  { return rotation(Quaternion<S>(axis, angle)); }
+    
 
 }}

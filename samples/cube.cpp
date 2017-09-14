@@ -2,12 +2,13 @@
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
-#include <ray/math/Transform.hpp>
+#include <ray/components/Transformable.hpp>
 #include <cstdlib>
 
 using namespace ray::platform;
 using namespace ray::gl;
 using namespace ray::math;
+using namespace ray::components;
 
 struct Cube : public VertexArray, public Transformable
 {
