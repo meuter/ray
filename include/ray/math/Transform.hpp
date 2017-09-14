@@ -46,7 +46,7 @@ namespace ray { namespace math {
     }
 
     template<typename S>
-    constexpr auto projection(rad fovy, Scalar<S> aspect, Scalar<S> near, Scalar<S> far) 
+    constexpr auto projection(rad fovy, const Scalar<S> &aspect, const Scalar<S> &near, const Scalar<S> &far) 
 	{
         float rz = far-near;
         float sy = 1/(tan(fovy*0.5f));
@@ -61,6 +61,5 @@ namespace ray { namespace math {
             0.0f, 0.0f, -1.0f, 0.0f
         };
     }
-
 
 }}

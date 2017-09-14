@@ -16,49 +16,75 @@ using namespace ray::rendering;
 class Camera 
 {
 public:
-    Camera(rad fovy, float aspect, float n, float f) : mProjectionMatrix(projection(fovy, aspect, n, f)), mPosition{0,0,0}, mOrientation{0,1,0,0} 
-    {
-        // NOTE(cme): from "Real-Time Renderingf 3rd Edition", Figure 4,19: the perspective projection matrix
-        //             maps the view frustum (pointed towards the negative z-axis) to the canonical view volume 
-        //             positive z gets out of the screen => we need to orient the camera so that the front 
-        //             points towards the screen, otherwise the front(), back(), left() and right() will be 
-        //             reversed => this is achieved by setting the orientation to (0,1,0,0)
-    }
+    Camera(rad fovy, float aspect, float n, float f) : mProjectionMatrix(projection(fovy, aspect, n, f)), mPosition{0,0,0}, mOrientation{0,1,0,0} {}
 
     mat4 projectionMatrix() const  { return mProjectionMatrix; }
 
     mat4 viewMatrix() const 
     {
-        auto inverseTranslation = translation(-mPosition);
+        // NOTE(cme): HACK!! This does what I want, by I cannot understand why from a math pov
+        auto displacement = mPosition;
+        displacement.y = -displacement.y;
+        // should be displacement = -mPosition;
+        // END HACK 
+
+        auto inverseTranslation = translation(displacement);
         auto inverseRotation = rotation(conjugate(mOrientation));
 
-        return inverseTranslation * inverseRotation;
+        return  inverseRotation * inverseTranslation;
     }
 
-    void update(const Window &window, float speed=0.1f)
+    void update(const Window &window)
     {
-        if (window.isKeyHeld(Key::KEY_UP))        move(mOrientation.front(), speed);
-        if (window.isKeyHeld(Key::KEY_DOWN))      move(mOrientation.back(), speed);
-        if (window.isKeyHeld(Key::KEY_LEFT))      move(mOrientation.left(), speed);
-        if (window.isKeyHeld(Key::KEY_RIGHT))     move(mOrientation.right(), speed);
-        if (window.isKeyHeld(Key::KEY_PAGE_UP))   move(mOrientation.up(), speed);
-        if (window.isKeyHeld(Key::KEY_PAGE_DOWN)) move(mOrientation.down(), speed);
+        moveUsingKeyboard(window);        
+        lookUsingMouse(window);
     }
 
-    vec3 left()            const                                   { return mOrientation.left(); }
-    vec3 right()           const                                   { return mOrientation.right(); }
-    vec3 up()              const                                   { return mOrientation.up(); }
-    vec3 down()            const                                   { return mOrientation.down(); }
-    vec3 front()           const                                   { return mOrientation.front(); }
-    vec3 back()            const                                   { return mOrientation.back(); }
-
-    vec3 position()        const                                   { return mPosition; }
-    quat orientation()     const                                   { return mOrientation; }
-
-    void move(const vec3 &direction, float amount)
+    void lookUsingMouse(const Window &window, float sensitivity=0.001f)
     {
-        mPosition += amount * direction;
+        static dvec2 lastCursorPos;
+        if (window.isMouseButtonReleased(MouseButton::BUTTON_LEFT))
+        {
+            window.showMouseCursor();		
+        }
+        else if (window.isMouseButtonPressed(MouseButton::BUTTON_LEFT))
+        {
+            window.disableMouseCursor();
+            window.getCursorPosition(lastCursorPos.x, lastCursorPos.y);
+        }
+        else if (window.isMouseButtonHeld(MouseButton::BUTTON_LEFT))
+        {
+            auto newPos = dvec2();
+            window.getCursorPosition(newPos.x, newPos.y);
+            auto dpos = lastCursorPos - newPos;
+            lastCursorPos = newPos;
+            if (dpos.x != 0) rotate(vec3(0,1,0), sensitivity * dpos.x);
+            if (dpos.y != 0) rotate(left(), sensitivity * dpos.y);
+        }
     }
+
+    void moveUsingKeyboard(const Window &window, float speed=0.1f)
+    {
+        if (window.isKeyHeld(Key::KEY_UP))        move(front(), speed);
+        if (window.isKeyHeld(Key::KEY_DOWN))      move(back(), speed);
+        if (window.isKeyHeld(Key::KEY_LEFT))      move(left(), speed);
+        if (window.isKeyHeld(Key::KEY_RIGHT))     move(right(), speed);
+        if (window.isKeyHeld(Key::KEY_PAGE_UP))   move(up(), speed);
+        if (window.isKeyHeld(Key::KEY_PAGE_DOWN)) move(down(), speed);
+    }
+
+    vec3 left()  const { return mOrientation.left(); }
+    vec3 right() const { return mOrientation.right(); }
+    vec3 up()    const { return mOrientation.up(); }
+    vec3 down()  const { return mOrientation.down(); }
+    vec3 front() const { return mOrientation.front(); }
+    vec3 back()  const { return mOrientation.back(); }
+
+    vec3 position()    const { return mPosition; }
+    quat orientation() const { return mOrientation; }
+
+    void move(const vec3 &direction, float amount)  { mPosition += amount * direction; }
+    void rotate(const vec3 &axis, const rad &angle) { mOrientation = normalize(quat(axis, angle) * mOrientation); }
 
 private:
     mat4 mProjectionMatrix;
@@ -147,10 +173,13 @@ int main()
     loop.run([&]() 
     {   
         camera.update(window);
-        fprintln("camera pos %1% / front = %2% / orientation = %3%", camera.position(), camera.front(), camera.orientation());
         renderer.render(camera, mesh);
         if (loop.frameCount()%60 == 0)
             fprintln("average frame time = %1%msec", 1000*loop.averageFrameTime().count());
+
+        if (loop.frameCount()%20 == 0)
+            fprintln("camera pos %1% / front = %2% / orientation = %3%", camera.position(), camera.front(), camera.orientation());
+    
     });
 
     return EXIT_SUCCESS;
