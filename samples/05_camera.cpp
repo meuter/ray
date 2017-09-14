@@ -1,7 +1,7 @@
 #include <ray/components/Movable.hpp>
 #include <ray/components/Orientable.hpp>
 #include <ray/math/Transform.hpp>
-#include <ray/rendering/Mesh.hpp>
+#include <ray/entities/Mesh.hpp>
 #include <ray/platform/Window.hpp>
 #include <ray/platform/GameLoop.hpp>
 #include <ray/platform/FileSystem.hpp>
