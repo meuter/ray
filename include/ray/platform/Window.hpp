@@ -72,6 +72,10 @@ namespace ray { namespace platform {
                 }
             });
 
+            setSizeCallback([](GLFWwindow *win, int w, int h) {                             
+                glViewport(0,0,w,h);
+            });
+
             int width, height;
             glfwGetWindowSize(mHandle, &width, &height);
             int frameBufferWidth, frameBufferHeight;
