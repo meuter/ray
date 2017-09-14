@@ -16,6 +16,7 @@ namespace ray { namespace gl {
         template<> struct OpenGLType<math::vec2>    { static constexpr GLenum value = GL_FLOAT_VEC2; }; 
         template<> struct OpenGLType<math::vec3>    { static constexpr GLenum value = GL_FLOAT_VEC3; }; 
         template<> struct OpenGLType<math::vec4>    { static constexpr GLenum value = GL_FLOAT_VEC4; }; 
+        template<> struct OpenGLType<math::mat3>    { static constexpr GLenum value = GL_FLOAT_MAT3; }; 
         template<> struct OpenGLType<math::mat4>    { static constexpr GLenum value = GL_FLOAT_MAT4; }; 
         template<> struct OpenGLType<sampler2D>     { static constexpr GLenum value = GL_SAMPLER_2D; }; 
         template<> struct OpenGLType<assets::Color> { static constexpr GLenum value = GL_UNSIGNED_BYTE; }; 
@@ -29,6 +30,7 @@ namespace ray { namespace gl {
             case GL_FLOAT_VEC2: return "vec2";
             case GL_FLOAT_VEC3: return "vec3";
             case GL_FLOAT_VEC4: return "vec4";
+            case GL_FLOAT_MAT3: return "mat3";
             case GL_FLOAT_MAT4: return "mat4";
             case GL_SAMPLER_2D: return "sampler2D";            
             default: return platform::fmt("unknown(%d)", type);
