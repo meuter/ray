@@ -12,8 +12,7 @@ namespace ray { namespace assets {
         Bitmap() : mPixels(nullptr), mWidth(0), mHeight(0), mDepth(0) {}
         Bitmap(int width, int height, int depth, u8 *pixels) : mPixels(pixels), mWidth(width), mHeight(height), mDepth(depth) {}
         Bitmap(int width, int height, int depth) : mPixels(nullptr) { resize(width, height, depth); }
-        Bitmap(int width, int height, int depth, const UnpackedColor &color) : Bitmap(width, height, depth, pack(color)) {}
-        Bitmap(int width, int height, int depth, const PackedColor &color);
+        Bitmap(int width, int height, int depth, const Color &color);
         Bitmap(const std::string &filename);
         Bitmap(const Bitmap &other) = delete;
         Bitmap(Bitmap &&other);

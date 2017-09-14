@@ -17,7 +17,7 @@ namespace ray { namespace assets {
         panicif(mPixels == nullptr, "could not load bitmap '%s'", filename);
     }
 
-    Bitmap::Bitmap(int width, int height, int depth, const PackedColor &color) : Bitmap(width, height, depth)
+    Bitmap::Bitmap(int width, int height, int depth, const Color &color) : Bitmap(width, height, depth)
     {
         const auto end = mPixels + size();
         for (auto pixel = mPixels; pixel < end; pixel += depth)

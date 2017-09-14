@@ -42,7 +42,7 @@ TEST(Bitmap, canAllocateItsMemory)
 TEST(Bitmap, canBeConstructedUsingSizeAndColor__depth1)
 {
     auto depth = 1;
-    auto color = pack(vec4(0.1f, 0.2f, 0.3f, 0.4f));
+    auto color = Color(0x12, 0x34, 0x56, 0x78);
     auto bitmap = Bitmap(5,3,depth, color);
     EXPECT_EQ(bitmap.width(), 5);
     EXPECT_EQ(bitmap.height(), 3);
@@ -50,10 +50,10 @@ TEST(Bitmap, canBeConstructedUsingSizeAndColor__depth1)
     EXPECT_EQ(bitmap.stride(), depth*5);
     EXPECT_EQ(bitmap.size(), depth*5*3);
     EXPECT_NE(bitmap.pixels(), nullptr);
-    EXPECT_EQ(color.r, (int)(0.1f * 255.0f));
-    EXPECT_EQ(color.g, (int)(0.2f * 255.0f));
-    EXPECT_EQ(color.b, (int)(0.3f * 255.0f));
-    EXPECT_EQ(color.a, (int)(0.4f * 255.0f));  
+    EXPECT_EQ(color.r, 0x12);
+    EXPECT_EQ(color.g, 0x34);
+    EXPECT_EQ(color.b, 0x56);
+    EXPECT_EQ(color.a, 0x78);
 
     for (auto ptr = bitmap.pixels(); ptr < bitmap.pixels()+bitmap.size(); ptr += bitmap.depth())
     {
@@ -65,7 +65,7 @@ TEST(Bitmap, canBeConstructedUsingSizeAndColor__depth1)
 TEST(Bitmap, canBeConstructedUsingSizeAndColor__depth2)
 {
     auto depth = 2;
-    auto color = pack(vec4(0.1f, 0.2f, 0.3f, 0.4f));
+    auto color = Color(0x12, 0x34, 0x56, 0x78);
     auto bitmap = Bitmap(5,3,depth, color);
     EXPECT_EQ(bitmap.width(), 5);
     EXPECT_EQ(bitmap.height(), 3);
@@ -73,10 +73,10 @@ TEST(Bitmap, canBeConstructedUsingSizeAndColor__depth2)
     EXPECT_EQ(bitmap.stride(), depth*5);
     EXPECT_EQ(bitmap.size(), depth*5*3);
     EXPECT_NE(bitmap.pixels(), nullptr);
-    EXPECT_EQ(color.r, (int)(0.1f * 255.0f));
-    EXPECT_EQ(color.g, (int)(0.2f * 255.0f));
-    EXPECT_EQ(color.b, (int)(0.3f * 255.0f));
-    EXPECT_EQ(color.a, (int)(0.4f * 255.0f));
+    EXPECT_EQ(color.r, 0x12);
+    EXPECT_EQ(color.g, 0x34);
+    EXPECT_EQ(color.b, 0x56);
+    EXPECT_EQ(color.a, 0x78);
     
     for (auto ptr = bitmap.pixels(); ptr < bitmap.pixels()+bitmap.size(); ptr += bitmap.depth())
     {
@@ -89,7 +89,7 @@ TEST(Bitmap, canBeConstructedUsingSizeAndColor__depth2)
 TEST(Bitmap, canBeConstructedUsingSizeAndColor__depth3)
 {
     auto depth = 3;
-    auto color = pack(vec4(0.1f, 0.2f, 0.3f, 0.4f));
+    auto color = Color(0x12, 0x34, 0x56, 0x78);
     auto bitmap = Bitmap(5,3,depth, color);
     EXPECT_EQ(bitmap.width(), 5);
     EXPECT_EQ(bitmap.height(), 3);
@@ -97,10 +97,10 @@ TEST(Bitmap, canBeConstructedUsingSizeAndColor__depth3)
     EXPECT_EQ(bitmap.stride(), depth*5);
     EXPECT_EQ(bitmap.size(), depth*5*3);
     EXPECT_NE(bitmap.pixels(), nullptr);
-    EXPECT_EQ(color.r, (int)(0.1f * 255.0f));
-    EXPECT_EQ(color.g, (int)(0.2f * 255.0f));
-    EXPECT_EQ(color.b, (int)(0.3f * 255.0f));
-    EXPECT_EQ(color.a, (int)(0.4f * 255.0f));
+    EXPECT_EQ(color.r, 0x12);
+    EXPECT_EQ(color.g, 0x34);
+    EXPECT_EQ(color.b, 0x56);
+    EXPECT_EQ(color.a, 0x78);
     
     for (auto ptr = bitmap.pixels(); ptr < bitmap.pixels()+bitmap.size(); ptr += bitmap.depth())
     {
@@ -114,7 +114,7 @@ TEST(Bitmap, canBeConstructedUsingSizeAndColor__depth3)
 TEST(Bitmap, canBeConstructedUsingSizeAndColor__depth4)
 {
     auto depth = 4;
-    auto color = pack(vec4(0.1f, 0.2f, 0.3f, 0.4f));
+    auto color = Color(0x12, 0x34, 0x56, 0x78);
     auto bitmap = Bitmap(5,3,depth, color);
     EXPECT_EQ(bitmap.width(), 5);
     EXPECT_EQ(bitmap.height(), 3);
@@ -122,10 +122,10 @@ TEST(Bitmap, canBeConstructedUsingSizeAndColor__depth4)
     EXPECT_EQ(bitmap.stride(), depth*5);
     EXPECT_EQ(bitmap.size(), depth*5*3);
     EXPECT_NE(bitmap.pixels(), nullptr);
-    EXPECT_EQ(color.r, (int)(0.1f * 255.0f));
-    EXPECT_EQ(color.g, (int)(0.2f * 255.0f));
-    EXPECT_EQ(color.b, (int)(0.3f * 255.0f));
-    EXPECT_EQ(color.a, (int)(0.4f * 255.0f));
+    EXPECT_EQ(color.r, 0x12);
+    EXPECT_EQ(color.g, 0x34);
+    EXPECT_EQ(color.b, 0x56);
+    EXPECT_EQ(color.a, 0x78);
     
     for (auto ptr = bitmap.pixels(); ptr < bitmap.pixels()+bitmap.size(); ptr += bitmap.depth())
     {
