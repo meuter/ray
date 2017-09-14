@@ -13,9 +13,9 @@ namespace ray { namespace assets {
         Color(const math::vec4 &c) : r(c.r*255), g(c.g*255), b(c.b*255), a(c.a*255) {}
         Color(u8 v): Color(v,v,v,v) {}
         u8 r,g,b,a;
-    };
 
-    #define SPREAD_COLOR(c) c.r, c.g, c.b, c.a
+        operator vec4() const { return vec4(r,g,b,a) / 255.0f; }
+    };
 
     static const auto RED    = Color(0xFF,0x00,0x00,0xFF);
     static const auto GREEN  = Color(0x00,0xFF,0x00,0xFF);
