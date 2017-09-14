@@ -33,7 +33,11 @@ namespace ray { namespace assets {
         float scale() const { return mScale; }
 
         int getGlyphIndex(int codepoint) const;
-        
+
+        bool hasKerning() const;
+        int codepointKerning(int codepoint1, int codepoint2) const;
+        int glyphKerning(int glyphIndex1, int glyphIndex2) const;
+
         GlyphMetrics getGlyphMetrics(int glyphIndex) const;
         GlyphMetrics getCodepointMetrics(int codepoint) const;
 
@@ -41,9 +45,7 @@ namespace ray { namespace assets {
         Bitmap rasterizeCodepoint(int codepoint) const;
         Bitmap rasterizeGlyphSDF(int glyphIndex, int padding, math::u8 insideValue, float distanceSlope) const;
         Bitmap rasterizeCodepointSDF(int codepoint, int padding, math::u8 insideValue, float distanceSlope) const;
-
-        // TODO(cme): kerning!
-
+    
     private:
         std::vector<math::u8> mInfo;
         std::vector<math::u8> mData;

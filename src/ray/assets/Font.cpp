@@ -62,8 +62,7 @@ namespace ray { namespace assets {
         static const int depth = 1;
         int width, height;
         auto pixels = stbtt_GetGlyphBitmapSubpixel(fontInfo, mScale, mScale, 0, 0, glyphIndex, &width, &height, nullptr, nullptr);
-        //return pixels ? Bitmap(width, height, depth, pixels) : Bitmap(1,1,1,Color(0,0,0,0));
-        return Bitmap(width, height, depth, pixels);
+        return pixels ? Bitmap(width, height, depth, pixels) : Bitmap(1,1,1,Color(0));
     }
 
     Bitmap Font::rasterizeCodepoint(int codepoint) const
@@ -77,13 +76,31 @@ namespace ray { namespace assets {
         static const int depth = 1;
         int width, height;
         auto pixels = stbtt_GetGlyphSDF(fontInfo, mScale, glyphIndex, padding, insideValue, distanceSlope, &width, &height, nullptr, nullptr);
-        //return pixels ? Bitmap(width, height, depth, pixels) : Bitmap(1,1,1,Color(0,0,0,0));
-        return Bitmap(width, height, depth, pixels);        
+        return pixels ? Bitmap(width, height, depth, pixels) : Bitmap(1,1,1,Color(0));
     }
 
     Bitmap Font::rasterizeCodepointSDF(int codepoint, int padding, u8 insideValue, float distanceSlope) const
     {
         return rasterizeGlyphSDF(getGlyphIndex(codepoint), padding, insideValue, distanceSlope);
     }
+
+    bool Font::hasKerning() const
+    {
+        auto fontInfo = reinterpret_cast<const stbtt_fontinfo*>(mInfo.data());                                        
+        return (fontInfo->kern != 0);
+    }
+    
+    int Font::codepointKerning(int codepoint1, int codepoint2) const
+    {
+        auto fontInfo = reinterpret_cast<const stbtt_fontinfo*>(mInfo.data());                                        
+        return stbtt_GetCodepointKernAdvance(fontInfo, codepoint1, codepoint2);
+    }
+
+    int Font::glyphKerning(int glyphIndex1, int glyphIndex2) const
+    {
+        auto fontInfo = reinterpret_cast<const stbtt_fontinfo*>(mInfo.data());                                        
+        return stbtt_GetGlyphKernAdvance(fontInfo, glyphIndex1, glyphIndex2);
+    }
+
 
 }}
