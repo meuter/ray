@@ -111,10 +111,10 @@ class CubeRenderer
         in  vec3 fragColor;
         in  vec2 fragTexCoord;
         out vec4 color;
-        uniform sampler2D quadTexture;
+        uniform sampler2D diffuseTexture;
         void main() 
         {                         
-            color = texture(quadTexture, fragTexCoord);
+            color = texture(diffuseTexture, fragTexCoord);
         }
     );
 
@@ -122,7 +122,7 @@ public:
     CubeRenderer(const Window &window)
     {
         shader.load(VERTEX_SHADER, FRAGMENT_SHADER);    
-        texture = shader.getUniform<sampler2D>("quadTexture");
+        texture = shader.getUniform<sampler2D>("diffuseTexture");
         modelMatrix = shader.getUniform<mat4>("modelMatrix");
         projectionMatrix = shader.getUniform<mat4>("projectionMatrix");    
 
