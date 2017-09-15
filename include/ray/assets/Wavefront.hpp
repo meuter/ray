@@ -52,7 +52,7 @@ namespace ray { namespace assets {
 
         math::vec3 getNormal(int shape, int triangle, int vertex) const
         {
-            auto k = 2*mShapes[shape].mesh.indices[3*triangle+vertex].normal_index;
+            auto k = 3*mShapes[shape].mesh.indices[3*triangle+vertex].normal_index;
             return math::vec3(mAttributes.normals[k], mAttributes.normals[k+1], mAttributes.normals[k+2]);
         }
 
