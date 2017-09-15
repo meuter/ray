@@ -3,9 +3,11 @@
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
-#include <ray/components/BakedFont.hpp>
+#include <ray/assets/Font.hpp>
 #include <ray/platform/GameLoop.hpp>
 #include <ray/platform/Print.hpp>
+#include <ray/components/TextureAtlas.hpp>
+#include <unordered_map>
 #include <cstdlib>
 #include <codecvt>
 
@@ -14,7 +16,7 @@ using namespace ray::platform;
 using namespace ray::gl;
 using namespace ray::math;
 using namespace ray::components;
-    
+
 class TextRenderer
 {
     static constexpr auto VERTEX_SHADER = GLSL(330, 
@@ -42,6 +44,19 @@ class TextRenderer
     );
 
     struct Vertex { vec2 xy, uv; };
+    struct Glyph { rect2 uv; rect2 bb; int advance; };
+    
+    const Glyph &getGlyph(const Font &font, u16 codepoint) 
+    { 
+        auto hit = mGlyphCache.find(codepoint);
+        if (hit != mGlyphCache.end()) return hit->second;
+
+        auto index   = font.getGlyphIndex(codepoint);
+        auto metrics = font.getGlyphMetrics(index);
+        auto uv      = mGlyphAtlas.add(font.rasterizeGlyph(index));        
+        return mGlyphCache[codepoint] = { uv, metrics.boundingBox(), metrics.advance() };
+    }
+    
 
 public:
     static constexpr auto MAX_LETTERS = 1024;
@@ -50,7 +65,7 @@ public:
     static constexpr auto N_FLOATS_PER_LETTER  = N_VERTEX_PER_LETTERS*N_FLOATS_PER_VERTEX;
     static constexpr auto N_INDICES_PER_LETTER = 6;
 
-    TextRenderer() : mShader(VERTEX_SHADER, FRAGMENT_SHADER) 
+    TextRenderer() : mShader(VERTEX_SHADER, FRAGMENT_SHADER), mGlyphAtlas(1)
     {        
         mVertexBuffer.reserve(MAX_LETTERS * N_FLOATS_PER_LETTER, GL_STREAM_DRAW);
         mIndexBuffer.reserve(MAX_LETTERS * N_INDICES_PER_LETTER);        
@@ -84,7 +99,7 @@ public:
         return { viewPort[2], viewPort[3] };
     }
 
-    vec2 renderText(const vec2 &pos, BakedFont &font, const Color &color, const std::string &u8Text)
+    vec2 renderText(const vec2 &pos, Font &font, const Color &color, const std::string &u8Text)
     {
         auto cursor = pos;
 
@@ -92,7 +107,9 @@ public:
         auto nLetters = 0;
         for (auto codepoint: u8Text)
         {
-            auto glyph = font.getGlyph(codepoint);
+            auto index   = font.getGlyphIndex(codepoint);
+            auto metrics = font.getGlyphMetrics(index);    
+            auto glyph = getGlyph(font, codepoint);
             auto topLeft     = cursor + glyph.bb.min;
             auto bottomRight = cursor + glyph.bb.max;
 
@@ -116,7 +133,7 @@ public:
 
         glEnable(GL_BLEND);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
-        mQuadTexture.set(font.texture().bind(GL_TEXTURE0));
+        mQuadTexture.set(mGlyphAtlas.bind(GL_TEXTURE0));
         mTextColor.set(color);
         mQuad.bind();
         glDrawElements(GL_TRIANGLES, N_INDICES_PER_LETTER * nLetters, GL_UNSIGNED_INT, 0);
@@ -134,6 +151,8 @@ private:
     Uniform<sampler2D> mQuadTexture;
     Uniform<mat4> mTransform;
     ElementBuffer mIndexBuffer;
+    TextureAtlas mGlyphAtlas;    
+    std::unordered_map<u16, Glyph> mGlyphCache;
 };
 
 
@@ -141,7 +160,7 @@ int main()
 {
     auto window   = Window(1920, 1080, "Text Sample");
     auto loop     = GameLoop(window, 60);    
-    auto melso    = BakedFont("res/fonts/Roboto-Regular.ttf", 30);
+    auto melso    = Font("res/fonts/Roboto-Regular.ttf", 30);
     auto renderer = TextRenderer();
     
     int maxsize;

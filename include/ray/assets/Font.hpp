@@ -17,9 +17,9 @@ namespace ray { namespace assets {
             int   rightSideBearing() const { return mAdvance - width() - leftSideBearing(); }        
             int   width() const { return mBoundingBox.size().w; }
             int   height() const { return mBoundingBox.size().h; }
-            const math::irect2 &boundingBox() const { return mBoundingBox; }
+            const math::rect2 &boundingBox() const { return mBoundingBox; }
         private:
-            math::irect2 mBoundingBox;
+            math::rect2 mBoundingBox;
             int mAdvance;
             friend class Font;
         };

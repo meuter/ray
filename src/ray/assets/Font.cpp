@@ -35,12 +35,13 @@ namespace ray { namespace assets {
 
     Font::GlyphMetrics Font::getGlyphMetrics(int glyphIndex) const
     {
+        irect2 bb;
         auto fontInfo = reinterpret_cast<const stbtt_fontinfo*>(mInfo.data());        
         GlyphMetrics metrics;
         stbtt_GetGlyphHMetrics(fontInfo, glyphIndex, &metrics.mAdvance, nullptr);
-        stbtt_GetGlyphBitmapBox(fontInfo, glyphIndex, mScale, mScale, &metrics.mBoundingBox.min.x, &metrics.mBoundingBox.min.y, &metrics.mBoundingBox.max.x, &metrics.mBoundingBox.max.y);
-        metrics.mBoundingBox.min.y += ascent();
-        metrics.mBoundingBox.max.y += ascent();
+        stbtt_GetGlyphBitmapBox(fontInfo, glyphIndex, mScale, mScale, &bb.min.x, &bb.min.y, &bb.max.x, &bb.max.y);
+        metrics.mBoundingBox.min = bb.min + vec2(0, ascent());
+        metrics.mBoundingBox.max = bb.max + vec2(0, ascent());
         metrics.mAdvance *= mScale;
         return metrics;
     }
