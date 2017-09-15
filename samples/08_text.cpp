@@ -104,7 +104,6 @@ public:
     vec2 renderText(const vec2 &pos, CachedFont &font, const Color &color, const std::string &u8Text)
     {
         auto cursor = pos;
-
         auto quadVertices = reinterpret_cast<Vertex*>(mVertexBuffer.map(GL_WRITE_ONLY));
         auto nLetters = 0;
         for (auto codepoint: u8Text)
@@ -158,22 +157,37 @@ private:
     ElementBuffer mIndexBuffer;
 };
 
+#define FAST
 
 int main()
 {
-    auto window   = Window(1920, 1080, "Text Sample");
-    auto loop     = GameLoop(window, 60);    
-    auto small    = CachedFont("res/fonts/Roboto-Regular.ttf", 50);
-    auto big      = CachedFont("res/fonts/Roboto-Regular.ttf", 350);
-    auto renderer = TextRenderer();
+    auto window    = Window(1920, 1080, "Text Sample");
+    auto loop      = GameLoop(window, 60);    
+    auto small     = CachedFont("res/fonts/Roboto-Regular.ttf", 50);
+    auto big       = CachedFont("res/fonts/Roboto-Regular.ttf", 350);
+    auto renderer1 = TextRenderer();
+    auto renderer2 = TextRenderer();
+    auto renderer3 = TextRenderer();
 
     glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
     loop.run([&]() 
     {   
         glClear(GL_COLOR_BUFFER_BIT);
-        renderer.renderText(vec2(2,2), small, BLACK, fmt("average frame time = %6.3fmsec", 1000*loop.averageFrameTime().count()));
-        renderer.renderText(vec2(0,0), small, YELLOW, fmt("average frame time = %6.3fmsec", 1000*loop.averageFrameTime().count()));
-        renderer.renderText(vec2(100,100), big, RED, "Hello World!!");
+        auto text = fmt("average frame time = %6.3fmsec", 1000*loop.averageFrameTime().count());
+#ifdef FAST        
+        renderer1.renderText(vec2(2,2), small, BLACK, text);
+        renderer2.renderText(vec2(0,0), small, YELLOW, text);
+        renderer3.renderText(vec2(100,100), big, RED, "Hello World!!");
+#else
+        // NOTE(cme): when trying to render several pieces of text using the same renderer, the second render call
+        //            will have to wait for the first render call to be finished by the GPU becasue the VBO is 
+        //            still being used when you try and map it to populate the next set of quads. The glMapBuffer
+        //            will therefore stall. On my setup, using 3 different renderers (and therefore VBOs) is about 
+        //            4x faster!! Detected using the "Instruments" built-in profiler on OSX.
+        renderer1.renderText(vec2(2,2), small, BLACK, text);
+        renderer1.renderText(vec2(0,0), small, YELLOW, text);
+        renderer1.renderText(vec2(100,100), big, RED, "Hello World!!");
+#endif        
     });
 
     return EXIT_SUCCESS;
