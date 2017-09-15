@@ -5,10 +5,11 @@
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/Texture.hpp>
 
-namespace ray { namespace rendering {
+namespace ray { namespace entities {
 
     class Mesh: public components::Transformable
     {
+        static constexpr size_t N_FLOATS_PER_VERTEX = 8;
     public:
         Mesh(const assets::Wavefront &object) { load(object); }
         Mesh(const std::string &filename) { load(filename); }
@@ -20,7 +21,7 @@ namespace ray { namespace rendering {
 
         void load(const assets::Wavefront &object)
         {
-            mVertexBuffer.reserve(5*object.totalVertexCount());
+            mVertexBuffer.reserve(N_FLOATS_PER_VERTEX*object.totalVertexCount());
             auto mapped = mVertexBuffer.map(GL_WRITE_ONLY);
             for (auto shape = 0u; shape < object.shapeCount(); ++shape)
             {
@@ -29,12 +30,16 @@ namespace ray { namespace rendering {
                     for (auto vertex = 0; vertex < 3; ++vertex)
                     {
                         auto position = object.getPosition(shape, triangle, vertex);
-                        auto texcoord = object.getTexCoord(shape, triangle, vertex);
                         (*mapped++) = position.x;
                         (*mapped++) = position.y;
                         (*mapped++) = position.z;
+                        auto texcoord = object.getTexCoord(shape, triangle, vertex);
                         (*mapped++) = texcoord.u; 
                         (*mapped++) = texcoord.v; 
+                        auto normal   = object.getNormal(shape, triangle, vertex);
+                        (*mapped++) = normal.x;
+                        (*mapped++) = normal.y;
+                        (*mapped++) = normal.z;                        
                     }
                 }
             }
@@ -62,13 +67,18 @@ namespace ray { namespace rendering {
             mVertexArray.bindAttributeAtOffset(3, texCoord, mVertexBuffer);
         }
 
+        void bindNormal(gl::Attribute<math::vec3> normal) const
+        {
+            mVertexArray.bindAttributeAtOffset(5, normal, mVertexBuffer);
+        }
+
         const gl::Texture &diffuseTexture(int index=0) const
         {
             return mDiffuseTextures[index];
         }
 
     private:
-        gl::VertexBuffer<float, 5> mVertexBuffer;
+        gl::VertexBuffer<float, N_FLOATS_PER_VERTEX> mVertexBuffer;
         gl::VertexArray mVertexArray;
         std::vector<gl::Texture> mDiffuseTextures;    
     };
