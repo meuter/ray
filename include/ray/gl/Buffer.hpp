@@ -61,7 +61,7 @@ namespace ray { namespace gl {
             return (T*)glMapBufferRange(target, offset*sizeof(T), count*sizeof(T), access);
         }
 
-        T *map(GLenum access) { bind(); return reinterpret_cast<T*>(glMapBuffer(GL_ARRAY_BUFFER, access)); }
+        T *map(GLenum access) { bind(); return reinterpret_cast<T*>(glMapBuffer(target, access)); }
 
         void unmap() { bind(); gl(UnmapBuffer(target)); }
         void bind() const  { gl(BindBuffer(target, mHandle)); }
