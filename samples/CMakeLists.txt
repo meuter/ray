@@ -11,4 +11,4 @@ add_sample(04_teapot)
 add_sample(05_camera)
 add_sample(06_lighting)
 add_sample(07_font)
-
+add_sample(08_text)

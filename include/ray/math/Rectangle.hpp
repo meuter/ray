@@ -23,7 +23,6 @@ namespace ray { namespace math {
         vector size()   const { return max - min; }
     };
 
-    // TODO(cme): test me
     template<typename T, template<typename U> class Vector, typename F> constexpr auto rect_cast(const Rectangle<Vector,F> &r) { return Rectangle<Vector,T>{ vector_cast<T>(r.min), vector_cast<T>(r.max) }; }
         
     template<template<typename U> class Vector, typename S1, typename S2> constexpr auto operator+(const Rectangle<Vector,S1> &r, const Vector<S2> &v) { return Rectangle<Vector, widest<S1,S2>>{ r.min+v, r.max+v}; }
