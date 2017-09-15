@@ -14,8 +14,8 @@ using namespace ray::platform;
 using namespace ray::gl;
 using namespace ray::math;
 using namespace ray::assets;
-using namespace ray::rendering;
 using namespace ray::components;
+using namespace ray::entities;
 
 
 class Camera : public Movable, public Orientable

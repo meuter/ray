@@ -12,7 +12,7 @@ using namespace ray::platform;
 using namespace ray::gl;
 using namespace ray::math;
 using namespace ray::assets;
-using namespace ray::rendering;
+using namespace ray::entities;
 
 class MeshRenderer
 {
