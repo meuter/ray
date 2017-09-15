@@ -12,6 +12,7 @@ namespace ray { namespace components {
         using ivec2 = math::ivec2;
         using u8 = math::u8;
     public:
+        TextureAtlas(int depth);
         TextureAtlas(int width, int height, int depth) : Texture(width, height, depth, Color(0)), mCursor{1,1}, mNextY(1) {}
         TextureAtlas(const TextureAtlas &&other) = delete;
         TextureAtlas(TextureAtlas &&other) = default;

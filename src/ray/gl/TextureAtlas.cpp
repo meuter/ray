@@ -4,6 +4,13 @@ using namespace ray::math;
 
 namespace ray { namespace components {
 
+    TextureAtlas::TextureAtlas(int depth)
+    {
+        int maxTextureSize;
+        glGetIntegerv(GL_MAX_RECTANGLE_TEXTURE_SIZE, &maxTextureSize);
+        resize(maxTextureSize, maxTextureSize, depth);
+    }
+    
     rect2 TextureAtlas::add(int width, int height, int depth, const u8 *pixels)
     {
         panicif(depth != this->depth(), "not the same depth");
