@@ -84,7 +84,7 @@ public:
         return { viewPort[2], viewPort[3] };
     }
 
-    vec2 renderText(const vec2 &pos, const BakedFont &font, const Color &color, const std::string &u8Text)
+    vec2 renderText(const vec2 &pos, BakedFont &font, const Color &color, const std::string &u8Text)
     {
         auto cursor = pos;
 
@@ -114,10 +114,13 @@ public:
             0.0f, 0.0f, 0.0f, 1.0f
         });
 
+        glEnable(GL_BLEND);
+        glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
         mQuadTexture.set(font.texture().bind(GL_TEXTURE0));
         mTextColor.set(color);
         mQuad.bind();
         glDrawElements(GL_TRIANGLES, N_INDICES_PER_LETTER * nLetters, GL_UNSIGNED_INT, 0);
+        glDisable(GL_BLEND);
 
         return cursor;
     }
@@ -141,17 +144,15 @@ int main()
     auto melso    = BakedFont("res/fonts/Roboto-Regular.ttf", 30);
     auto renderer = TextRenderer();
     
-    glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
-    glEnable(GL_BLEND);
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    int maxsize;
+    glGetIntegerv(GL_MAX_RECTANGLE_TEXTURE_SIZE, &maxsize);
+    fprintln("max texture size = %1%", maxsize);
 
+    glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
     loop.run([&]() 
     {   
         glClear(GL_COLOR_BUFFER_BIT);
-
-        auto text = fmt("average frame time = %6.3fmsec", 1000*loop.averageFrameTime().count());
-
-        renderer.renderText(vec2(0,0), melso, YELLOW, text);
+        renderer.renderText(vec2(0,0), melso, YELLOW, fmt("average frame time = %6.3fmsec", 1000*loop.averageFrameTime().count()));
     });
 
     return EXIT_SUCCESS;

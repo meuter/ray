@@ -9,8 +9,6 @@ namespace ray { namespace components {
 
     class BakedFont : public assets::Font
     {
-        static constexpr auto TEXTURE_ATLAS_SIZE = 2048;
-        
     protected:
         using rect2 = math::rect2;
         using irect2 = math::irect2;
@@ -23,17 +21,19 @@ namespace ray { namespace components {
         enum RasterType {  NORMAL_RASTER, SDF_RASTER };
 
         BakedFont(const std::string &filename, int pixelHeight, const RasterType &rasterType=NORMAL_RASTER)
-            : Font(filename, pixelHeight), mGlyphAtlas(TEXTURE_ATLAS_SIZE, TEXTURE_ATLAS_SIZE, 1), mRasterType(rasterType)
-        {
-            bakeGlyph(0); 
-            for (u16 codepoint = 32; codepoint <= 255; ++codepoint)
-                bakeGlyph(codepoint);
-            bakeGlyph(0x2713);
+            : Font(filename, pixelHeight), mGlyphAtlas(1), mRasterType(rasterType)
+        { }
+
+        const Glyph &getGlyph(u16 codepoint) 
+        { 
+            if (!hasGlyph(codepoint)) bakeGlyph(codepoint);
+            return mGlyphCache.at(codepoint);
         }
 
-        const Glyph &getGlyph(u16 codepoint) const { return hasGlyph(codepoint) ? mGlyphCache.at(codepoint) : mGlyphCache.at(0);  }
-        const gl::Texture &texture() const { return mGlyphAtlas; }
-        bool hasGlyph(u16 codepoint) const {  return mGlyphCache.find(codepoint) != mGlyphCache.end(); }
+        bool hasGlyph(u16 codepoint) const 
+        { 
+            return mGlyphCache.find(codepoint) != mGlyphCache.end(); 
+        }
 
         void bakeGlyph(u16 codepoint)
         {
@@ -63,6 +63,8 @@ namespace ray { namespace components {
             };        
         }
         
+        const gl::Texture &texture() const { return mGlyphAtlas; }
+            
     private:
         TextureAtlas mGlyphAtlas;
         std::unordered_map<u16, Glyph> mGlyphCache;
