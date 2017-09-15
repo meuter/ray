@@ -1,21 +1,37 @@
-#include <ray/assets/Font.hpp>
 #include <ray/platform/Window.hpp>
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
-#include <ray/gl/Texture.hpp>
-#include <ray/assets/Font.hpp>
 #include <ray/platform/GameLoop.hpp>
 #include <ray/platform/Print.hpp>
 #include <ray/components/TextureAtlas.hpp>
+#include <ray/assets/Font.hpp>
 #include <unordered_map>
 #include <cstdlib>
-#include <codecvt>
 
 using namespace ray::assets;
 using namespace ray::platform;
 using namespace ray::gl;
 using namespace ray::math;
 using namespace ray::components;
+
+class CachedFont : public Font
+{
+public:
+    CachedFont(const std::string &filename, int lineHeight) : Font(filename, lineHeight), mGlyphAtlas(1) {}
+
+    const rect2 &getGlyphTextureCoordinates(u16 index)
+    {
+        auto hit = mGlyphCache.find(index);
+        if (hit != mGlyphCache.end()) return hit->second;
+        return (mGlyphCache[index] = mGlyphAtlas.add(rasterizeGlyph(index)));
+    }
+
+    const Texture &glyphAtlas() const { return mGlyphAtlas; }
+
+private:
+    TextureAtlas mGlyphAtlas;    
+    std::unordered_map<u16, rect2> mGlyphCache;    
+};
 
 class TextRenderer
 {
@@ -44,20 +60,7 @@ class TextRenderer
     );
 
     struct Vertex { vec2 xy, uv; };
-    struct Glyph { rect2 uv; rect2 bb; int advance; };
     
-    const Glyph &getGlyph(const Font &font, u16 codepoint) 
-    { 
-        auto hit = mGlyphCache.find(codepoint);
-        if (hit != mGlyphCache.end()) return hit->second;
-
-        auto index   = font.getGlyphIndex(codepoint);
-        auto metrics = font.getGlyphMetrics(index);
-        auto uv      = mGlyphAtlas.add(font.rasterizeGlyph(index));        
-        return mGlyphCache[codepoint] = { uv, metrics.boundingBox(), metrics.advance() };
-    }
-    
-
 public:
     static constexpr auto MAX_LETTERS = 1024;
     static constexpr auto N_VERTEX_PER_LETTERS = 4;
@@ -65,15 +68,15 @@ public:
     static constexpr auto N_FLOATS_PER_LETTER  = N_VERTEX_PER_LETTERS*N_FLOATS_PER_VERTEX;
     static constexpr auto N_INDICES_PER_LETTER = 6;
 
-    TextRenderer() : mShader(VERTEX_SHADER, FRAGMENT_SHADER), mGlyphAtlas(1)
+    TextRenderer() : mShader(VERTEX_SHADER, FRAGMENT_SHADER)
     {        
         mVertexBuffer.reserve(MAX_LETTERS * N_FLOATS_PER_LETTER, GL_STREAM_DRAW);
         mIndexBuffer.reserve(MAX_LETTERS * N_INDICES_PER_LETTER);        
-        mQuad.bindAttributeAtOffset(0, mShader.getAttribute<vec2>("vertPosition"), mVertexBuffer);
-        mQuad.bindAttributeAtOffset(2, mShader.getAttribute<vec2>("vertTexCoord"), mVertexBuffer);            
-        mQuad.bindIndices(mIndexBuffer);
+        mQuads.bindAttributeAtOffset(0, mShader.getAttribute<vec2>("vertPosition"), mVertexBuffer);
+        mQuads.bindAttributeAtOffset(2, mShader.getAttribute<vec2>("vertTexCoord"), mVertexBuffer);            
+        mQuads.bindIndices(mIndexBuffer);
         mTextColor = mShader.getUniform<vec4>("textColor");
-        mQuadTexture = mShader.getUniform<sampler2D>("quadTexture");
+        mQuadsTexture = mShader.getUniform<sampler2D>("quadTexture");
         mTransform = mShader.getUniform<mat4>("transform");
 
         auto mappedIndices = mIndexBuffer.map(GL_WRITE_ONLY);
@@ -89,7 +92,6 @@ public:
             index += 4;
         }
         mIndexBuffer.unmap();
-
     }
 
     static ivec2 getViewport()
@@ -99,7 +101,7 @@ public:
         return { viewPort[2], viewPort[3] };
     }
 
-    vec2 renderText(const vec2 &pos, Font &font, const Color &color, const std::string &u8Text)
+    vec2 renderText(const vec2 &pos, CachedFont &font, const Color &color, const std::string &u8Text)
     {
         auto cursor = pos;
 
@@ -107,20 +109,24 @@ public:
         auto nLetters = 0;
         for (auto codepoint: u8Text)
         {
-            auto index   = font.getGlyphIndex(codepoint);
-            auto metrics = font.getGlyphMetrics(index);    
-            auto glyph = getGlyph(font, codepoint);
-            auto topLeft     = cursor + glyph.bb.min;
-            auto bottomRight = cursor + glyph.bb.max;
+            if (codepoint == '\n') cursor = { pos.x, cursor.y+font.lineHeight() };
 
-            (*quadVertices++) = { {bottomRight.x, topLeft.y},     {glyph.uv.max.x, glyph.uv.min.y} };
-            (*quadVertices++) = { {topLeft.x,     topLeft.y},     {glyph.uv.min.x, glyph.uv.min.y} };
-            (*quadVertices++) = { {bottomRight.x, bottomRight.y}, {glyph.uv.max.x, glyph.uv.max.y} };
-            (*quadVertices++) = { {topLeft.x,     bottomRight.y}, {glyph.uv.min.x, glyph.uv.max.y} };
+            auto index       = font.getGlyphIndex(codepoint);
+            auto metrics     = font.getGlyphMetrics(index);    
+            auto bb          = metrics.boundingBox();
+            auto uv          = font.getGlyphTextureCoordinates(index);
+            auto topLeft     = cursor + bb.min;
+            auto bottomRight = cursor + bb.max;
 
-            cursor.x += glyph.advance;
+            (*quadVertices++) = { {bottomRight.x, topLeft.y},     {uv.max.x, uv.min.y} };
+            (*quadVertices++) = { {topLeft.x,     topLeft.y},     {uv.min.x, uv.min.y} };
+            (*quadVertices++) = { {bottomRight.x, bottomRight.y}, {uv.max.x, uv.max.y} };
+            (*quadVertices++) = { {topLeft.x,     bottomRight.y}, {uv.min.x, uv.max.y} };
+
+            cursor.x += metrics.advance();
             nLetters += 1;
-        }            
+        }     
+
         mVertexBuffer.unmap();
 
         auto viewport = getViewport();
@@ -133,26 +139,23 @@ public:
 
         glEnable(GL_BLEND);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
-        mQuadTexture.set(mGlyphAtlas.bind(GL_TEXTURE0));
+        mQuadsTexture.set(font.glyphAtlas().bind(GL_TEXTURE0));
         mTextColor.set(color);
-        mQuad.bind();
+        mQuads.bind();
         glDrawElements(GL_TRIANGLES, N_INDICES_PER_LETTER * nLetters, GL_UNSIGNED_INT, 0);
         glDisable(GL_BLEND);
 
         return cursor;
     }
 
-
 private:
     ShaderProgram mShader;
-    VertexArray mQuad;
+    VertexArray mQuads;
     VertexBuffer<f32,4> mVertexBuffer;
     Uniform<vec4> mTextColor;
-    Uniform<sampler2D> mQuadTexture;
+    Uniform<sampler2D> mQuadsTexture;
     Uniform<mat4> mTransform;
     ElementBuffer mIndexBuffer;
-    TextureAtlas mGlyphAtlas;    
-    std::unordered_map<u16, Glyph> mGlyphCache;
 };
 
 
@@ -160,18 +163,17 @@ int main()
 {
     auto window   = Window(1920, 1080, "Text Sample");
     auto loop     = GameLoop(window, 60);    
-    auto melso    = Font("res/fonts/Roboto-Regular.ttf", 30);
+    auto small    = CachedFont("res/fonts/Roboto-Regular.ttf", 50);
+    auto big      = CachedFont("res/fonts/Roboto-Regular.ttf", 350);
     auto renderer = TextRenderer();
-    
-    int maxsize;
-    glGetIntegerv(GL_MAX_RECTANGLE_TEXTURE_SIZE, &maxsize);
-    fprintln("max texture size = %1%", maxsize);
 
     glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
     loop.run([&]() 
     {   
         glClear(GL_COLOR_BUFFER_BIT);
-        renderer.renderText(vec2(0,0), melso, YELLOW, fmt("average frame time = %6.3fmsec", 1000*loop.averageFrameTime().count()));
+        renderer.renderText(vec2(2,2), small, BLACK, fmt("average frame time = %6.3fmsec", 1000*loop.averageFrameTime().count()));
+        renderer.renderText(vec2(0,0), small, YELLOW, fmt("average frame time = %6.3fmsec", 1000*loop.averageFrameTime().count()));
+        renderer.renderText(vec2(100,100), big, RED, "Hello World!!");
     });
 
     return EXIT_SUCCESS;
