@@ -4,8 +4,7 @@
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
-#include <ray/entities/Mesh.hpp>
-#include <ray/math/Transform.hpp>
+#include <ray/entities/TransformableMesh.hpp>
 #include <ray/components/Movable.hpp>
 #include <cstdlib>
 
@@ -96,7 +95,7 @@ public:
         mesh.bindNormal(shader.getAttribute<vec3>("vertNormal"));
     }
 
-    void render(const Mesh &mesh, const Material &material, const Light &light) const
+    void render(const TransformableMesh &mesh, const Material &material, const Light &light) const
     {
         glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -125,7 +124,7 @@ int main()
     auto window   = Window(1920, 1080, "Lighting Sample");
     auto loop     = GameLoop(window, 60);
     auto renderer = MeshRenderer(window);
-    auto mesh     = Mesh("res/mesh/bunny.obj");
+    auto mesh     = TransformableMesh("res/mesh/bunny.obj");
     auto material = Material{DARK_GRAY, 1.0f, 10.0f};
     auto light    = Light(vec3(2,2,5), YELLOW);
 

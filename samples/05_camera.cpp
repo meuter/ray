@@ -1,7 +1,7 @@
 #include <ray/components/Movable.hpp>
 #include <ray/components/Orientable.hpp>
 #include <ray/math/Transform.hpp>
-#include <ray/entities/Mesh.hpp>
+#include <ray/entities/TransformableMesh.hpp>
 #include <ray/platform/Window.hpp>
 #include <ray/platform/GameLoop.hpp>
 #include <ray/platform/FileSystem.hpp>
@@ -126,7 +126,7 @@ public:
         mesh.bindTexCoord(shader.getAttribute<vec2>("vertTexCoord"));            
     }
 
-    void render(const Camera &camera, const Mesh &mesh) const
+    void render(const Camera &camera, const TransformableMesh &mesh) const
     {
         glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -152,7 +152,7 @@ int main()
     auto loop     = GameLoop(window, 60);
     auto camera   = Camera(43_deg, window.aspectRatio(), 0.001f, 1000.0f);
     auto renderer = MeshRenderer(window, camera);
-    auto mesh     = Mesh("res/mesh/teapot.obj");
+    auto mesh     = TransformableMesh("res/mesh/teapot.obj");
     
     mesh.scale(0.05f);
     mesh.move(vec3(0,-1,0), 2);

@@ -4,7 +4,7 @@
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
-#include <ray/entities/Mesh.hpp>
+#include <ray/entities/TransformableMesh.hpp>
 #include <ray/math/Transform.hpp>
 #include <cstdlib>
 
@@ -57,7 +57,7 @@ public:
         mesh.bindTexCoord(shader.getAttribute<vec2>("vertTexCoord"));            
     }
 
-    void render(const Mesh &mesh) const
+    void render(const TransformableMesh &mesh) const
     {
         glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -80,7 +80,7 @@ int main()
     auto window   = Window(1920, 1080, "Teapot Sample");
     auto loop     = GameLoop(window, 60);
     auto renderer = MeshRenderer(window);
-    auto mesh     = Mesh("res/mesh/teapot.obj");
+    auto mesh     = TransformableMesh("res/mesh/teapot.obj");
 
     mesh.scale(0.05f);
     mesh.moveTo(0,-2.0f,-10);

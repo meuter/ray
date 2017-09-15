@@ -1,13 +1,12 @@
 #pragma once
 
-#include <ray/components/Transformable.hpp>
 #include <ray/assets/Wavefront.hpp>
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/Texture.hpp>
 
 namespace ray { namespace entities {
 
-    class Mesh: public components::Transformable
+    class Mesh
     {
         static constexpr size_t N_FLOATS_PER_VERTEX = 8;
     public:
