@@ -3,14 +3,13 @@
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
+#include <ray/platform/GameLoop.hpp>
 #include <cstdlib>
 
 using namespace ray::assets;
 using namespace ray::platform;
 using namespace ray::gl;
 using namespace ray::math;
-
-
 
 class TextRenderer
 {
@@ -66,6 +65,11 @@ public:
         return { viewPort[2], viewPort[3] };
     }
 
+    // NOTE(cme): this is really slow! Each glyph is rasterized on demand, in a newly allocated
+    //            Bitmap, put in a new Texture each time!!! Also, reusing the same VBO for each
+    //            letter means that we litterally have to wait for the GPU to have finished 
+    //            rendering each letter before moving to the next. See '08_text.cpp' for a somewhat
+    //            better and faster solution.
     int renderCodepoint(const vec2 &pos, const Font &font, const Color &color, int codepoint)
     {
         auto glyph = font.rasterizeCodepoint(codepoint);
@@ -112,6 +116,7 @@ private:
 int main()
 {
     auto window   = Window(1920, 1080, "Font Sample");
+    auto loop     = GameLoop(window, 60);    
     auto melso    = Font("res/fonts/Roboto-Regular.ttf", 500);
     auto renderer = TextRenderer();
     
@@ -119,8 +124,8 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    while (!window.shouldClose())
-    {
+    loop.run([&]() 
+    {   
         glClear(GL_COLOR_BUFFER_BIT);
 
         auto x = 300;
@@ -131,10 +136,8 @@ int main()
         x += renderer.renderCodepoint(vec2(x,y), melso, YELLOW, 'l');
         x += renderer.renderCodepoint(vec2(x,y), melso, PINK, 'o');
         x += renderer.renderCodepoint(vec2(x,y), melso, TEAL, '!');
-        
-        window.pollEvents();
-        window.swapBuffers();
-    }
+        if (loop.frameCount() % 60 == 0) fprintln("average frame time = %6.3fmsec", 1000*loop.averageFrameTime().count());
+    });
 
     return EXIT_SUCCESS;
 }

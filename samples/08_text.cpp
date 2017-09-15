@@ -182,8 +182,8 @@ int main()
         // NOTE(cme): when trying to render several pieces of text using the same renderer, the second render call
         //            will have to wait for the first render call to be finished by the GPU becasue the VBO is 
         //            still being used when you try and map it to populate the next set of quads. The glMapBuffer
-        //            will therefore stall. On my setup, using 3 different renderers (and therefore VBOs) is about 
-        //            4x faster!! Detected using the "Instruments" built-in profiler on OSX.
+        //            call will therefore stall. On my setup, using 3 different renderers (and therefore VBOs) is
+        //            about 4x faster!! Detected using the "Instruments" built-in profiler on OSX.
         renderer1.renderText(vec2(2,2), small, BLACK, text);
         renderer1.renderText(vec2(0,0), small, YELLOW, text);
         renderer1.renderText(vec2(100,100), big, RED, "Hello World!!");
