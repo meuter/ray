@@ -72,7 +72,7 @@ namespace ray { namespace platform {
                 }
             });
 
-            setSizeCallback([](GLFWwindow *win, int w, int h) {                             
+            setFramebufferSizeCallback([](GLFWwindow *win, int w, int h) {                          
                 glViewport(0,0,w,h);
             });
 
