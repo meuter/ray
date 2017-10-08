@@ -24,11 +24,12 @@ namespace ray { namespace gl {
             attach(VertexShader(vertexShader));
             attach(FragmentShader(fragmentShader));
             link();
-            use();
+            start();
         }
 
-        void use() const { gl(UseProgram(mHandle)); }
-
+        void start() const { gl(UseProgram(mHandle)); }
+        void stop()  const { gl(UseProgram(0)); }
+        
         template<GLenum shaderType>
         void attach(const Shader<shaderType> &shader) const
         {

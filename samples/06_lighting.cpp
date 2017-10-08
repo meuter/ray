@@ -99,7 +99,7 @@ public:
     {
         glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        shader.use();
+        shader.start();
         glEnable(GL_DEPTH_TEST);
         modelMatrix.set(mesh.modelMatrix());
         modelColor.set(material.color);
@@ -109,6 +109,7 @@ public:
         lightPosition.set(light.position());
         mesh.draw();
         glDisable(GL_DEPTH_TEST);
+        shader.stop();
     }
 
 private:

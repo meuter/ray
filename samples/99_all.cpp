@@ -132,6 +132,7 @@ public:
         mVertexBuffer.unmap();
 
         auto viewport = getViewport();
+        mShader.start();
         mTransform.set({
             2.0f/viewport.w, 0.0f, 0.0f, -1.0f,
             0.0f, -2.0f/viewport.h, 0.0f, 1.0f,
@@ -142,13 +143,13 @@ public:
         glEnable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);    
-        mShader.use();
         mQuadsTexture.set(font.glyphAtlas().bind(GL_TEXTURE0));
         mTextColor.set(color);
         mQuads.bind();
-        glDrawElements(GL_TRIANGLES, N_INDICES_PER_LETTER * nLetters, GL_UNSIGNED_INT, 0);
+        gl(DrawElements(GL_TRIANGLES, N_INDICES_PER_LETTER * nLetters, GL_UNSIGNED_INT, 0));
         glDisable(GL_BLEND);
 
+        mShader.stop();
         return cursor;
     }
 
@@ -239,6 +240,7 @@ public:
         shineDamper = shader.getUniform<float>("shineDamper");
 
         projectionMatrix = projection(43_deg, window.aspectRatio(), 0.01f, 1000.0f);
+        shader.stop();
     }
 
     void bind(const Mesh &mesh) const
@@ -249,7 +251,7 @@ public:
 
     void render(const TransformableMesh &mesh, const Material &material, const Light &light) const
     {
-        shader.use();
+        shader.start();
         glEnable(GL_DEPTH_TEST);
         modelMatrix.set(mesh.modelMatrix());
         modelColor.set(material.color);
@@ -259,6 +261,7 @@ public:
         lightPosition.set(light.position());
         mesh.draw();
         glDisable(GL_DEPTH_TEST);
+        shader.stop();
     }
 
 private:
@@ -291,8 +294,6 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         auto fps = fmt("average frame time = %6.3fmsec", 1000*loop.averageFrameTime().count());
         
-        // TODO(cme): when inverting those two calls the text is not being displayed
-        //            investigate why
         texter.renderText(vec2(0,0), small, YELLOW, fps);
         renderer.render(mesh, material, light);
         mesh.rotate(vec3(0,1,0), 2_deg);

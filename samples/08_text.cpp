@@ -128,6 +128,8 @@ public:
 
         mVertexBuffer.unmap();
 
+
+        mShader.start();
         auto viewport = getViewport();
         mTransform.set({
             2.0f/viewport.w, 0.0f, 0.0f, -1.0f,
@@ -143,6 +145,7 @@ public:
         mQuads.bind();
         glDrawElements(GL_TRIANGLES, N_INDICES_PER_LETTER * nLetters, GL_UNSIGNED_INT, 0);
         glDisable(GL_BLEND);
+        mShader.stop();
 
         return cursor;
     }

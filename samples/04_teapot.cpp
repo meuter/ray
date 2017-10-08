@@ -61,12 +61,13 @@ public:
     {
         glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        shader.use();
+        shader.start();
         glEnable(GL_DEPTH_TEST);
         texture.set(mesh.diffuseTexture().bind(GL_TEXTURE0));
         modelMatrix.set(mesh.modelMatrix());
         mesh.draw();
         glDisable(GL_DEPTH_TEST);
+        shader.stop();
     }
 
 private:
