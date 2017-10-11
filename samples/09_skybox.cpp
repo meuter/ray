@@ -24,29 +24,6 @@ using namespace assets;
 #include <fstream>
 #include <sstream>
 
-
-mat4 myLookAt(vec3 const& eye, vec3 const& center, vec3 const& up)
-{
-    vec3 const f(normalize(center - eye));
-    vec3 const s(normalize(cross(f, up)));
-    vec3 const u(cross(s, f));
-
-    mat4 Result = scaling(1.0f);
-    Result(0,0) = s.x;
-    Result(0,1) = s.y;
-    Result(0,2) = s.z;
-    Result(1,0) = u.x;
-    Result(1,1) = u.y;
-    Result(1,2) = u.z;
-    Result(2,0) =-f.x;
-    Result(2,1) =-f.y;
-    Result(2,2) =-f.z;
-    Result(0,3) =-dot(s, eye);
-    Result(1,3) =-dot(u, eye);
-    Result(2,3) = dot(f, eye);
-    return Result;
-}
-
 class SkyboxShader : public ShaderProgram
 {
     static constexpr auto VERTEX_SHADER = GLSL(330, 
@@ -180,7 +157,7 @@ public:
     // Returns the view matrix calculated using Eular Angles and the LookAt Matrix
     mat4 GetViewMatrix()
     {
-        return myLookAt(Position, Position + Front, Up);
+        return lookAt(Position, Position + Front, Up);
     }
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
@@ -194,7 +171,7 @@ public:
         if (direction == LEFT)
             Position -= Right*velocity;
         if (direction == RIGHT)
-            Position -=  Right*velocity;
+            Position +=  Right*velocity;
     }
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
