@@ -12,7 +12,7 @@
 
 using namespace ray::platform;
 using namespace ray::gl;
-// using namespace ray::math;
+using namespace ray::math;
 // using namespace ray::assets;
 // using namespace ray::components;
 // using namespace ray::entities;
@@ -354,7 +354,7 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    float cubeVertices[] = {
+    auto cubeVBO = VertexBuffer<f32,5>{
         // positions          // texture Coords
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
          0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -398,7 +398,7 @@ int main()
         -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
-    float skyboxVertices[] = {
+    auto skyboxVBO = VertexBuffer<f32,3>{
         // positions          
         -1.0f,  1.0f, -1.0f,
         -1.0f, -1.0f, -1.0f,
@@ -445,27 +445,12 @@ int main()
 
     // cube VAO
     auto cubeVAO = VertexArray();
-    unsigned int cubeVBO;
-    glGenBuffers(1, &cubeVBO);
-    cubeVAO.bind();
-    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    cubeVAO.unbind();
+    cubeVAO.bindAttributeAtOffset(0, Attribute<vec3>(0), cubeVBO);
+    cubeVAO.bindAttributeAtOffset(3, Attribute<vec3>(1), cubeVBO);
 
     // skybox VAO
     auto skyboxVAO = VertexArray();
-    unsigned int skyboxVBO;
-    glGenBuffers(1, &skyboxVBO);
-    skyboxVAO.bind();
-    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    skyboxVAO.unbind();
+    skyboxVAO.bindAttribute(Attribute<vec3>(0), skyboxVBO);
 
     // load textures
     // -------------    
@@ -543,12 +528,6 @@ int main()
         rayWindow.pollEvents();
     }
 
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
-    glDeleteBuffers(1, &cubeVBO);
-    glDeleteBuffers(1, &skyboxVBO);
-
-    glfwTerminate();
     return 0;
 }
 
