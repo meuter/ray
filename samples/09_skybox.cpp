@@ -1,6 +1,6 @@
 // #include <ray/components/Movable.hpp>
 // #include <ray/components/Orientable.hpp>
-// #include <ray/math/Transform.hpp>
+#include <ray/math/Transform.hpp>
 // #include <ray/entities/TransformableMesh.hpp>
 #include <ray/platform/Window.hpp>
 #include <ray/platform/GameLoop.hpp>
@@ -39,10 +39,24 @@ glm::vec3 toGlm(const vec3 &v)
     return glm::vec3(v.x, v.y, v.z);
 }
 
-vec3 fromGlm(const glm::vec3 &v)
+glm::mat4 toGlm(const mat4 &m)
 {
-    return vec3(v.x, v.y, v.z);
+    glm::mat4 result;
+    for(int i = 0; i < 4; ++i)
+        for(int j = 0; j < 4; ++j)
+            result[i][j] = m(i,j);
+    return result;
 }
+
+mat4 fromGlm(const glm::mat4 &m)
+{
+    mat4 result;
+    for(int i = 0; i < 4; ++i)
+        for(int j = 0; j < 4; ++j)
+            result(i,j) = m[i][j];
+    return result;
+}
+
 
 class Shader
 {

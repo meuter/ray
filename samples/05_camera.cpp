@@ -21,7 +21,7 @@ using namespace ray::entities;
 class Camera : public Movable, public Orientable
 {
 public:
-    Camera(rad fovy, float aspect, float n, float f) : Orientable(0,0,-1), mProjectionMatrix(projection(fovy, aspect, n, f)) {}
+    Camera(rad fovy, float aspect, float n, float f) : Orientable(0,0,-1), mProjectionMatrix(perspective(fovy, aspect, n, f)) {}
 
     mat4 projectionMatrix() const  { return mProjectionMatrix; }
 

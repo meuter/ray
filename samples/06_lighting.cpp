@@ -86,7 +86,7 @@ public:
         reflectivity = shader.getUniform<float>("reflectivity");
         shineDamper = shader.getUniform<float>("shineDamper");
 
-        projectionMatrix = projection(43_deg, window.aspectRatio(), 0.01f, 1000.0f);
+        projectionMatrix = perspective(43_deg, window.aspectRatio(), 0.01f, 1000.0f);
     }
 
     void bind(const Mesh &mesh) const

@@ -126,7 +126,7 @@ public:
         modelMatrix = shader.getUniform<mat4>("modelMatrix");
         projectionMatrix = shader.getUniform<mat4>("projectionMatrix");    
 
-        projectionMatrix = projection(43_deg, window.aspectRatio(), 0.01f, 1000.0f);        
+        projectionMatrix = perspective(43_deg, window.aspectRatio(), 0.01f, 1000.0f);        
     }
 
     void bind(const Cube &cube)
