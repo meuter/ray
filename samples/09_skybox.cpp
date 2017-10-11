@@ -168,6 +168,7 @@ public:
     rad Yaw, Pitch, Zoom;
     float MovementSpeed;
     float MouseSensitivity;
+    mat4 mProjection;
 
     Camera(const vec3 &position = vec3(0.0f, 0.0f, 0.0f), const vec3 &up = vec3(0.0f, 1.0f, 0.0f), rad yaw = YAW, rad pitch = PITCH) : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
     {
@@ -175,21 +176,33 @@ public:
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
+        mProjection = scaling(1.0f);
         updateCameraVectors();
     }
 
-    mat4 GetViewMatrix()
+    void update(const Window &window, float dt)
+    {
+        mProjection = perspective(Zoom, window.aspectRatio(),  0.1f, 100.0f);
+        moveUsingKeyboard(window, dt);
+    }
+
+    void moveUsingKeyboard(const Window &window, float dt)
+    {
+        float amount = MovementSpeed * dt;
+        if (window.isKeyHeld(Key::KEY_UP))      move(Front,  amount);
+        if (window.isKeyHeld(Key::KEY_DOWN))    move(Front, -amount);
+        if (window.isKeyHeld(Key::KEY_LEFT))    move(Right, -amount);
+        if (window.isKeyHeld(Key::KEY_RIGHT))   move(Right,  amount);
+    }
+
+    mat4 view() const
     {
         return lookAt(position(), position() + Front, Up);
     }
 
-    void ProcessKeyboard(Camera_Movement direction, float deltaTime)
+    const mat4 &projection() const
     {
-        float amount = MovementSpeed * deltaTime;
-        if (direction == FORWARD)  move(Front,  amount);
-        if (direction == BACKWARD) move(Front, -amount);
-        if (direction == LEFT)     move(Right, -amount);
-        if (direction == RIGHT)    move(Right,  amount);
+        return mProjection;
     }
 
     void ProcessMouseMovement(float xoffset, float yoffset)
@@ -311,18 +324,6 @@ public:
 
 Camera camera(vec3(0.0f, 0.0f, 3.0f));
 
-void processInput(const Window &window, float deltaTime)
-{
-    if (window.isKeyHeld(Key::KEY_UP))
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (window.isKeyHeld(Key::KEY_DOWN))
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (window.isKeyHeld(Key::KEY_LEFT))
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (window.isKeyHeld(Key::KEY_RIGHT))
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-}
-
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     static float lastX = (float)1920 / 2.0;
@@ -407,17 +408,17 @@ int main()
 
     loop.run([&]() {
 
-        processInput(window, loop.dt().count());
+        camera.update(window, loop.dt().count());
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        auto view = camera.GetViewMatrix();
-        auto projection = perspective(camera.Zoom, window.aspectRatio(), 0.1f, 100.0f);
+        auto view = camera.view();
 
         cubeRenderer.render(cube); 
         cubeRenderer.texture = cube.texture().bind(GL_TEXTURE0) ;      
         cubeRenderer.viewMatrix = view;
-        cubeRenderer.projection = projection;
+        cubeRenderer.projection = camera.projection();
         cube.draw();
 
         glDepthFunc(GL_LEQUAL);
@@ -430,7 +431,7 @@ int main()
         view(3,1) = 0;
         view(3,2) = 0;
         skyboxRenderer.view = view;
-        skyboxRenderer.projection = projection;
+        skyboxRenderer.projection = camera.projection();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         skyboxVAO.draw();
@@ -442,33 +443,6 @@ int main()
     
     return 0;
 }
-
-// class Camera : public Movable, public Orientable
-// {
-// public:
-//     Camera(rad fovy, float aspect, float n, float f) : Orientable(0,0,-1), mProjectionMatrix(projection(fovy, aspect, n, f)) {}
-
-//     mat4 projectionMatrix() const  { return mProjectionMatrix; }
-
-//     mat4 viewMatrix() const 
-//     {
-//         // NOTE(cme): HACK!! This does what I want, by I cannot understand why from a math pov
-//         auto displacement = position();
-//         displacement.y = -displacement.y;
-//         // should be displacement = -mPosition;
-//         // END HACK 
-
-//         auto inverseTranslation = translation(displacement);
-//         auto inverseRotation = rotation(conjugate(orientation()));
-
-//         return  inverseRotation * inverseTranslation;
-//     }
-
-//     void update(const Window &window)
-//     {
-//         moveUsingKeyboard(window);        
-//         lookUsingMouse(window);
-//     }
 
 //     void lookUsingMouse(const Window &window, float sensitivity=0.001f)
 //     {
@@ -492,20 +466,6 @@ int main()
 //             if (dpos.y != 0) rotate(left(), sensitivity * dpos.y);
 //         }
 //     }
-
-//     void moveUsingKeyboard(const Window &window, float speed=0.1f)
-//     {
-//         if (window.isKeyHeld(Key::KEY_UP))        move(front(), speed);
-//         if (window.isKeyHeld(Key::KEY_DOWN))      move(back(), speed);
-//         if (window.isKeyHeld(Key::KEY_LEFT))      move(left(), speed);
-//         if (window.isKeyHeld(Key::KEY_RIGHT))     move(right(), speed);
-//         if (window.isKeyHeld(Key::KEY_PAGE_UP))   move(up(), speed);
-//         if (window.isKeyHeld(Key::KEY_PAGE_DOWN)) move(down(), speed);
-//     }
-
-// private:
-//     mat4 mProjectionMatrix;
-// };
 
 // class CubeMap
 // {
