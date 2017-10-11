@@ -277,9 +277,11 @@ public:
         texture1 = mShader.getUniform<sampler2D>("texture1");
         position = mShader.getAttribute<vec3>("aPos");
         texCoord = mShader.getAttribute<vec2>("aTexCoords");
+
+        model = scaling(1.0f);
     }
 
-    void render(const VertexArray &cubeVAO, const Texture &texture)
+    void render(const Cube &cube)
     {
         mShader.start();
     }
@@ -372,9 +374,9 @@ int main()
     };
 
     // cube VAO
-    auto cubeVAO = Cube("res/images/marble.jpg");
-    cubeVAO.bindPosition(cubeRenderer.position);
-    cubeVAO.bindTexCoord(cubeRenderer.texCoord);
+    auto cube = Cube("res/images/marble.jpg");
+    cube.bindPosition(cubeRenderer.position);
+    cube.bindTexCoord(cubeRenderer.texCoord);
 
     // skybox VAO
     auto skyboxVAO = VertexArray();
@@ -391,11 +393,6 @@ int main()
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
-    // cubeRenderer configuration
-    // --------------------
-    cubeRenderer.mShader.start();
-    cubeRenderer.texture1 = sampler2D{0};
-
     skyboxRenderer.mShader.start();
     skyboxRenderer.skybox = samplerCube{0};
 
@@ -407,18 +404,15 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // draw scene as normal
-        cubeRenderer.render(cubeVAO, cubeVAO.texture());
         mat4 view = camera.GetViewMatrix();
         auto projection = perspective(camera.Zoom, window.aspectRatio(), 0.1f, 100.0f);
-        
-        cubeRenderer.model = scaling(1.0f);
+
+        // draw scene as normal
+        cubeRenderer.render(cube); 
+        cubeRenderer.texture1 = cube.texture().bind(GL_TEXTURE0) ;      
         cubeRenderer.view = view;
         cubeRenderer.projection = projection;
-
-        // cubes
-        cubeVAO.texture().bind(GL_TEXTURE0);
-        cubeVAO.draw();
+        cube.draw();
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
