@@ -6,16 +6,16 @@
 #include <ray/platform/GameLoop.hpp>
 // #include <ray/platform/FileSystem.hpp>
 #include <ray/gl/VertexArray.hpp>
-// #include <ray/gl/ShaderProgram.hpp>
+#include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
 // #include <cstdlib>
 
-using namespace ray::platform;
-using namespace ray::gl;
-using namespace ray::math;
-// using namespace ray::assets;
-// using namespace ray::components;
-// using namespace ray::entities;
+using namespace ray;
+using namespace platform;
+using namespace math;
+// using namespace assets;
+// using namespace components;
+// using namespace entities;
 
 
 
@@ -39,179 +39,91 @@ glm::vec3 toGlm(const vec3 &v)
     return glm::vec3(v.x, v.y, v.z);
 }
 
-glm::mat4 toGlm(const mat4 &m)
-{
-    glm::mat4 result;
-    for(int i = 0; i < 4; ++i)
-        for(int j = 0; j < 4; ++j)
-            result[i][j] = m(i,j);
-    return result;
-}
-
 mat4 fromGlm(const glm::mat4 &m)
 {
     mat4 result;
     for(int i = 0; i < 4; ++i)
         for(int j = 0; j < 4; ++j)
-            result(i,j) = m[i][j];
+            result(j,i) = m[i][j];
     return result;
 }
 
-
-class Shader
+class SkyboxShader : public gl::ShaderProgram
 {
+    static constexpr auto VERTEX_SHADER = GLSL(330, 
+        layout (location = 0) in vec3 aPos;
+        
+        out vec3 TexCoords;
+        
+        uniform mat4 projection;
+        uniform mat4 view;
+        
+        void main()
+        {
+            TexCoords = aPos;
+            vec4 pos = projection * view * vec4(aPos, 1.0);
+            gl_Position = pos.xyww;
+        }  
+    );
+    
+    static constexpr auto FRAGMENT_SHADER = GLSL(330,
+        out vec4 FragColor;
+        in vec3 TexCoords;
+        uniform samplerCube skybox;
+        void main()
+        {    
+            FragColor = texture(skybox, TexCoords);
+        }
+    );
+
 public:
-    unsigned int ID;
-    // constructor generates the shader on the fly
-    // ------------------------------------------------------------------------
-    Shader(const char* vertexPath, const char* fragmentPath)
-    {
-        // 1. retrieve the vertex/fragment source code from filePath
-        std::string vertexCode;
-        std::string fragmentCode;
-        std::ifstream vShaderFile;
-        std::ifstream fShaderFile;
-        // ensure ifstream objects can throw exceptions:
-        vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        try 
-        {
-            // open files
-            vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
-            std::stringstream vShaderStream, fShaderStream;
-            // read file's buffer contents into streams
-            vShaderStream << vShaderFile.rdbuf();
-            fShaderStream << fShaderFile.rdbuf();		
-            // close file handlers
-            vShaderFile.close();
-            fShaderFile.close();
-            // convert stream into string
-            vertexCode = vShaderStream.str();
-            fragmentCode = fShaderStream.str();			
-        }
-        catch (std::ifstream::failure e)
-        {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-        }
-        const char* vShaderCode = vertexCode.c_str();
-        const char * fShaderCode = fragmentCode.c_str();
-        // 2. compile shaders
-        unsigned int vertex, fragment;
-        int success;
-        char infoLog[512];
-        // vertex shader
-        vertex = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex, 1, &vShaderCode, NULL);
-        glCompileShader(vertex);
-        checkCompileErrors(vertex, "VERTEX");
-        // fragment Shader
-        fragment = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment, 1, &fShaderCode, NULL);
-        glCompileShader(fragment);
-        checkCompileErrors(fragment, "FRAGMENT");
-        // shader Program
-        ID = glCreateProgram();
-        glAttachShader(ID, vertex);
-        glAttachShader(ID, fragment);
-        glLinkProgram(ID);
-        checkCompileErrors(ID, "PROGRAM");
-        // delete the shaders as they're linked into our program now and no longer necessery
-        glDeleteShader(vertex);
-        glDeleteShader(fragment);
-
-    }
-    // activate the shader
-    // ------------------------------------------------------------------------
-    void use() const
-    { 
-        glUseProgram(ID); 
-    }
-    // utility uniform functions
-    // ------------------------------------------------------------------------
-    void setBool(const std::string &name, bool value) const
-    {         
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value); 
-    }
-    // ------------------------------------------------------------------------
-    void setInt(const std::string &name, int value) const
-    { 
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), value); 
-    }
-    // ------------------------------------------------------------------------
-    void setFloat(const std::string &name, float value) const
-    { 
-        glUniform1f(glGetUniformLocation(ID, name.c_str()), value); 
-    }
-    // ------------------------------------------------------------------------
-    void setVec2(const std::string &name, const glm::vec2 &value) const
-    { 
-        glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]); 
-    }
-    void setVec2(const std::string &name, float x, float y) const
-    { 
-        glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y); 
-    }
-    // ------------------------------------------------------------------------
-    void setVec3(const std::string &name, const glm::vec3 &value) const
-    { 
-        glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]); 
-    }
-    void setVec3(const std::string &name, float x, float y, float z) const
-    { 
-        glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z); 
-    }
-    // ------------------------------------------------------------------------
-    void setVec4(const std::string &name, const glm::vec4 &value) const
-    { 
-        glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]); 
-    }
-    void setVec4(const std::string &name, float x, float y, float z, float w) const
-    { 
-        glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w); 
-    }
-    // ------------------------------------------------------------------------
-    void setMat2(const std::string &name, const glm::mat2 &mat) const
-    {
-        glUniformMatrix2fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
-    }
-    // ------------------------------------------------------------------------
-    void setMat3(const std::string &name, const glm::mat3 &mat) const
-    {
-        glUniformMatrix3fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
-    }
-    // ------------------------------------------------------------------------
-    void setMat4(const std::string &name, const glm::mat4 &mat) const
-    {
-        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+    SkyboxShader() : ShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER) {
+        projection = getUniform<mat4>("projection");
+        view = getUniform<mat4>("view");
+        skybox = getUniform<gl::samplerCube>("skybox");
     }
 
-private:
-    // utility function for checking shader compilation/linking errors.
-    // ------------------------------------------------------------------------
-    void checkCompileErrors(GLuint shader, std::string type)
-    {
-        GLint success;
-        GLchar infoLog[1024];
-        if (type != "PROGRAM")
+    gl::Uniform<gl::samplerCube> skybox;
+    gl::Uniform<mat4> projection, view;
+};
+
+
+class CubeShader : public gl::ShaderProgram
+{
+    static constexpr auto VERTEX_SHADER = GLSL(330, 
+        layout (location = 0) in vec3 aPos;
+        layout (location = 1) in vec2 aTexCoords;        
+        out vec2 TexCoords;
+        uniform mat4 model;
+        uniform mat4 view;
+        uniform mat4 projection;
+        void main()
         {
-            glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-            if (!success)
-            {
-                glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
-            }
+            TexCoords = aTexCoords;    
+            gl_Position = projection * view * model * vec4(aPos, 1.0);
+        }  
+    );
+    
+    static constexpr auto FRAGMENT_SHADER = GLSL(330,
+        out vec4 FragColor;        
+        in vec2 TexCoords;
+        uniform sampler2D texture1;
+        void main()
+        {    
+            FragColor = texture(texture1, TexCoords);
         }
-        else
-        {
-            glGetProgramiv(shader, GL_LINK_STATUS, &success);
-            if (!success)
-            {
-                glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-                std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
-            }
-        }
+    );
+
+public:
+    CubeShader() : ShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER) {
+        projection = getUniform<mat4>("projection");
+        view = getUniform<mat4>("view");
+        model = getUniform<mat4>("model");
+        texture1 = getUniform<gl::sampler2D>("texture1");
     }
+
+    gl::Uniform<gl::sampler2D> texture1;
+    gl::Uniform<mat4> projection, view, model;
 };
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
@@ -234,7 +146,6 @@ const float SPEED      =  2.5f;
 class Camera
 {
 public:
-    // Camera Attributes
     vec3 Position;
     vec3 Front;
     vec3 Up;
@@ -368,12 +279,12 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    Shader shader("res/shaders/6.1.cubemaps.vs", "res/shaders/6.1.cubemaps.fs");
-    Shader skyboxShader("res/shaders/6.1.skybox.vs", "res/shaders/6.1.skybox.fs");
+    CubeShader shader;
+    SkyboxShader skyboxShader;
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    auto cubeVBO = VertexBuffer<f32,5>{
+    auto cubeVBO = gl::VertexBuffer<f32,5>{
         // positions          // texture Coords
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
          0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -417,7 +328,7 @@ int main()
         -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
-    auto skyboxVBO = VertexBuffer<f32,3>{
+    auto skyboxVBO = gl::VertexBuffer<f32,3>{
         // positions          
         -1.0f,  1.0f, -1.0f,
         -1.0f, -1.0f, -1.0f,
@@ -463,17 +374,17 @@ int main()
     };
 
     // cube VAO
-    auto cubeVAO = VertexArray();
-    cubeVAO.bindAttributeAtOffset(0, Attribute<vec3>(0), cubeVBO);
-    cubeVAO.bindAttributeAtOffset(3, Attribute<vec3>(1), cubeVBO);
+    auto cubeVAO = gl::VertexArray();
+    cubeVAO.bindAttributeAtOffset(0, gl::Attribute<vec3>(0), cubeVBO);
+    cubeVAO.bindAttributeAtOffset(3, gl::Attribute<vec3>(1), cubeVBO);
 
     // skybox VAO
-    auto skyboxVAO = VertexArray();
-    skyboxVAO.bindAttribute(Attribute<vec3>(0), skyboxVBO);
+    auto skyboxVAO = gl::VertexArray();
+    skyboxVAO.bindAttribute(gl::Attribute<vec3>(0), skyboxVBO);
 
     // load textures
     // -------------    
-    auto cubeTexture = Texture("res/images/marble.jpg");
+    auto cubeTexture = gl::Texture("res/images/marble.jpg");
 
     std::vector<std::string> faces
     {
@@ -488,11 +399,11 @@ int main()
 
     // shader configuration
     // --------------------
-    shader.use();
-    shader.setInt("texture1", 0);
+    shader.start();
+    shader.texture1 = gl::sampler2D{0};
 
-    skyboxShader.use();
-    skyboxShader.setInt("skybox", 0);
+    skyboxShader.start();
+    skyboxShader.skybox = gl::samplerCube{0};
 
     // render loop
     // -----------
@@ -513,13 +424,13 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // draw scene as normal
-        shader.use();
+        shader.start();
         glm::mat4 model;
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective((float)camera.Zoom, window.aspectRatio(), 0.1f, 100.0f);
-        shader.setMat4("model", model);
-        shader.setMat4("view", view);
-        shader.setMat4("projection", projection);
+        shader.model = fromGlm(model);
+        shader.view = fromGlm(view);
+        shader.projection = fromGlm(projection);
         // cubes
         cubeVAO.bind();
         cubeTexture.bind(GL_TEXTURE0);
@@ -528,10 +439,10 @@ int main()
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-        skyboxShader.use();
+        skyboxShader.start();
         view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
-        skyboxShader.setMat4("view", view);
-        skyboxShader.setMat4("projection", projection);
+        skyboxShader.view = fromGlm(view);
+        skyboxShader.projection = fromGlm(projection);
         // skybox cube
         skyboxVAO.bind();
         glActiveTexture(GL_TEXTURE0);
