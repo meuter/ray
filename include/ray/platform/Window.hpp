@@ -35,7 +35,9 @@ namespace ray { namespace platform {
 
 
         friend class GLFW;
+    public:
         GLFWwindow *mHandle;
+    private:
         bool mShouldBeDestroyed;
         inline Window(GLFWwindow *handle, bool shouldBeDestroyed) : mHandle(handle), mShouldBeDestroyed(shouldBeDestroyed) 
         {
