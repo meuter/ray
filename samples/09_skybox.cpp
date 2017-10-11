@@ -1,4 +1,5 @@
 #include <ray/components/Movable.hpp>
+#include <ray/components/Orientable.hpp>
 #include <ray/math/Transform.hpp>
 #include <ray/platform/Window.hpp>
 #include <ray/platform/GameLoop.hpp>
@@ -98,7 +99,7 @@ private:
 };
 
 
-class Camera : public Movable
+class Camera : public Movable, public Orientable
 {
 public:
     vec3 Front, Up, Right, WorldUp;
@@ -142,36 +143,24 @@ public:
     }
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
+    void ProcessMouseMovement(float xoffset, float yoffset)
     {
         xoffset *= MouseSensitivity;
         yoffset *= MouseSensitivity;
 
         Yaw   += xoffset;
-        Pitch += yoffset;
 
-        // Make sure that when pitch is out of bounds, screen doesn't get flipped
-        if (constrainPitch)
-        {
-            if (Pitch > 89.0f)
-                Pitch = 89.0f;
-            if (Pitch < -89.0f)
-                Pitch = -89.0f;
-        }
+        Pitch = clamp(-89_deg, Pitch+yoffset, 89_deg);
 
-        // Update Front, Right and Up Vectors using the updated Eular angles
         updateCameraVectors();
     }
 
     // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void ProcessMouseScroll(float yoffset)
     {
-        if (Zoom >= 1.0f && Zoom <= 45.0f)
-            Zoom -= yoffset;
-        if (Zoom <= 1.0f)
-            Zoom = 1.0f;
-        if (Zoom >= 45.0f)
-            Zoom = 45.0f;
+        if (Zoom >= 1_deg && Zoom <= 63_deg)
+            Zoom -= yoffset * PI_OVER_180;
+        Zoom = clamp(1_deg, Zoom, 63_deg);
     }
 
 private:
@@ -496,26 +485,6 @@ unsigned int loadCubemap(std::vector<std::string> faces)
 }
 
 
-// #include <ray/components/Movable.hpp>
-// #include <ray/components/Orientable.hpp>
-// #include <ray/math/Transform.hpp>
-// #include <ray/entities/TransformableMesh.hpp>
-// #include <ray/platform/Window.hpp>
-// #include <ray/platform/GameLoop.hpp>
-// #include <ray/platform/FileSystem.hpp>
-// #include <ray/gl/VertexArray.hpp>
-// #include <ray/gl/ShaderProgram.hpp>
-// #include <ray/gl/Texture.hpp>
-// #include <cstdlib>
-
-// using namespace ray::platform;
-// using namespace ray::gl;
-// using namespace ray::math;
-// using namespace ray::assets;
-// using namespace ray::components;
-// using namespace ray::entities;
-
-
 // class Camera : public Movable, public Orientable
 // {
 // public:
@@ -716,80 +685,3 @@ unsigned int loadCubemap(std::vector<std::string> faces)
 //     CubeMap mCubeMap;
 // };
 
-// class SkyboxRenderer
-// {
-//     static constexpr auto VERTEX_SHADER = GLSL(330, 
-//         in  vec3 vertPosition;
-//         out vec3 fragTexDirection;
-//         uniform mat4 projectionMatrix;
-//         uniform mat4 viewMatrix;
-//         void main() 
-//         { 
-//             gl_Position = projectionMatrix * viewMatrix * vec4(vertPosition,1); 
-//             fragTexDirection = gl_Position.xyz;
-//         }
-//     );
-    
-//     static constexpr auto FRAGMENT_SHADER = GLSL(330,
-//         out vec3 fragTexDirection;
-//         uniform samplerCube cubeMap;
-//         out vec4 color;
-//         void main() 
-//         {                         
-//             color = texture(cubeMap, fragTexDirection);
-//         }
-//     );
-
-// public:
-//     SkyboxRenderer(const Window &window, const Camera &camera)
-//     {
-//         shader.load(VERTEX_SHADER, FRAGMENT_SHADER);    
-//         cubeMap = shader.getUniform<samplerCube>("cubeMap");
-//         projectionMatrix = shader.getUniform<mat4>("projectionMatrix");  
-//         viewMatrix = shader.getUniform<mat4>("viewMatrix");  
-
-//         projectionMatrix = projection(43_deg, window.aspectRatio(), 0.01f, 1000.0f);        
-//     }
-
-//     void bind(const SkyBox &skybox)
-//     {
-//         skybox.bindPosition(shader.getAttribute<vec3>("vertPosition"));
-//     }
-    
-//     void render(const Camera &camera, const SkyBox &skybox)
-//     {
-//         glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
-//         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//         shader.start();
-//         glEnable(GL_DEPTH_TEST);
-//         cubeMap.set(skybox.cubeMap().bind(GL_TEXTURE0));
-//         skybox.draw();
-//         glDisable(GL_DEPTH_TEST);
-//         shader.stop();
-//     }
-
-// private:
-//     ShaderProgram shader;
-//     Uniform<samplerCube> cubeMap;
-//     Uniform<mat4> projectionMatrix, viewMatrix;
-// };
-
-// int main()
-// {    
-//     auto window   = Window(1920, 1080, "Camera Sample");
-//     auto loop     = GameLoop(window, 60);
-//     auto camera   = Camera(43_deg, window.aspectRatio(), 0.001f, 1000.0f);
-//     auto renderer = SkyboxRenderer(window, camera);
-//     auto skybox   = SkyBox("res/images/skybox");
-    
-//     camera.move(camera.back(), 10);
-//     renderer.bind(skybox);
-
-//     loop.run([&]() 
-//     {   
-//          camera.update(window);
-//         renderer.render(camera, skybox);
-//     });
-
-//     return EXIT_SUCCESS;
-// }
