@@ -118,22 +118,13 @@ const rad SENSITIVTY =  0.1_deg;
 const float SPEED      =  2.5f;
 
 
-// An abstract camera class that processes input and calculates the corresponding Eular Angles, Vectors and Matrices for use in OpenGL
 class Camera
 {
 public:
-    vec3 Position;
-    vec3 Front;
-    vec3 Up;
-    vec3 Right;
-    vec3 WorldUp;
-    // Eular Angles
-    rad Yaw;
-    rad Pitch;
-    // Camera options
+    vec3 Position, Front, Up, Right, WorldUp;
+    rad Yaw, Pitch, Zoom;
     float MovementSpeed;
     float MouseSensitivity;
-    rad Zoom;
 
     // Constructor with vectors
     Camera(const vec3 &position = vec3(0.0f, 0.0f, 0.0f), const vec3 &up = vec3(0.0f, 1.0f, 0.0f), rad yaw = YAW, rad pitch = PITCH) : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
