@@ -5,13 +5,13 @@
 #include <ray/platform/Window.hpp>
 // #include <ray/platform/GameLoop.hpp>
 // #include <ray/platform/FileSystem.hpp>
-// #include <ray/gl/VertexArray.hpp>
+#include <ray/gl/VertexArray.hpp>
 // #include <ray/gl/ShaderProgram.hpp>
-// #include <ray/gl/Texture.hpp>
+#include <ray/gl/Texture.hpp>
 // #include <cstdlib>
 
 using namespace ray::platform;
-// using namespace ray::gl;
+using namespace ray::gl;
 // using namespace ray::math;
 // using namespace ray::assets;
 // using namespace ray::components;
@@ -316,7 +316,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
-unsigned int loadTexture(const char *path);
 unsigned int loadCubemap(std::vector<std::string> faces);
 
 // settings
@@ -445,29 +444,32 @@ int main()
     };
 
     // cube VAO
-    unsigned int cubeVAO, cubeVBO;
-    glGenVertexArrays(1, &cubeVAO);
+    auto cubeVAO = VertexArray();
+    unsigned int cubeVBO;
     glGenBuffers(1, &cubeVBO);
-    glBindVertexArray(cubeVAO);
+    cubeVAO.bind();
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    cubeVAO.unbind();
+
     // skybox VAO
-    unsigned int skyboxVAO, skyboxVBO;
-    glGenVertexArrays(1, &skyboxVAO);
+    auto skyboxVAO = VertexArray();
+    unsigned int skyboxVBO;
     glGenBuffers(1, &skyboxVBO);
-    glBindVertexArray(skyboxVAO);
+    skyboxVAO.bind();
     glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    skyboxVAO.unbind();
 
     // load textures
     // -------------    
-    unsigned int cubeTexture = loadTexture("res/images/marble.jpg");
+    auto cubeTexture = Texture("res/images/marble.jpg");
 
     std::vector<std::string> faces
     {
@@ -516,11 +518,10 @@ int main()
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
         // cubes
-        glBindVertexArray(cubeVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, cubeTexture);
+        cubeVAO.bind();
+        cubeTexture.bind(GL_TEXTURE0);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
+        cubeVAO.unbind();
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
@@ -529,11 +530,11 @@ int main()
         skyboxShader.setMat4("view", view);
         skyboxShader.setMat4("projection", projection);
         // skybox cube
-        glBindVertexArray(skyboxVAO);
+        skyboxVAO.bind();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
+        skyboxVAO.unbind();
         glDepthFunc(GL_LESS); // set depth function back to default
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -544,10 +545,8 @@ int main()
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &cubeVAO);
-    glDeleteVertexArrays(1, &skyboxVAO);
     glDeleteBuffers(1, &cubeVBO);
-    glDeleteBuffers(1, &skyboxVAO);
+    glDeleteBuffers(1, &skyboxVBO);
 
     glfwTerminate();
     return 0;
@@ -597,44 +596,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     camera.ProcessMouseScroll(yoffset);
 }
 
-// utility function for loading a 2D texture from file
-// ---------------------------------------------------
-unsigned int loadTexture(char const * path)
-{
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data)
-    {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
-    }
-
-    return textureID;
-}
 
 // loads a cubemap texture from 6 individual texture faces
 // order:

@@ -70,6 +70,7 @@ namespace ray { namespace gl {
     private:
         static void create(GLuint &handle) { gl(GenBuffers(1, &handle)); }
         static void destroy(GLuint handle) { gl(DeleteBuffers(1, &handle)); }
+    public:
         gl::Handle<create, destroy> mHandle;
     };
 
