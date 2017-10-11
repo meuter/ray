@@ -209,11 +209,11 @@ enum Camera_Movement {
 };
 
 // Default camera values
-const float YAW        = -90.0f;
-const float PITCH      =  0.0f;
+const rad YAW        = -90_deg;
+const rad PITCH      =  0_deg;
+const rad ZOOM       =  45_deg;
+const rad SENSITIVTY =  0.1_deg;
 const float SPEED      =  2.5f;
-const float SENSITIVTY =  0.1f;
-const float ZOOM       =  45.0f;
 
 
 // An abstract camera class that processes input and calculates the corresponding Eular Angles, Vectors and Matrices for use in OpenGL
@@ -227,15 +227,15 @@ public:
     vec3 Right;
     vec3 WorldUp;
     // Eular Angles
-    float Yaw;
-    float Pitch;
+    rad Yaw;
+    rad Pitch;
     // Camera options
     float MovementSpeed;
     float MouseSensitivity;
-    float Zoom;
+    rad Zoom;
 
     // Constructor with vectors
-    Camera(const vec3 &position = vec3(0.0f, 0.0f, 0.0f), const vec3 &up = vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
+    Camera(const vec3 &position = vec3(0.0f, 0.0f, 0.0f), const vec3 &up = vec3(0.0f, 1.0f, 0.0f), rad yaw = YAW, rad pitch = PITCH) : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
     {
         Position = position;
         WorldUp = up;
@@ -244,7 +244,7 @@ public:
         updateCameraVectors();
     }
     // Constructor with scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
+    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, rad yaw, rad pitch) : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
     {
         Position = vec3(posX, posY, posZ);
         WorldUp = vec3(upX, upY, upZ);
@@ -312,9 +312,9 @@ private:
     {
         // Calculate the new Front vector
         vec3 front;
-        front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-        front.y = sin(glm::radians(Pitch));
-        front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+        front.x = cos(Yaw) * cos(Pitch);
+        front.y = sin(Pitch);
+        front.z = sin(Yaw) * cos(Pitch);
         Front = normalize(front);
         Right = normalize(cross(Front, WorldUp)); 
         Up    = normalize(cross(Right, Front));
@@ -507,7 +507,7 @@ int main()
         shader.use();
         glm::mat4 model;
         glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective((float)camera.Zoom, (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         shader.setMat4("model", model);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
