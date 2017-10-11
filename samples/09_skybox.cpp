@@ -15,7 +15,6 @@ using namespace gl;
 using namespace assets;
 using namespace components;
 
-// Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
     FORWARD,
     BACKWARD,
@@ -23,7 +22,6 @@ enum Camera_Movement {
     RIGHT
 };
 
-// Default camera values
 const rad YAW        = -90_deg;
 const rad PITCH      =  0_deg;
 const rad ZOOM       =  45_deg;
@@ -107,7 +105,6 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
 
-    // Constructor with vectors
     Camera(const vec3 &position = vec3(0.0f, 0.0f, 0.0f), const vec3 &up = vec3(0.0f, 1.0f, 0.0f), rad yaw = YAW, rad pitch = PITCH) : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
     {
         moveTo(position);
@@ -116,23 +113,12 @@ public:
         Pitch = pitch;
         updateCameraVectors();
     }
-    // Constructor with scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, rad yaw, rad pitch) : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
-    {
-        moveTo(posX, posY, posZ);
-        WorldUp = vec3(upX, upY, upZ);
-        Yaw = yaw;
-        Pitch = pitch;
-        updateCameraVectors();
-    }
 
-    // Returns the view matrix calculated using Eular Angles and the LookAt Matrix
     mat4 GetViewMatrix()
     {
         return lookAt(position(), position() + Front, Up);
     }
 
-    // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
     {
         float amount = MovementSpeed * deltaTime;
@@ -142,32 +128,21 @@ public:
         if (direction == RIGHT)    move(Right,  amount);
     }
 
-    // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     void ProcessMouseMovement(float xoffset, float yoffset)
     {
-        xoffset *= MouseSensitivity;
-        yoffset *= MouseSensitivity;
-
-        Yaw   += xoffset;
-
-        Pitch = clamp(-89_deg, Pitch+yoffset, 89_deg);
-
+        Yaw   = Yaw+xoffset*MouseSensitivity;
+        Pitch = clamp(-89_deg, Pitch+yoffset*MouseSensitivity, 89_deg);
         updateCameraVectors();
     }
 
-    // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void ProcessMouseScroll(float yoffset)
     {
-        if (Zoom >= 1_deg && Zoom <= 63_deg)
-            Zoom -= yoffset * PI_OVER_180;
-        Zoom = clamp(1_deg, Zoom, 63_deg);
+        Zoom = clamp(1_deg, Zoom - yoffset*PI_OVER_180, 63_deg);
     }
 
 private:
-    // Calculates the front vector from the Camera's (updated) Eular Angles
     void updateCameraVectors()
     {
-        // Calculate the new Front vector
         vec3 front;
         front.x = cos(Yaw) * cos(Pitch);
         front.y = sin(Pitch);
@@ -276,7 +251,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(const Window &window, float deltaTime);
 unsigned int loadCubemap(std::vector<std::string> faces);
 
-// camera
 Camera camera(vec3(0.0f, 0.0f, 3.0f));
 float lastX = (float)1920 / 2.0;
 float lastY = (float)1082 / 2.0;
@@ -284,8 +258,10 @@ bool firstMouse = true;
 
 int main()
 {
-    auto window = Window(1920, 1080, "Skybox");
-    auto loop   = GameLoop(window, 60);
+    auto window         = Window(1920, 1080, "Skybox");
+    auto loop           = GameLoop(window, 60);
+    auto cubeRenderer   = CubeRenderer();
+    auto skyboxRenderer = SkyboxRenderer();
 
     window.setCursorPosCallback(mouse_callback);
     window.setScrollCallback(scroll_callback);
@@ -293,8 +269,6 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    CubeRenderer cubeRenderer;
-    SkyboxRenderer skyboxRenderer;
 
     auto skyboxVBO = VertexBuffer<f32,3>{
         // positions          
@@ -359,7 +333,7 @@ int main()
         "res/images/skybox/back.jpg",
         "res/images/skybox/front.jpg",
     };
-    unsigned int cubemapTexture = loadCubemap(faces);
+    auto cubemapTexture = loadCubemap(faces);
 
     skyboxRenderer.mShader.start();
     skyboxRenderer.skybox = samplerCube{0};
@@ -408,14 +382,10 @@ int main()
     return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
 void processInput(const Window &window, float deltaTime)
 {
     if (window.isKeyPressed(Key::KEY_ESCAPE))
         window.setShouldClose(true);
-
-
     if (window.isKeyHeld(Key::KEY_UP))
         camera.ProcessKeyboard(FORWARD, deltaTime);
     if (window.isKeyHeld(Key::KEY_DOWN))
@@ -426,8 +396,6 @@ void processInput(const Window &window, float deltaTime)
         camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
-// glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     if (firstMouse)
@@ -438,7 +406,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset = lastY - ypos;
 
     lastX = xpos;
     lastY = ypos;
@@ -446,8 +414,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(yoffset);
