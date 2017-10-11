@@ -13,20 +13,10 @@
 using namespace ray;
 using namespace platform;
 using namespace math;
-// using namespace assets;
+using namespace gl;
+using namespace assets;
 // using namespace components;
 // using namespace entities;
-
-
-
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <stb_image.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 #include <vector>
@@ -34,21 +24,30 @@ using namespace math;
 #include <fstream>
 #include <sstream>
 
-glm::vec3 toGlm(const vec3 &v)
+
+mat4 myLookAt(vec3 const& eye, vec3 const& center, vec3 const& up)
 {
-    return glm::vec3(v.x, v.y, v.z);
+    vec3 const f(normalize(center - eye));
+    vec3 const s(normalize(cross(f, up)));
+    vec3 const u(cross(s, f));
+
+    mat4 Result = scaling(1.0f);
+    Result(0,0) = s.x;
+    Result(0,1) = s.y;
+    Result(0,2) = s.z;
+    Result(1,0) = u.x;
+    Result(1,1) = u.y;
+    Result(1,2) = u.z;
+    Result(2,0) =-f.x;
+    Result(2,1) =-f.y;
+    Result(2,2) =-f.z;
+    Result(0,3) =-dot(s, eye);
+    Result(1,3) =-dot(u, eye);
+    Result(2,3) = dot(f, eye);
+    return Result;
 }
 
-mat4 fromGlm(const glm::mat4 &m)
-{
-    mat4 result;
-    for(int i = 0; i < 4; ++i)
-        for(int j = 0; j < 4; ++j)
-            result(j,i) = m[i][j];
-    return result;
-}
-
-class SkyboxShader : public gl::ShaderProgram
+class SkyboxShader : public ShaderProgram
 {
     static constexpr auto VERTEX_SHADER = GLSL(330, 
         layout (location = 0) in vec3 aPos;
@@ -80,15 +79,15 @@ public:
     SkyboxShader() : ShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER) {
         projection = getUniform<mat4>("projection");
         view = getUniform<mat4>("view");
-        skybox = getUniform<gl::samplerCube>("skybox");
+        skybox = getUniform<samplerCube>("skybox");
     }
 
-    gl::Uniform<gl::samplerCube> skybox;
-    gl::Uniform<mat4> projection, view;
+    Uniform<samplerCube> skybox;
+    Uniform<mat4> projection, view;
 };
 
 
-class CubeShader : public gl::ShaderProgram
+class CubeShader : public ShaderProgram
 {
     static constexpr auto VERTEX_SHADER = GLSL(330, 
         layout (location = 0) in vec3 aPos;
@@ -119,11 +118,11 @@ public:
         projection = getUniform<mat4>("projection");
         view = getUniform<mat4>("view");
         model = getUniform<mat4>("model");
-        texture1 = getUniform<gl::sampler2D>("texture1");
+        texture1 = getUniform<sampler2D>("texture1");
     }
 
-    gl::Uniform<gl::sampler2D> texture1;
-    gl::Uniform<mat4> projection, view, model;
+    Uniform<sampler2D> texture1;
+    Uniform<mat4> projection, view, model;
 };
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
@@ -179,9 +178,9 @@ public:
     }
 
     // Returns the view matrix calculated using Eular Angles and the LookAt Matrix
-    glm::mat4 GetViewMatrix()
+    mat4 GetViewMatrix()
     {
-        return glm::lookAt(toGlm(Position), toGlm(Position + Front), toGlm(Up));
+        return myLookAt(Position, Position + Front, Up);
     }
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
@@ -284,7 +283,7 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    auto cubeVBO = gl::VertexBuffer<f32,5>{
+    auto cubeVBO = VertexBuffer<f32,5>{
         // positions          // texture Coords
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
          0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -328,7 +327,7 @@ int main()
         -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
-    auto skyboxVBO = gl::VertexBuffer<f32,3>{
+    auto skyboxVBO = VertexBuffer<f32,3>{
         // positions          
         -1.0f,  1.0f, -1.0f,
         -1.0f, -1.0f, -1.0f,
@@ -374,17 +373,17 @@ int main()
     };
 
     // cube VAO
-    auto cubeVAO = gl::VertexArray();
-    cubeVAO.bindAttributeAtOffset(0, gl::Attribute<vec3>(0), cubeVBO);
-    cubeVAO.bindAttributeAtOffset(3, gl::Attribute<vec3>(1), cubeVBO);
+    auto cubeVAO = VertexArray();
+    cubeVAO.bindAttributeAtOffset(0, Attribute<vec3>(0), cubeVBO);
+    cubeVAO.bindAttributeAtOffset(3, Attribute<vec3>(1), cubeVBO);
 
     // skybox VAO
-    auto skyboxVAO = gl::VertexArray();
-    skyboxVAO.bindAttribute(gl::Attribute<vec3>(0), skyboxVBO);
+    auto skyboxVAO = VertexArray();
+    skyboxVAO.bindAttribute(Attribute<vec3>(0), skyboxVBO);
 
     // load textures
     // -------------    
-    auto cubeTexture = gl::Texture("res/images/marble.jpg");
+    auto cubeTexture = Texture("res/images/marble.jpg");
 
     std::vector<std::string> faces
     {
@@ -400,10 +399,10 @@ int main()
     // shader configuration
     // --------------------
     shader.start();
-    shader.texture1 = gl::sampler2D{0};
+    shader.texture1 = sampler2D{0};
 
     skyboxShader.start();
-    skyboxShader.skybox = gl::samplerCube{0};
+    skyboxShader.skybox = samplerCube{0};
 
     // render loop
     // -----------
@@ -425,12 +424,12 @@ int main()
 
         // draw scene as normal
         shader.start();
-        glm::mat4 model;
-        glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective((float)camera.Zoom, window.aspectRatio(), 0.1f, 100.0f);
-        shader.model = fromGlm(model);
-        shader.view = fromGlm(view);
-        shader.projection = fromGlm(projection);
+        mat4 view = camera.GetViewMatrix();
+        auto projection = perspective(camera.Zoom, window.aspectRatio(), 0.1f, 100.0f);
+        
+        shader.model = scaling(1.0f);
+        shader.view = view;
+        shader.projection = projection;
         // cubes
         cubeVAO.bind();
         cubeTexture.bind(GL_TEXTURE0);
@@ -440,9 +439,15 @@ int main()
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
         skyboxShader.start();
-        view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
-        skyboxShader.view = fromGlm(view);
-        skyboxShader.projection = fromGlm(projection);
+        view(0,3) = 0;
+        view(1,3) = 0;
+        view(2,3) = 0;
+        view(4,3) = 1;
+        view(3,0) = 0;
+        view(3,1) = 0;
+        view(3,2) = 0;
+        skyboxShader.view = view;
+        skyboxShader.projection = projection;
         // skybox cube
         skyboxVAO.bind();
         glActiveTexture(GL_TEXTURE0);
@@ -519,17 +524,8 @@ unsigned int loadCubemap(std::vector<std::string> faces)
     int width, height, nrChannels;
     for (unsigned int i = 0; i < faces.size(); i++)
     {
-        unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-        if (data)
-        {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            stbi_image_free(data);
-        }
-        else
-        {
-            std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
-            stbi_image_free(data);
-        }
+        auto bitmap = Bitmap(faces[i]);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, bitmap.width(), bitmap.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, bitmap.pixels());
     }
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

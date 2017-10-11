@@ -60,6 +60,7 @@ namespace ray { namespace math {
 
     template<typename S> constexpr auto translation(const Vector3<S> &displacement) { return translation(displacement.x, displacement.y, displacement.z); }
     template<typename S> constexpr auto scaling(const Vector3<S> &scaleFactor)      { return scaling(scaleFactor.x, scaleFactor.y, scaleFactor.z); }
+    template<typename S> constexpr auto scaling(const Scalar<S> &scaleFactor)      { return scaling(scaleFactor, scaleFactor, scaleFactor); }
     template<typename S> constexpr auto rotation(const Quaternion<S> &orientation)  { return rotation(orientation.left(), orientation.up(), orientation.front()); }
     template<typename S> constexpr auto rotation(const Vector3<S> axis, rad angle)  { return rotation(Quaternion<S>(axis, angle)); }
     
