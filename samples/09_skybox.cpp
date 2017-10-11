@@ -96,6 +96,70 @@ private:
     Texture mTexture;
 };
 
+class Skybox : public VertexArray
+{
+public:
+    Skybox() 
+    {
+        mVertexBuffer.load({
+            // positions          
+            -1.0f,  1.0f, -1.0f,
+            -1.0f, -1.0f, -1.0f,
+             1.0f, -1.0f, -1.0f,
+             1.0f, -1.0f, -1.0f,
+             1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+    
+            -1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+    
+             1.0f, -1.0f, -1.0f,
+             1.0f, -1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f, -1.0f,
+             1.0f, -1.0f, -1.0f,
+    
+            -1.0f, -1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+    
+            -1.0f,  1.0f, -1.0f,
+             1.0f,  1.0f, -1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f, -1.0f,
+    
+            -1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+             1.0f, -1.0f, -1.0f,
+             1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+             1.0f, -1.0f,  1.0f
+        });
+    }
+
+    void draw() const
+    {
+        bind();
+        glDrawArrays(GL_TRIANGLES, 0, mVertexBuffer.vertexCount());
+        unbind();
+    }
+
+    void bindPosition(Attribute<vec3> position) const { bindAttributeAtOffset(0, position, mVertexBuffer);  }
+
+private:
+    VertexBuffer<f32,3> mVertexBuffer;
+};
+
 
 class Camera : public Movable, public Orientable
 {
@@ -156,10 +220,8 @@ private:
 class SkyboxRenderer 
 {
     static constexpr auto VERTEX_SHADER = GLSL(330, 
-        layout (location = 0) in vec3 vertPosition;
-        
+        in vec3 vertPosition;
         out vec3 TexCoords;
-        
         uniform mat4 projection;
         uniform mat4 view;
         
@@ -186,11 +248,13 @@ public:
         projection = mShader.getUniform<mat4>("projection");
         view = mShader.getUniform<mat4>("view");
         skybox = mShader.getUniform<samplerCube>("skybox");
+        position = mShader.getAttribute<vec3>("vertPosition");
     }
 
     ShaderProgram mShader;
     Uniform<samplerCube> skybox;
     Uniform<mat4> projection, view;
+    Attribute<vec3> position;
 };
 
 
@@ -245,16 +309,67 @@ public:
     Attribute<vec2> texCoord;
 };
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(const Window &window, float deltaTime);
-unsigned int loadCubemap(std::vector<std::string> faces);
-
 Camera camera(vec3(0.0f, 0.0f, 3.0f));
-float lastX = (float)1920 / 2.0;
-float lastY = (float)1082 / 2.0;
-bool firstMouse = true;
+
+void processInput(const Window &window, float deltaTime)
+{
+    if (window.isKeyHeld(Key::KEY_UP))
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (window.isKeyHeld(Key::KEY_DOWN))
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (window.isKeyHeld(Key::KEY_LEFT))
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (window.isKeyHeld(Key::KEY_RIGHT))
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    static float lastX = (float)1920 / 2.0;
+    static float lastY = (float)1082 / 2.0;
+    static bool firstMouse = true;
+    
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(yoffset);
+}
+
+unsigned int loadCubemap(std::vector<std::string> faces)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < faces.size(); i++)
+    {
+        auto bitmap = Bitmap(faces[i]);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, bitmap.width(), bitmap.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, bitmap.pixels());
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    return textureID;
+}
 
 int main()
 {
@@ -269,60 +384,12 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-
-    auto skyboxVBO = VertexBuffer<f32,3>{
-        // positions          
-        -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
-
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
-
-        -1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-        -1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f
-    };
-
-    // cube VAO
     auto cube = Cube("res/images/marble.jpg");
     cube.bindPosition(cubeRenderer.position);
     cube.bindTexCoord(cubeRenderer.texCoord);
 
-    // skybox VAO
-    auto skyboxVAO = VertexArray();
-    skyboxVAO.bindAttribute(Attribute<vec3>(0), skyboxVBO);
+    auto skyboxVAO = Skybox();
+    skyboxVAO.bindPosition(skyboxRenderer.position);
 
     std::vector<std::string> faces
     {
@@ -347,15 +414,13 @@ int main()
         auto view = camera.GetViewMatrix();
         auto projection = perspective(camera.Zoom, window.aspectRatio(), 0.1f, 100.0f);
 
-        // draw scene as normal
         cubeRenderer.render(cube); 
         cubeRenderer.texture = cube.texture().bind(GL_TEXTURE0) ;      
         cubeRenderer.viewMatrix = view;
         cubeRenderer.projection = projection;
         cube.draw();
 
-        // draw skybox as last
-        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+        glDepthFunc(GL_LEQUAL);
         skyboxRenderer.mShader.start();
         view(0,3) = 0;
         view(1,3) = 0;
@@ -366,14 +431,10 @@ int main()
         view(3,2) = 0;
         skyboxRenderer.view = view;
         skyboxRenderer.projection = projection;
-
-        // skybox cube
-        skyboxVAO.bind();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        skyboxVAO.unbind();
-        glDepthFunc(GL_LESS); // set depth function back to default
+        skyboxVAO.draw();
+        glDepthFunc(GL_LESS);
 
         if (loop.frameCount()%60 == 0)
             fprintln("average frame time = %1%msec", 1000*loop.averageFrameTime().count());
@@ -381,75 +442,6 @@ int main()
     
     return 0;
 }
-
-void processInput(const Window &window, float deltaTime)
-{
-    if (window.isKeyPressed(Key::KEY_ESCAPE))
-        window.setShouldClose(true);
-    if (window.isKeyHeld(Key::KEY_UP))
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (window.isKeyHeld(Key::KEY_DOWN))
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (window.isKeyHeld(Key::KEY_LEFT))
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (window.isKeyHeld(Key::KEY_RIGHT))
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-}
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos;
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
-}
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    camera.ProcessMouseScroll(yoffset);
-}
-
-
-// loads a cubemap texture from 6 individual texture faces
-// order:
-// +X (right)
-// -X (left)
-// +Y (top)
-// -Y (bottom)
-// +Z (front) 
-// -Z (back)
-// -------------------------------------------------------
-unsigned int loadCubemap(std::vector<std::string> faces)
-{
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-    int width, height, nrChannels;
-    for (unsigned int i = 0; i < faces.size(); i++)
-    {
-        auto bitmap = Bitmap(faces[i]);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, bitmap.width(), bitmap.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, bitmap.pixels());
-    }
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    return textureID;
-}
-
 
 // class Camera : public Movable, public Orientable
 // {
@@ -575,79 +567,3 @@ unsigned int loadCubemap(std::vector<std::string> faces)
 //     static void create(GLuint &handle) { gl(GenTextures(1, &handle)); }
 //     Handle<create, destroy> mHandle;
 // };
-
-
-
-// struct SkyBox : public VertexArray
-// {
-//     SkyBox(const char *textureDirectory) 
-//     {
-//         // mTexture.load(textureFilename);
-//         constexpr auto SIZE = 50;
-//         vbo.load({
-//             // Front face
-//             -SIZE, -SIZE,  SIZE,
-//              SIZE, -SIZE,  SIZE,
-//              SIZE,  SIZE,  SIZE,
-//              SIZE,  SIZE,  SIZE,
-//             -SIZE,  SIZE,  SIZE,
-//             -SIZE, -SIZE,  SIZE,
-
-//             // Back face
-//             -SIZE, -SIZE, -SIZE,
-//              SIZE, -SIZE, -SIZE,
-//              SIZE,  SIZE, -SIZE,
-//              SIZE,  SIZE, -SIZE,
-//             -SIZE,  SIZE, -SIZE,
-//             -SIZE, -SIZE, -SIZE,
-
-//             // Left face
-//             -SIZE,  SIZE, -SIZE,
-//             -SIZE,  SIZE,  SIZE,
-//             -SIZE, -SIZE,  SIZE,
-//             -SIZE, -SIZE,  SIZE,
-//             -SIZE, -SIZE, -SIZE,
-//             -SIZE,  SIZE, -SIZE,
-
-//             // Right face 
-//             SIZE,  SIZE, -SIZE,
-//             SIZE,  SIZE, +SIZE,
-//             SIZE, -SIZE, +SIZE,
-//             SIZE, -SIZE, +SIZE,
-//             SIZE, -SIZE, -SIZE,
-//             SIZE,  SIZE, -SIZE,
-
-//             // Bottom face
-//             -SIZE, -SIZE,  SIZE,
-//              SIZE, -SIZE,  SIZE,
-//              SIZE, -SIZE, -SIZE,
-//              SIZE, -SIZE, -SIZE,
-//             -SIZE, -SIZE, -SIZE,
-//             -SIZE, -SIZE, +SIZE,
-
-//             // Top face
-//             -SIZE,  SIZE, -SIZE, 
-//              SIZE,  SIZE, -SIZE,
-//              SIZE,  SIZE,  SIZE,
-//              SIZE,  SIZE,  SIZE,
-//             -SIZE,  SIZE,  SIZE,
-//             -SIZE,  SIZE, -SIZE,
-//         });        
-//     }
-
-//     void bindPosition(Attribute<vec3> position) const { bindAttributeAtOffset(0, position, vbo);  }
-
-//     const CubeMap &cubeMap() const { return mCubeMap; }
-    
-//     void draw() const
-//     {
-//         bind();
-//         glDrawArrays(GL_TRIANGLES, 0, vbo.vertexCount());
-//         unbind();
-//     }
-
-// private:    
-//     VertexBuffer<f32,3> vbo;
-//     CubeMap mCubeMap;
-// };
-
