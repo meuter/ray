@@ -8,7 +8,8 @@
 namespace ray { namespace gl {
     
     struct sampler2D { GLuint value; };        
-
+    struct samplerCube { GLuint value; };        
+    
     class Texture 
     {
     protected:
