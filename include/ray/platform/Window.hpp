@@ -35,10 +35,9 @@ namespace ray { namespace platform {
 
 
         friend class GLFW;
-    public:
         GLFWwindow *mHandle;
-    private:
         bool mShouldBeDestroyed;
+
         inline Window(GLFWwindow *handle, bool shouldBeDestroyed) : mHandle(handle), mShouldBeDestroyed(shouldBeDestroyed) 
         {
             makeContextCurrent();
@@ -140,7 +139,7 @@ namespace ray { namespace platform {
         inline GLFWmousebuttonfun setMouseButtonCallback(GLFWmousebuttonfun callback) const { return glfwSetMouseButtonCallback(mHandle, callback); }
         inline GLFWcursorposfun setCursorPosCallback(GLFWcursorposfun callback) const { return glfwSetCursorPosCallback(mHandle, callback); }
         inline GLFWcursorenterfun setCursorEnterCallback(GLFWcursorenterfun callback) const { return glfwSetCursorEnterCallback(mHandle, callback); }
-        inline GLFWscrollfun setScrollbackCallback(GLFWscrollfun callback) const { return glfwSetScrollCallback(mHandle, callback); }
+        inline GLFWscrollfun setScrollCallback(GLFWscrollfun callback) const { return glfwSetScrollCallback(mHandle, callback); }
         inline GLFWdropfun setDropCallback(GLFWdropfun callback ) const { return glfwSetDropCallback(mHandle, callback); }
         inline GLFWwindow *handle() const { return mHandle; }
 

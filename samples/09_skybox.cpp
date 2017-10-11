@@ -3,7 +3,7 @@
 // #include <ray/math/Transform.hpp>
 // #include <ray/entities/TransformableMesh.hpp>
 #include <ray/platform/Window.hpp>
-// #include <ray/platform/GameLoop.hpp>
+#include <ray/platform/GameLoop.hpp>
 // #include <ray/platform/FileSystem.hpp>
 #include <ray/gl/VertexArray.hpp>
 // #include <ray/gl/ShaderProgram.hpp>
@@ -324,17 +324,13 @@ private:
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
+void processInput(const Window &window);
 unsigned int loadCubemap(std::vector<std::string> faces);
-
-// settings
-const unsigned int SCR_WIDTH = 1280;
-const unsigned int SCR_HEIGHT = 720;
 
 // camera
 Camera camera(vec3(0.0f, 0.0f, 3.0f));
-float lastX = (float)SCR_WIDTH / 2.0;
-float lastY = (float)SCR_HEIGHT / 2.0;
+float lastX = (float)1920 / 2.0;
+float lastY = (float)1082 / 2.0;
 bool firstMouse = true;
 
 // timing
@@ -343,14 +339,14 @@ float lastFrame = 0.0f;
 
 int main()
 {
-    auto rayWindow = Window(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL");
-    auto window = rayWindow.mHandle;
+    auto window = Window(1920, 1080, "Skybox");
+    auto loop   = GameLoop(window, 60);
 
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
+    window.setCursorPosCallback(mouse_callback);
+    window.setScrollCallback(scroll_callback);
 
     // tell GLFW to capture our mouse
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    window.setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // configure global opengl state
     // -----------------------------
@@ -486,8 +482,7 @@ int main()
 
     // render loop
     // -----------
-    while (!rayWindow.shouldClose())
-    {
+    loop.run([&]() {
         // per-frame time logic
         // --------------------
         float currentFrame = glfwGetTime();
@@ -507,7 +502,7 @@ int main()
         shader.use();
         glm::mat4 model;
         glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective((float)camera.Zoom, (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective((float)camera.Zoom, window.aspectRatio(), 0.1f, 100.0f);
         shader.setMat4("model", model);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
@@ -530,30 +525,26 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 36);
         skyboxVAO.unbind();
         glDepthFunc(GL_LESS); // set depth function back to default
-
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
-        rayWindow.swapBuffers();
-        rayWindow.pollEvents();
-    }
+    });
+    
 
     return 0;
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
+void processInput(const Window &window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+    if (window.isKeyPressed(Key::KEY_ESCAPE))
+        window.setShouldClose(true);
 
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    if (window.isKeyHeld(Key::KEY_UP))
         camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    if (window.isKeyHeld(Key::KEY_DOWN))
         camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    if (window.isKeyHeld(Key::KEY_LEFT))
         camera.ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    if (window.isKeyHeld(Key::KEY_RIGHT))
         camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
