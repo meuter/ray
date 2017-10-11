@@ -1,26 +1,18 @@
-// #include <ray/components/Movable.hpp>
-// #include <ray/components/Orientable.hpp>
+#include <ray/components/Movable.hpp>
 #include <ray/math/Transform.hpp>
-// #include <ray/entities/TransformableMesh.hpp>
 #include <ray/platform/Window.hpp>
 #include <ray/platform/GameLoop.hpp>
 #include <ray/platform/Print.hpp>
-// #include <ray/platform/FileSystem.hpp>
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
-// #include <cstdlib>
 
 using namespace ray;
 using namespace platform;
 using namespace math;
 using namespace gl;
 using namespace assets;
-// using namespace components;
-// using namespace entities;
-
-#include <iostream>
-#include <vector>
+using namespace components;
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
@@ -106,10 +98,10 @@ private:
 };
 
 
-class Camera
+class Camera : public Movable
 {
 public:
-    vec3 Position, Front, Up, Right, WorldUp;
+    vec3 Front, Up, Right, WorldUp;
     rad Yaw, Pitch, Zoom;
     float MovementSpeed;
     float MouseSensitivity;
@@ -117,7 +109,7 @@ public:
     // Constructor with vectors
     Camera(const vec3 &position = vec3(0.0f, 0.0f, 0.0f), const vec3 &up = vec3(0.0f, 1.0f, 0.0f), rad yaw = YAW, rad pitch = PITCH) : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
     {
-        Position = position;
+        moveTo(position);
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
@@ -126,7 +118,7 @@ public:
     // Constructor with scalar values
     Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, rad yaw, rad pitch) : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
     {
-        Position = vec3(posX, posY, posZ);
+        moveTo(posX, posY, posZ);
         WorldUp = vec3(upX, upY, upZ);
         Yaw = yaw;
         Pitch = pitch;
@@ -136,22 +128,17 @@ public:
     // Returns the view matrix calculated using Eular Angles and the LookAt Matrix
     mat4 GetViewMatrix()
     {
-        return lookAt(Position, Position + Front, Up);
+        return lookAt(position(), position() + Front, Up);
     }
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
     {
-        println("deltaTime =", deltaTime);
-        float velocity = MovementSpeed * deltaTime;
-        if (direction == FORWARD)
-            Position += Front*velocity;
-        if (direction == BACKWARD)
-            Position -= Front*velocity;
-        if (direction == LEFT)
-            Position -= Right*velocity;
-        if (direction == RIGHT)
-            Position +=  Right*velocity;
+        float amount = MovementSpeed * deltaTime;
+        if (direction == FORWARD)  move(Front,  amount);
+        if (direction == BACKWARD) move(Front, -amount);
+        if (direction == LEFT)     move(Right, -amount);
+        if (direction == RIGHT)    move(Right,  amount);
     }
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
@@ -205,7 +192,7 @@ private:
 class SkyboxRenderer 
 {
     static constexpr auto VERTEX_SHADER = GLSL(330, 
-        layout (location = 0) in vec3 aPos;
+        layout (location = 0) in vec3 vertPosition;
         
         out vec3 TexCoords;
         
@@ -214,8 +201,8 @@ class SkyboxRenderer
         
         void main()
         {
-            TexCoords = aPos;
-            vec4 pos = projection * view * vec4(aPos, 1.0);
+            TexCoords = vertPosition;
+            vec4 pos = projection * view * vec4(vertPosition, 1.0);
             gl_Position = pos.xyww;
         }  
     );
@@ -246,39 +233,40 @@ public:
 class CubeRenderer 
 {
     static constexpr auto VERTEX_SHADER = GLSL(330, 
-        layout (location = 0) in vec3 aPos;
-        layout (location = 1) in vec2 aTexCoords;        
-        out vec2 TexCoords;
-        uniform mat4 model;
-        uniform mat4 view;
+        in vec3 vertPosition;
+        in vec2 vertTexCoord;        
+        out vec2 fragTexCoord;
+        uniform mat4 modelMatrix;
+        uniform mat4 viewMatrix;
         uniform mat4 projection;
         void main()
         {
-            TexCoords = aTexCoords;    
-            gl_Position = projection * view * model * vec4(aPos, 1.0);
+            fragTexCoord = vertTexCoord;    
+            gl_Position = projection * viewMatrix * modelMatrix * vec4(vertPosition, 1.0);
         }  
     );
     
     static constexpr auto FRAGMENT_SHADER = GLSL(330,
         out vec4 FragColor;        
-        in vec2 TexCoords;
-        uniform sampler2D texture1;
+        in vec2 fragTexCoord;
+        uniform sampler2D diffuseTexture;
         void main()
         {    
-            FragColor = texture(texture1, TexCoords);
+            FragColor = texture(diffuseTexture, fragTexCoord);
         }
     );
 
 public:
-    CubeRenderer() : mShader(VERTEX_SHADER, FRAGMENT_SHADER) {
+    CubeRenderer() : mShader(VERTEX_SHADER, FRAGMENT_SHADER) 
+    {
         projection = mShader.getUniform<mat4>("projection");
-        view = mShader.getUniform<mat4>("view");
-        model = mShader.getUniform<mat4>("model");
-        texture1 = mShader.getUniform<sampler2D>("texture1");
-        position = mShader.getAttribute<vec3>("aPos");
-        texCoord = mShader.getAttribute<vec2>("aTexCoords");
+        viewMatrix = mShader.getUniform<mat4>("viewMatrix");
+        modelMatrix = mShader.getUniform<mat4>("modelMatrix");
+        texture = mShader.getUniform<sampler2D>("diffuseTexture");
+        position = mShader.getAttribute<vec3>("vertPosition");
+        texCoord = mShader.getAttribute<vec2>("vertTexCoord");
 
-        model = scaling(1.0f);
+        modelMatrix.set(scaling(1.0f));
     }
 
     void render(const Cube &cube)
@@ -287,8 +275,8 @@ public:
     }
 
     ShaderProgram mShader;
-    Uniform<sampler2D> texture1;
-    Uniform<mat4> projection, view, model;
+    Uniform<sampler2D> texture;
+    Uniform<mat4> projection, viewMatrix, modelMatrix;
     Attribute<vec3> position;
     Attribute<vec2> texCoord;
 };
@@ -312,22 +300,13 @@ int main()
 
     window.setCursorPosCallback(mouse_callback);
     window.setScrollCallback(scroll_callback);
-
-    // tell GLFW to capture our mouse
     window.setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // configure global opengl state
-    // -----------------------------
     glEnable(GL_DEPTH_TEST);
 
-    // build and compile shaders
-    // -------------------------
     CubeRenderer cubeRenderer;
     SkyboxRenderer skyboxRenderer;
 
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-    
     auto skyboxVBO = VertexBuffer<f32,3>{
         // positions          
         -1.0f,  1.0f, -1.0f,
@@ -396,21 +375,19 @@ int main()
     skyboxRenderer.mShader.start();
     skyboxRenderer.skybox = samplerCube{0};
 
-    // render loop
-    // -----------
     loop.run([&]() {
 
         processInput(window, loop.dt().count());
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        mat4 view = camera.GetViewMatrix();
+        auto view = camera.GetViewMatrix();
         auto projection = perspective(camera.Zoom, window.aspectRatio(), 0.1f, 100.0f);
 
         // draw scene as normal
         cubeRenderer.render(cube); 
-        cubeRenderer.texture1 = cube.texture().bind(GL_TEXTURE0) ;      
-        cubeRenderer.view = view;
+        cubeRenderer.texture = cube.texture().bind(GL_TEXTURE0) ;      
+        cubeRenderer.viewMatrix = view;
         cubeRenderer.projection = projection;
         cube.draw();
 
@@ -426,6 +403,7 @@ int main()
         view(3,2) = 0;
         skyboxRenderer.view = view;
         skyboxRenderer.projection = projection;
+
         // skybox cube
         skyboxVAO.bind();
         glActiveTexture(GL_TEXTURE0);
@@ -433,9 +411,11 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 36);
         skyboxVAO.unbind();
         glDepthFunc(GL_LESS); // set depth function back to default
+
+        if (loop.frameCount()%60 == 0)
+            fprintln("average frame time = %1%msec", 1000*loop.averageFrameTime().count());
     });
     
-
     return 0;
 }
 
@@ -809,8 +789,6 @@ unsigned int loadCubemap(std::vector<std::string> faces)
 //     {   
 //          camera.update(window);
 //         renderer.render(camera, skybox);
-//         if (loop.frameCount()%60 == 0)
-//             fprintln("average frame time = %1%msec", 1000*loop.averageFrameTime().count());
 //     });
 
 //     return EXIT_SUCCESS;
