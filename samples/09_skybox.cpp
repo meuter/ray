@@ -34,6 +34,11 @@ using namespace ray::math;
 #include <fstream>
 #include <sstream>
 
+glm::vec3 toGlm(const vec3 &v)
+{
+    return glm::vec3(v.x, v.y, v.z);
+}
+
 class Shader
 {
 public:
@@ -211,7 +216,7 @@ class Camera
 {
 public:
     // Camera Attributes
-    glm::vec3 Position;
+    vec3 Position;
     glm::vec3 Front;
     glm::vec3 Up;
     glm::vec3 Right;
@@ -225,7 +230,7 @@ public:
     float Zoom;
 
     // Constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
+    Camera(const vec3 &position = vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
     {
         Position = position;
         WorldUp = up;
@@ -236,7 +241,7 @@ public:
     // Constructor with scalar values
     Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
     {
-        Position = glm::vec3(posX, posY, posZ);
+        Position = vec3(posX, posY, posZ);
         WorldUp = glm::vec3(upX, upY, upZ);
         Yaw = yaw;
         Pitch = pitch;
@@ -246,21 +251,29 @@ public:
     // Returns the view matrix calculated using Eular Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix()
     {
-        return glm::lookAt(Position, Position + Front, Up);
+        glm::vec3 glmPosition = toGlm(Position);
+
+        return glm::lookAt(glmPosition, glmPosition + Front, Up);
     }
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
     {
+        glm::vec3 glmPosition = toGlm(Position);
+
         float velocity = MovementSpeed * deltaTime;
         if (direction == FORWARD)
-            Position += Front * velocity;
+            glmPosition += Front * velocity;
         if (direction == BACKWARD)
-            Position -= Front * velocity;
+            glmPosition -= Front * velocity;
         if (direction == LEFT)
-            Position -= Right * velocity;
+            glmPosition -= Right * velocity;
         if (direction == RIGHT)
-            Position += Right * velocity;
+            glmPosition += Right * velocity;
+
+        Position.x = glmPosition.x;
+        Position.y = glmPosition.y;
+        Position.z = glmPosition.z;
     }
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
@@ -323,7 +336,7 @@ const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 720;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(vec3(0.0f, 0.0f, 3.0f));
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
