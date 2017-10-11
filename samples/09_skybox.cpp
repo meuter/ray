@@ -4,6 +4,7 @@
 // #include <ray/entities/TransformableMesh.hpp>
 #include <ray/platform/Window.hpp>
 #include <ray/platform/GameLoop.hpp>
+#include <ray/platform/Print.hpp>
 // #include <ray/platform/FileSystem.hpp>
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
@@ -20,87 +21,6 @@ using namespace assets;
 
 #include <iostream>
 #include <vector>
-#include <string>
-#include <fstream>
-#include <sstream>
-
-class SkyboxShader : public ShaderProgram
-{
-    static constexpr auto VERTEX_SHADER = GLSL(330, 
-        layout (location = 0) in vec3 aPos;
-        
-        out vec3 TexCoords;
-        
-        uniform mat4 projection;
-        uniform mat4 view;
-        
-        void main()
-        {
-            TexCoords = aPos;
-            vec4 pos = projection * view * vec4(aPos, 1.0);
-            gl_Position = pos.xyww;
-        }  
-    );
-    
-    static constexpr auto FRAGMENT_SHADER = GLSL(330,
-        out vec4 FragColor;
-        in vec3 TexCoords;
-        uniform samplerCube skybox;
-        void main()
-        {    
-            FragColor = texture(skybox, TexCoords);
-        }
-    );
-
-public:
-    SkyboxShader() : ShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER) {
-        projection = getUniform<mat4>("projection");
-        view = getUniform<mat4>("view");
-        skybox = getUniform<samplerCube>("skybox");
-    }
-
-    Uniform<samplerCube> skybox;
-    Uniform<mat4> projection, view;
-};
-
-
-class CubeShader : public ShaderProgram
-{
-    static constexpr auto VERTEX_SHADER = GLSL(330, 
-        layout (location = 0) in vec3 aPos;
-        layout (location = 1) in vec2 aTexCoords;        
-        out vec2 TexCoords;
-        uniform mat4 model;
-        uniform mat4 view;
-        uniform mat4 projection;
-        void main()
-        {
-            TexCoords = aTexCoords;    
-            gl_Position = projection * view * model * vec4(aPos, 1.0);
-        }  
-    );
-    
-    static constexpr auto FRAGMENT_SHADER = GLSL(330,
-        out vec4 FragColor;        
-        in vec2 TexCoords;
-        uniform sampler2D texture1;
-        void main()
-        {    
-            FragColor = texture(texture1, TexCoords);
-        }
-    );
-
-public:
-    CubeShader() : ShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER) {
-        projection = getUniform<mat4>("projection");
-        view = getUniform<mat4>("view");
-        model = getUniform<mat4>("model");
-        texture1 = getUniform<sampler2D>("texture1");
-    }
-
-    Uniform<sampler2D> texture1;
-    Uniform<mat4> projection, view, model;
-};
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
@@ -116,6 +36,74 @@ const rad PITCH      =  0_deg;
 const rad ZOOM       =  45_deg;
 const rad SENSITIVTY =  0.1_deg;
 const float SPEED      =  2.5f;
+
+class Cube : public VertexArray 
+{
+public:
+    Cube(const std::string &textureFilename) : mTexture(textureFilename)
+    {
+        mVertexBuffer.load({
+            // positions          // texture Coords
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+    
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+        });
+    }
+
+    void bindPosition(Attribute<vec3> position) const { bindAttributeAtOffset(0, position, mVertexBuffer);  }
+    void bindTexCoord(Attribute<vec2> texCoord) const { bindAttributeAtOffset(3, texCoord, mVertexBuffer);  }
+
+    const Texture &texture() const { return mTexture; }
+
+    void draw() const
+    {
+        bind();
+        glDrawArrays(GL_TRIANGLES, 0, mVertexBuffer.vertexCount());
+        unbind();
+    }
+
+private:
+    VertexBuffer<f32,5> mVertexBuffer;
+    Texture mTexture;
+};
 
 
 class Camera
@@ -154,6 +142,7 @@ public:
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
     {
+        println("deltaTime =", deltaTime);
         float velocity = MovementSpeed * deltaTime;
         if (direction == FORWARD)
             Position += Front*velocity;
@@ -213,10 +202,99 @@ private:
     }
 };
 
+class SkyboxRenderer 
+{
+    static constexpr auto VERTEX_SHADER = GLSL(330, 
+        layout (location = 0) in vec3 aPos;
+        
+        out vec3 TexCoords;
+        
+        uniform mat4 projection;
+        uniform mat4 view;
+        
+        void main()
+        {
+            TexCoords = aPos;
+            vec4 pos = projection * view * vec4(aPos, 1.0);
+            gl_Position = pos.xyww;
+        }  
+    );
+    
+    static constexpr auto FRAGMENT_SHADER = GLSL(330,
+        out vec4 FragColor;
+        in vec3 TexCoords;
+        uniform samplerCube skybox;
+        void main()
+        {    
+            FragColor = texture(skybox, TexCoords);
+        }
+    );
+
+public:
+    SkyboxRenderer() : mShader(VERTEX_SHADER, FRAGMENT_SHADER) {
+        projection = mShader.getUniform<mat4>("projection");
+        view = mShader.getUniform<mat4>("view");
+        skybox = mShader.getUniform<samplerCube>("skybox");
+    }
+
+    ShaderProgram mShader;
+    Uniform<samplerCube> skybox;
+    Uniform<mat4> projection, view;
+};
+
+
+class CubeRenderer 
+{
+    static constexpr auto VERTEX_SHADER = GLSL(330, 
+        layout (location = 0) in vec3 aPos;
+        layout (location = 1) in vec2 aTexCoords;        
+        out vec2 TexCoords;
+        uniform mat4 model;
+        uniform mat4 view;
+        uniform mat4 projection;
+        void main()
+        {
+            TexCoords = aTexCoords;    
+            gl_Position = projection * view * model * vec4(aPos, 1.0);
+        }  
+    );
+    
+    static constexpr auto FRAGMENT_SHADER = GLSL(330,
+        out vec4 FragColor;        
+        in vec2 TexCoords;
+        uniform sampler2D texture1;
+        void main()
+        {    
+            FragColor = texture(texture1, TexCoords);
+        }
+    );
+
+public:
+    CubeRenderer() : mShader(VERTEX_SHADER, FRAGMENT_SHADER) {
+        projection = mShader.getUniform<mat4>("projection");
+        view = mShader.getUniform<mat4>("view");
+        model = mShader.getUniform<mat4>("model");
+        texture1 = mShader.getUniform<sampler2D>("texture1");
+        position = mShader.getAttribute<vec3>("aPos");
+        texCoord = mShader.getAttribute<vec2>("aTexCoords");
+    }
+
+    void render(const VertexArray &cubeVAO, const Texture &texture)
+    {
+        mShader.start();
+    }
+
+    ShaderProgram mShader;
+    Uniform<sampler2D> texture1;
+    Uniform<mat4> projection, view, model;
+    Attribute<vec3> position;
+    Attribute<vec2> texCoord;
+};
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(const Window &window);
+void processInput(const Window &window, float deltaTime);
 unsigned int loadCubemap(std::vector<std::string> faces);
 
 // camera
@@ -224,10 +302,6 @@ Camera camera(vec3(0.0f, 0.0f, 3.0f));
 float lastX = (float)1920 / 2.0;
 float lastY = (float)1082 / 2.0;
 bool firstMouse = true;
-
-// timing
-float deltaTime = 0.0f;
-float lastFrame = 0.0f;
 
 int main()
 {
@@ -246,55 +320,12 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    CubeShader shader;
-    SkyboxShader skyboxShader;
+    CubeRenderer cubeRenderer;
+    SkyboxRenderer skyboxRenderer;
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    auto cubeVBO = VertexBuffer<f32,5>{
-        // positions          // texture Coords
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-    };
+    
     auto skyboxVBO = VertexBuffer<f32,3>{
         // positions          
         -1.0f,  1.0f, -1.0f,
@@ -341,17 +372,13 @@ int main()
     };
 
     // cube VAO
-    auto cubeVAO = VertexArray();
-    cubeVAO.bindAttributeAtOffset(0, Attribute<vec3>(0), cubeVBO);
-    cubeVAO.bindAttributeAtOffset(3, Attribute<vec3>(1), cubeVBO);
+    auto cubeVAO = Cube("res/images/marble.jpg");
+    cubeVAO.bindPosition(cubeRenderer.position);
+    cubeVAO.bindTexCoord(cubeRenderer.texCoord);
 
     // skybox VAO
     auto skyboxVAO = VertexArray();
     skyboxVAO.bindAttribute(Attribute<vec3>(0), skyboxVBO);
-
-    // load textures
-    // -------------    
-    auto cubeTexture = Texture("res/images/marble.jpg");
 
     std::vector<std::string> faces
     {
@@ -364,49 +391,38 @@ int main()
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
-    // shader configuration
+    // cubeRenderer configuration
     // --------------------
-    shader.start();
-    shader.texture1 = sampler2D{0};
+    cubeRenderer.mShader.start();
+    cubeRenderer.texture1 = sampler2D{0};
 
-    skyboxShader.start();
-    skyboxShader.skybox = samplerCube{0};
+    skyboxRenderer.mShader.start();
+    skyboxRenderer.skybox = samplerCube{0};
 
     // render loop
     // -----------
     loop.run([&]() {
-        // per-frame time logic
-        // --------------------
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
 
-        // input
-        // -----
-        processInput(window);
-
-        // render
-        // ------
+        processInput(window, loop.dt().count());
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // draw scene as normal
-        shader.start();
+        cubeRenderer.render(cubeVAO, cubeVAO.texture());
         mat4 view = camera.GetViewMatrix();
         auto projection = perspective(camera.Zoom, window.aspectRatio(), 0.1f, 100.0f);
         
-        shader.model = scaling(1.0f);
-        shader.view = view;
-        shader.projection = projection;
+        cubeRenderer.model = scaling(1.0f);
+        cubeRenderer.view = view;
+        cubeRenderer.projection = projection;
+
         // cubes
-        cubeVAO.bind();
-        cubeTexture.bind(GL_TEXTURE0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        cubeVAO.unbind();
+        cubeVAO.texture().bind(GL_TEXTURE0);
+        cubeVAO.draw();
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-        skyboxShader.start();
+        skyboxRenderer.mShader.start();
         view(0,3) = 0;
         view(1,3) = 0;
         view(2,3) = 0;
@@ -414,8 +430,8 @@ int main()
         view(3,0) = 0;
         view(3,1) = 0;
         view(3,2) = 0;
-        skyboxShader.view = view;
-        skyboxShader.projection = projection;
+        skyboxRenderer.view = view;
+        skyboxRenderer.projection = projection;
         // skybox cube
         skyboxVAO.bind();
         glActiveTexture(GL_TEXTURE0);
@@ -431,10 +447,11 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(const Window &window)
+void processInput(const Window &window, float deltaTime)
 {
     if (window.isKeyPressed(Key::KEY_ESCAPE))
         window.setShouldClose(true);
+
 
     if (window.isKeyHeld(Key::KEY_UP))
         camera.ProcessKeyboard(FORWARD, deltaTime);
