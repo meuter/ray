@@ -38,7 +38,6 @@ namespace ray { namespace gl {
     private:        
         static void destroy(GLuint handle) { gl(DeleteVertexArrays(1, &handle)); }
         static void create(GLuint &handle) { gl(GenVertexArrays(1, &handle)); }
-    public:
         Handle<create, destroy> mHandle;
     };
 
