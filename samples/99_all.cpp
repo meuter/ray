@@ -5,6 +5,7 @@
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
 #include <ray/entities/TransformableMesh.hpp>
+#include <ray/entities/Camera.hpp>
 #include <ray/components/Movable.hpp>
 #include <ray/assets/Font.hpp>
 #include <ray/components/TextureAtlas.hpp>
@@ -191,15 +192,17 @@ class MeshRenderer
 
         uniform mat4 modelMatrix;
         uniform mat4 projectionMatrix;
-        uniform vec3 lightPosition;  
+        uniform mat4 viewMatrix;
+        uniform vec3 lightPosition;
+        uniform vec3 cameraPosition;
 
         void main() 
         { 
             vec4 worldPosition = modelMatrix * vec4(vertPosition,1);
-            gl_Position = projectionMatrix * worldPosition;
+            gl_Position = projectionMatrix * viewMatrix * worldPosition;
             surfaceNormal = (modelMatrix * vec4(vertNormal, 0)).xyz;
             lightVector = lightPosition - worldPosition.xyz;
-            cameraVector = vec3(0,0,0) - worldPosition.xyz; 
+            cameraVector = cameraPosition - worldPosition.xyz; 
         }
     );
     
@@ -233,13 +236,13 @@ public:
         shader.load(VERTEX_SHADER, FRAGMENT_SHADER);    
         modelMatrix = shader.getUniform<mat4>("modelMatrix");
         projectionMatrix = shader.getUniform<mat4>("projectionMatrix");    
+        viewMatrix = shader.getUniform<mat4>("viewMatrix");    
         modelColor = shader.getUniform<vec4>("modelColor");
         lightColor = shader.getUniform<vec4>("lightColor");
         lightPosition = shader.getUniform<vec3>("lightPosition");
+        cameraPosition = shader.getUniform<vec3>("cameraPosition");
         reflectivity = shader.getUniform<float>("reflectivity");
         shineDamper = shader.getUniform<float>("shineDamper");
-
-        projectionMatrix = perspective(43_deg, window.aspectRatio(), 0.01f, 1000.0f);
         shader.stop();
     }
 
@@ -249,7 +252,7 @@ public:
         mesh.bindNormal(shader.getAttribute<vec3>("vertNormal"));
     }
 
-    void render(const TransformableMesh &mesh, const Material &material, const Light &light) const
+    void render(const TransformableMesh &mesh, const Material &material, const Light &light, const Camera &camera) const
     {
         shader.start();
         glEnable(GL_DEPTH_TEST);
@@ -259,6 +262,9 @@ public:
         shineDamper.set(material.shineDamper);
         lightColor.set(light.color);
         lightPosition.set(light.position());
+        cameraPosition.set(camera.position());
+        viewMatrix.set(camera.viewMatrix());
+        projectionMatrix.set(camera.projectionMatrix());
         mesh.draw();
         glDisable(GL_DEPTH_TEST);
         shader.stop();
@@ -266,9 +272,9 @@ public:
 
 private:
     ShaderProgram shader;
-    Uniform<mat4> modelMatrix, projectionMatrix;
+    Uniform<mat4> modelMatrix, projectionMatrix, viewMatrix;
     Uniform<vec4> modelColor, lightColor;
-    Uniform<vec3> lightPosition;
+    Uniform<vec3> lightPosition, cameraPosition;
     Uniform<float> reflectivity, shineDamper;
 };
 
@@ -282,10 +288,14 @@ int main()
     auto light    = Light(vec3(2,2,5), YELLOW);
     auto small    = CachedFont("res/fonts/Roboto-Regular.ttf", 30);
     auto texter   = TextRenderer();
+    auto camera   = Camera(43_deg, window.aspectRatio(), 0.001f, 1000.0f);
     
     mesh.moveTo(0,-0.8f,-3.5f);
 
     renderer.bind(mesh);
+
+    camera.moveTo(0.0f, 0.0f, 3.0f);
+    camera.rotate(vec3(0,1,0), 180_deg);
 
     glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
 
@@ -294,8 +304,10 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         auto fps = fmt("average frame time = %6.3fmsec", 1000*loop.averageFrameTime().count());
         
+        camera.update(window, loop.dt().count());
+
         texter.renderText(vec2(0,0), small, YELLOW, fps);
-        renderer.render(mesh, material, light);
+        renderer.render(mesh, material, light, camera);
         mesh.rotate(vec3(0,1,0), 2_deg);
     });
 
