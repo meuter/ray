@@ -88,7 +88,6 @@ private:
     CubeMap mCubeMap;
 };
 
-
 class SkyboxRenderer 
 {
     static constexpr auto VERTEX_SHADER = GLSL(330, 
@@ -121,7 +120,6 @@ public:
         projection = mShader.getUniform<mat4>("projection");
         view       = mShader.getUniform<mat4>("view");
         cubeMap    = mShader.getUniform<samplerCube>("cubeMap");
-
         position   = mShader.getAttribute<vec3>("vertPosition");
     }
 
@@ -155,13 +153,9 @@ int main()
 {
     auto window         = Window(1920, 1080, "Skybox");
     auto loop           = GameLoop(window, 60);
-    auto skyboxRenderer = SkyboxRenderer();
     auto camera         = Camera(45_deg, window.aspectRatio(), 0.001f, 1000.0f);
-
-    camera.moveTo(0.0f, 0.0f, 3.0f);
-    camera.rotate(vec3(0,1,0), 180_deg);
-
-    auto skybox = Skybox({
+    auto skyboxRenderer = SkyboxRenderer();
+    auto skybox         = Skybox({
         "res/images/skybox/right.jpg",
         "res/images/skybox/left.jpg",
         "res/images/skybox/top.jpg",
@@ -169,13 +163,15 @@ int main()
         "res/images/skybox/back.jpg",
         "res/images/skybox/front.jpg",
     });
+
     skyboxRenderer.bind(skybox);
 
-    loop.run([&]() {
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
+    loop.run([&]() 
+    {
         camera.update(window, loop.dt().count());
-
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         skyboxRenderer.render(camera, skybox);

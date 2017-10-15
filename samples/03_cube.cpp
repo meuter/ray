@@ -64,8 +64,6 @@ public:
     
     void render(const Cube &cube)
     {
-        glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader.start();
         glEnable(GL_DEPTH_TEST);
         texture.set(cube.texture().bind(GL_TEXTURE0));
@@ -93,8 +91,11 @@ int main()
 
     window.swapInterval(1);
 
+    glClearColor(0.0f, 0.2f, 0.2f, 0.0f);    
+
     while (!window.shouldClose())
     {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderer.render(cube);
         cube.update();
 
