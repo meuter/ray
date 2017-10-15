@@ -242,11 +242,6 @@ public:
     Attribute<vec2> texCoord;
 };
 
-// void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-// {
-//     camera.ProcessMouseScroll(yoffset);
-// }
-
 unsigned int loadCubemap(std::vector<std::string> faces)
 {
     unsigned int textureID;
@@ -276,14 +271,8 @@ int main()
     auto skyboxRenderer = SkyboxRenderer();
     auto camera         = Camera(45_deg, window.aspectRatio(), 0.001f, 1000.0f);
 
-    // window.setCursorPosCallback(mouse_callback);
-    // window.setScrollCallback(scroll_callback);
-    // window.setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-
     camera.moveTo(0.0f, 0.0f, 3.0f);
     camera.rotate(vec3(0,1,0), 180_deg);
-
 
     glEnable(GL_DEPTH_TEST);
 
@@ -291,8 +280,8 @@ int main()
     cube.bindPosition(cubeRenderer.position);
     cube.bindTexCoord(cubeRenderer.texCoord);
 
-    auto skyboxVAO = Skybox();
-    skyboxVAO.bindPosition(skyboxRenderer.position);
+    auto skybox = Skybox();
+    skybox.bindPosition(skyboxRenderer.position);
 
     std::vector<std::string> faces
     {
@@ -336,7 +325,7 @@ int main()
         skyboxRenderer.projection = camera.projectionMatrix();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-        skyboxVAO.draw();
+        skybox.draw();
         glDepthFunc(GL_LESS);
 
         if (loop.frameCount()%60 == 0)
