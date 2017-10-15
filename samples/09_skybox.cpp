@@ -150,89 +150,6 @@ private:
 };
 
 
-// class Camera : public Movable, public Orientable
-// {
-//     rad mFieldOfView;    
-//     mat4 mProjection, mView;
-//     float mMovementSpeed, mMouseSensitivity;
-// public:
-
-//     Camera(rad fov, float aspect, float near, float far) : mFieldOfView(fov), mMovementSpeed(2.5f), mMouseSensitivity(0.001f)
-//     {
-//         mProjection = perspective(fov, aspect, near, far);
-//         mView = lookAt(position(), position() + front(), up());
-//     }
-
-//     const mat4 &view() const       { return mView; }
-//     const mat4 &projection() const { return mProjection; }
-
-//     void update(const Window &window, float dt)
-//     {        
-//         auto moved = moveUsingKeyboard(window, dt);
-//         auto looked = lookUsingMouse(window);
-//         auto zoomed = zoomUsingScrollWheel(window);
-
-//         if (moved || looked) mView = lookAt(position(), position() + front(), up());
-//         if (zoomed)          mProjection = perspective(mFieldOfView, window.aspectRatio(),  0.1f, 100.0f);        
-//     }
-
-// private:
-//     bool moveUsingKeyboard(const Window &window, float dt)
-//     {
-//         float amount = mMovementSpeed * dt;
-//         if (amount)
-//         {
-//             if (window.isKeyHeld(Key::KEY_UP))        move(front(), amount);
-//             if (window.isKeyHeld(Key::KEY_DOWN))      move(back(),  amount);
-//             if (window.isKeyHeld(Key::KEY_LEFT))      move(left(),  amount);
-//             if (window.isKeyHeld(Key::KEY_RIGHT))     move(right(), amount);
-//             if (window.isKeyHeld(Key::KEY_PAGE_UP))   move(up(),    amount);
-//             if (window.isKeyHeld(Key::KEY_PAGE_DOWN)) move(down(),  amount);            
-//             return true;
-//         }
-//         return false;
-//     }
-
-//     bool lookUsingMouse(const Window &window)
-//     {
-//         static dvec2 lastCursorPos;
-
-//         if (window.isMouseButtonReleased(MouseButton::BUTTON_LEFT))
-//         {
-//             window.showMouseCursor();		
-//         }
-//         else if (window.isMouseButtonPressed(MouseButton::BUTTON_LEFT))
-//         {
-//             window.disableMouseCursor();
-//             window.getCursorPosition(lastCursorPos.x, lastCursorPos.y);
-//         }
-//         else if (window.isMouseButtonHeld(MouseButton::BUTTON_LEFT))
-//         {
-//             auto newPos = dvec2();
-//             window.getCursorPosition(newPos.x, newPos.y);
-//             auto dpos = lastCursorPos - newPos;
-//             lastCursorPos = newPos;
-//             if (dpos.x != 0) rotate(vec3(0,1,0), mMouseSensitivity * dpos.x);
-//             if (dpos.y != 0) rotate(left(), -mMouseSensitivity * dpos.y);
-//             return (dpos.x != 0) || (dpos.y != 0);
-//         }
-
-//         return false;
-//     }    
-
-//     bool zoomUsingScrollWheel(const Window &window)
-//     {
-//         double xOffset, yOffset;
-//         window.getScrollOffsets(xOffset, yOffset);
-//         if (yOffset)
-//         {
-//             mFieldOfView = clamp(10_deg, mFieldOfView - yOffset*PI_OVER_180, 90_deg);        
-//             return true;
-//         }
-//         return false;
-//     }
-// };
-
 class SkyboxRenderer 
 {
     static constexpr auto VERTEX_SHADER = GLSL(330, 
@@ -398,12 +315,12 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        auto view = camera.view();
+        auto view = camera.viewMatrix();
 
         cubeRenderer.render(cube); 
         cubeRenderer.texture = cube.texture().bind(GL_TEXTURE0) ;      
         cubeRenderer.viewMatrix = view;
-        cubeRenderer.projection = camera.projection();
+        cubeRenderer.projection = camera.projectionMatrix();
         cube.draw();
 
         glDepthFunc(GL_LEQUAL);
@@ -416,7 +333,7 @@ int main()
         view(3,1) = 0;
         view(3,2) = 0;
         skyboxRenderer.view = view;
-        skyboxRenderer.projection = camera.projection();
+        skyboxRenderer.projection = camera.projectionMatrix();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         skyboxVAO.draw();

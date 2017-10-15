@@ -1,5 +1,6 @@
 #include <ray/components/Movable.hpp>
 #include <ray/components/Orientable.hpp>
+#include <ray/entities/Camera.hpp>
 #include <ray/math/Transform.hpp>
 #include <ray/entities/TransformableMesh.hpp>
 #include <ray/platform/Window.hpp>
@@ -16,71 +17,6 @@ using namespace ray::math;
 using namespace ray::assets;
 using namespace ray::components;
 using namespace ray::entities;
-
-
-class Camera : public Movable, public Orientable
-{
-public:
-    Camera(rad fovy, float aspect, float n, float f) : Orientable(0,0,-1), mProjectionMatrix(perspective(fovy, aspect, n, f)) {}
-
-    mat4 projectionMatrix() const  { return mProjectionMatrix; }
-
-    mat4 viewMatrix() const 
-    {
-        // NOTE(cme): HACK!! This does what I want, by I cannot understand why from a math pov
-        auto displacement = position();
-        displacement.y = -displacement.y;
-        // should be displacement = -mPosition;
-        // END HACK 
-
-        auto inverseTranslation = translation(displacement);
-        auto inverseRotation = rotation(conjugate(orientation()));
-
-        return  inverseRotation * inverseTranslation;
-    }
-
-    void update(const Window &window)
-    {
-        moveUsingKeyboard(window);        
-        lookUsingMouse(window);
-    }
-
-    void lookUsingMouse(const Window &window, float sensitivity=0.001f)
-    {
-        static dvec2 lastCursorPos;
-        if (window.isMouseButtonReleased(MouseButton::BUTTON_LEFT))
-        {
-            window.showMouseCursor();		
-        }
-        else if (window.isMouseButtonPressed(MouseButton::BUTTON_LEFT))
-        {
-            window.disableMouseCursor();
-            window.getCursorPosition(lastCursorPos.x, lastCursorPos.y);
-        }
-        else if (window.isMouseButtonHeld(MouseButton::BUTTON_LEFT))
-        {
-            auto newPos = dvec2();
-            window.getCursorPosition(newPos.x, newPos.y);
-            auto dpos = lastCursorPos - newPos;
-            lastCursorPos = newPos;
-            if (dpos.x != 0) rotate(vec3(0,1,0), sensitivity * dpos.x);
-            if (dpos.y != 0) rotate(left(), sensitivity * dpos.y);
-        }
-    }
-
-    void moveUsingKeyboard(const Window &window, float speed=0.1f)
-    {
-        if (window.isKeyHeld(Key::KEY_UP))        move(front(), speed);
-        if (window.isKeyHeld(Key::KEY_DOWN))      move(back(), speed);
-        if (window.isKeyHeld(Key::KEY_LEFT))      move(left(), speed);
-        if (window.isKeyHeld(Key::KEY_RIGHT))     move(right(), speed);
-        if (window.isKeyHeld(Key::KEY_PAGE_UP))   move(up(), speed);
-        if (window.isKeyHeld(Key::KEY_PAGE_DOWN)) move(down(), speed);
-    }
-
-private:
-    mat4 mProjectionMatrix;
-};
 
 class MeshRenderer
 {
@@ -163,7 +99,7 @@ int main()
 
     loop.run([&]() 
     {   
-        camera.update(window);
+        camera.update(window, loop.dt().count());
         renderer.render(camera, mesh);
         if (loop.frameCount()%60 == 0)
             fprintln("average frame time = %1%msec", 1000*loop.averageFrameTime().count());

@@ -30,8 +30,8 @@ namespace ray { namespace entities {
             mView = lookAt(position(), position() + front(), up());
         }
     
-        const mat4 &view() const       { return mView; }
-        const mat4 &projection() const { return mProjection; }
+        const mat4 &viewMatrix()       const { return mView; }
+        const mat4 &projectionMatrix() const { return mProjection; }
     
         void update(const Window &window, float dt)
         {        
@@ -90,7 +90,7 @@ namespace ray { namespace entities {
         bool zoomUsingScrollWheel(const Window &window)
         {
             using namespace math;
-            
+
             double xOffset, yOffset;
             window.getScrollOffsets(xOffset, yOffset);
             if (yOffset)
