@@ -15,7 +15,8 @@ namespace ray { namespace gl {
         template<> struct ScalarType<math::vec3> { using type = math::f32; }; 
         template<> struct ScalarType<math::vec4> { using type = math::f32; }; 
         template<> struct ScalarType<math::mat4> { using type = math::f32; }; 
-        template<> struct ScalarType<sampler2D>  { using type = math::u32; }; 
+        template<> struct ScalarType<sampler<GL_TEXTURE_2D>>        { using type = math::u32; }; 
+        template<> struct ScalarType<sampler<GL_TEXTURE_CUBE_MAP>>  { using type = math::u32; }; 
     }
 
     template<typename V>

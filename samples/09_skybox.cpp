@@ -8,6 +8,7 @@
 #include <ray/platform/Print.hpp>
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
+#include <ray/gl/CubeMap.hpp>
 #include <ray/gl/Texture.hpp>
 
 using namespace ray;
@@ -17,67 +18,6 @@ using namespace gl;
 using namespace assets;
 using namespace components;
 using namespace entities;
-
-class CubeMap 
-{
-public:
-    CubeMap(const std::vector<std::string> &faces) { load(faces); }
-
-    samplerCube bind(GLuint slotIndex=GL_TEXTURE0) const
-    {
-        glActiveTexture(slotIndex);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, mHandle);
-        return samplerCube{GL_TEXTURE0-slotIndex};
-    }
-
-    void setSwizzle(GLint r, GLint g, GLint b, GLint a) const
-    {
-        bind();
-        GLint swizzleMask[] = { r, g, b, a };
-        gl(TexParameteriv(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask));
-    }
-
-    void loadFace(int target, const std::string filename)
-    {
-        auto bitmap = Bitmap(filename);
-        switch(bitmap.depth())
-        {
-            case 3:
-                gl(TexImage2D(target, 0, GL_RGB, bitmap.width(), bitmap.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, bitmap.pixels()));
-                setSwizzle(GL_RED, GL_GREEN, GL_BLUE, GL_ONE);
-                break;
-            case 4:   
-                gl(TexImage2D(target, 0, GL_RGBA, bitmap.width(), bitmap.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.pixels()));
-                setSwizzle(GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA);
-                break;
-            default:
-                panic("unexpected number of channels '%d'", bitmap.depth());
-        }
-    }
-
-    void load(const std::vector<std::string> &faces)
-    {
-        bind();
-    
-        loadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_X, faces[0]);
-        loadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, faces[1]);
-        loadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, faces[2]);
-        loadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, faces[3]);
-        loadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, faces[4]);
-        loadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, faces[5]);
-
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    }
-
-private:
-    static void destroy(GLuint handle) { gl(DeleteTextures(1, &handle)); }
-    static void create(GLuint &handle) { gl(GenTextures(1, &handle)); }
-    Handle<create, destroy> mHandle;
-};
 
 class Skybox : public Cube
 {
