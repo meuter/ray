@@ -77,6 +77,13 @@ namespace ray { namespace platform {
                 glViewport(0,0,w,h);
             });
 
+            mScrollOffsetX = mScrollOffsetY = 0;
+            setScrollCallback([](GLFWwindow *w, double xOffset, double yOffset) {
+                auto &window = self(w);
+                window.mScrollOffsetX = xOffset;
+                window.mScrollOffsetY = yOffset;
+            });
+
             int width, height;
             glfwGetWindowSize(mHandle, &width, &height);
             int frameBufferWidth, frameBufferHeight;
@@ -125,6 +132,7 @@ namespace ray { namespace platform {
         inline void setCursorPosition(double x, double y) const { return glfwSetCursorPos(mHandle, x, y); }
         inline void makeContextCurrent() const { glfwMakeContextCurrent(mHandle); }
         inline void swapBuffers() const { glfwSwapBuffers(mHandle); }
+        inline void getScrollOffsets(double &x, double &y) const { x = mScrollOffsetX; y = mScrollOffsetY; }
         
         inline GLFWwindowposfun setPositionCallback(GLFWwindowposfun callback) const { return glfwSetWindowPosCallback(mHandle, callback); }
         inline GLFWwindowsizefun setSizeCallback(GLFWwindowsizefun callback) const { return glfwSetWindowSizeCallback(mHandle, callback); }
@@ -169,11 +177,13 @@ namespace ray { namespace platform {
             mIsKeyReleased.reset();
             mIsMouseButtonPressed.reset();
             mIsMouseButtonReleased.reset();
+            mScrollOffsetX = mScrollOffsetY = 0;
             GLFW::getInstance().pollEvents();
         }
     private:
         std::bitset<static_cast<size_t>(Key::KEY_LAST)> mIsKeyPressed, mIsKeyReleased, mIsKeyHeld;
         std::bitset<static_cast<size_t>(MouseButton::BUTTON_LAST)> mIsMouseButtonPressed, mIsMouseButtonReleased, mIsMouseButtonHeld;
+        double mScrollOffsetX, mScrollOffsetY;
     };
 
 }}

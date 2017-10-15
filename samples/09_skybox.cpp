@@ -1,3 +1,4 @@
+#include <ray/entities/Camera.hpp>
 #include <ray/components/Movable.hpp>
 #include <ray/components/Orientable.hpp>
 #include <ray/math/Transform.hpp>
@@ -14,19 +15,7 @@ using namespace math;
 using namespace gl;
 using namespace assets;
 using namespace components;
-
-enum Camera_Movement {
-    FORWARD,
-    BACKWARD,
-    LEFT,
-    RIGHT
-};
-
-const rad YAW        = -90_deg;
-const rad PITCH      =  0_deg;
-const rad ZOOM       =  45_deg;
-const rad SENSITIVTY =  0.1_deg;
-const float SPEED      =  2.5f;
+using namespace entities;
 
 class Cube : public VertexArray 
 {
@@ -161,74 +150,88 @@ private:
 };
 
 
-class Camera : public Movable, public Orientable
-{
-public:
-    vec3 Front, Up, Right, WorldUp;
-    rad Yaw, Pitch, Zoom;
-    float MovementSpeed;
-    float MouseSensitivity;
-    mat4 mProjection;
+// class Camera : public Movable, public Orientable
+// {
+//     rad mFieldOfView;    
+//     mat4 mProjection, mView;
+//     float mMovementSpeed, mMouseSensitivity;
+// public:
 
-    Camera(const vec3 &position = vec3(0.0f, 0.0f, 0.0f), const vec3 &up = vec3(0.0f, 1.0f, 0.0f), rad yaw = YAW, rad pitch = PITCH) : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
-    {
-        moveTo(position);
-        WorldUp = up;
-        Yaw = yaw;
-        Pitch = pitch;
-        mProjection = scaling(1.0f);
-        updateCameraVectors();
-    }
+//     Camera(rad fov, float aspect, float near, float far) : mFieldOfView(fov), mMovementSpeed(2.5f), mMouseSensitivity(0.001f)
+//     {
+//         mProjection = perspective(fov, aspect, near, far);
+//         mView = lookAt(position(), position() + front(), up());
+//     }
 
-    void update(const Window &window, float dt)
-    {
-        mProjection = perspective(Zoom, window.aspectRatio(),  0.1f, 100.0f);
-        moveUsingKeyboard(window, dt);
-    }
+//     const mat4 &view() const       { return mView; }
+//     const mat4 &projection() const { return mProjection; }
 
-    void moveUsingKeyboard(const Window &window, float dt)
-    {
-        float amount = MovementSpeed * dt;
-        if (window.isKeyHeld(Key::KEY_UP))      move(Front,  amount);
-        if (window.isKeyHeld(Key::KEY_DOWN))    move(Front, -amount);
-        if (window.isKeyHeld(Key::KEY_LEFT))    move(Right, -amount);
-        if (window.isKeyHeld(Key::KEY_RIGHT))   move(Right,  amount);
-    }
+//     void update(const Window &window, float dt)
+//     {        
+//         auto moved = moveUsingKeyboard(window, dt);
+//         auto looked = lookUsingMouse(window);
+//         auto zoomed = zoomUsingScrollWheel(window);
 
-    mat4 view() const
-    {
-        return lookAt(position(), position() + Front, Up);
-    }
+//         if (moved || looked) mView = lookAt(position(), position() + front(), up());
+//         if (zoomed)          mProjection = perspective(mFieldOfView, window.aspectRatio(),  0.1f, 100.0f);        
+//     }
 
-    const mat4 &projection() const
-    {
-        return mProjection;
-    }
+// private:
+//     bool moveUsingKeyboard(const Window &window, float dt)
+//     {
+//         float amount = mMovementSpeed * dt;
+//         if (amount)
+//         {
+//             if (window.isKeyHeld(Key::KEY_UP))        move(front(), amount);
+//             if (window.isKeyHeld(Key::KEY_DOWN))      move(back(),  amount);
+//             if (window.isKeyHeld(Key::KEY_LEFT))      move(left(),  amount);
+//             if (window.isKeyHeld(Key::KEY_RIGHT))     move(right(), amount);
+//             if (window.isKeyHeld(Key::KEY_PAGE_UP))   move(up(),    amount);
+//             if (window.isKeyHeld(Key::KEY_PAGE_DOWN)) move(down(),  amount);            
+//             return true;
+//         }
+//         return false;
+//     }
 
-    void ProcessMouseMovement(float xoffset, float yoffset)
-    {
-        Yaw   = Yaw+xoffset*MouseSensitivity;
-        Pitch = clamp(-89_deg, Pitch+yoffset*MouseSensitivity, 89_deg);
-        updateCameraVectors();
-    }
+//     bool lookUsingMouse(const Window &window)
+//     {
+//         static dvec2 lastCursorPos;
 
-    void ProcessMouseScroll(float yoffset)
-    {
-        Zoom = clamp(1_deg, Zoom - yoffset*PI_OVER_180, 63_deg);
-    }
+//         if (window.isMouseButtonReleased(MouseButton::BUTTON_LEFT))
+//         {
+//             window.showMouseCursor();		
+//         }
+//         else if (window.isMouseButtonPressed(MouseButton::BUTTON_LEFT))
+//         {
+//             window.disableMouseCursor();
+//             window.getCursorPosition(lastCursorPos.x, lastCursorPos.y);
+//         }
+//         else if (window.isMouseButtonHeld(MouseButton::BUTTON_LEFT))
+//         {
+//             auto newPos = dvec2();
+//             window.getCursorPosition(newPos.x, newPos.y);
+//             auto dpos = lastCursorPos - newPos;
+//             lastCursorPos = newPos;
+//             if (dpos.x != 0) rotate(vec3(0,1,0), mMouseSensitivity * dpos.x);
+//             if (dpos.y != 0) rotate(left(), -mMouseSensitivity * dpos.y);
+//             return (dpos.x != 0) || (dpos.y != 0);
+//         }
 
-private:
-    void updateCameraVectors()
-    {
-        vec3 front;
-        front.x = cos(Yaw) * cos(Pitch);
-        front.y = sin(Pitch);
-        front.z = sin(Yaw) * cos(Pitch);
-        Front = normalize(front);
-        Right = normalize(cross(Front, WorldUp)); 
-        Up    = normalize(cross(Right, Front));
-    }
-};
+//         return false;
+//     }    
+
+//     bool zoomUsingScrollWheel(const Window &window)
+//     {
+//         double xOffset, yOffset;
+//         window.getScrollOffsets(xOffset, yOffset);
+//         if (yOffset)
+//         {
+//             mFieldOfView = clamp(10_deg, mFieldOfView - yOffset*PI_OVER_180, 90_deg);        
+//             return true;
+//         }
+//         return false;
+//     }
+// };
 
 class SkyboxRenderer 
 {
@@ -322,34 +325,10 @@ public:
     Attribute<vec2> texCoord;
 };
 
-Camera camera(vec3(0.0f, 0.0f, 3.0f));
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    static float lastX = (float)1920 / 2.0;
-    static float lastY = (float)1082 / 2.0;
-    static bool firstMouse = true;
-    
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos;
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
-}
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    camera.ProcessMouseScroll(yoffset);
-}
+// void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+// {
+//     camera.ProcessMouseScroll(yoffset);
+// }
 
 unsigned int loadCubemap(std::vector<std::string> faces)
 {
@@ -378,10 +357,16 @@ int main()
     auto loop           = GameLoop(window, 60);
     auto cubeRenderer   = CubeRenderer();
     auto skyboxRenderer = SkyboxRenderer();
+    auto camera         = Camera(45_deg, window.aspectRatio(), 0.001f, 1000.0f);
 
-    window.setCursorPosCallback(mouse_callback);
-    window.setScrollCallback(scroll_callback);
-    window.setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // window.setCursorPosCallback(mouse_callback);
+    // window.setScrollCallback(scroll_callback);
+    // window.setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+
+    camera.moveTo(0.0f, 0.0f, 3.0f);
+    camera.rotate(vec3(0,1,0), 180_deg);
+
 
     glEnable(GL_DEPTH_TEST);
 
@@ -443,29 +428,6 @@ int main()
     
     return 0;
 }
-
-//     void lookUsingMouse(const Window &window, float sensitivity=0.001f)
-//     {
-//         static dvec2 lastCursorPos;
-//         if (window.isMouseButtonReleased(MouseButton::BUTTON_LEFT))
-//         {
-//             window.showMouseCursor();		
-//         }
-//         else if (window.isMouseButtonPressed(MouseButton::BUTTON_LEFT))
-//         {
-//             window.disableMouseCursor();
-//             window.getCursorPosition(lastCursorPos.x, lastCursorPos.y);
-//         }
-//         else if (window.isMouseButtonHeld(MouseButton::BUTTON_LEFT))
-//         {
-//             auto newPos = dvec2();
-//             window.getCursorPosition(newPos.x, newPos.y);
-//             auto dpos = lastCursorPos - newPos;
-//             lastCursorPos = newPos;
-//             if (dpos.x != 0) rotate(vec3(0,1,0), sensitivity * dpos.x);
-//             if (dpos.y != 0) rotate(left(), sensitivity * dpos.y);
-//         }
-//     }
 
 // class CubeMap
 // {
