@@ -31,8 +31,8 @@ namespace ray { namespace platform {
             {
                 mStopwatch.lap();            
                 {
-                    doOneFrame();
                     mWindow.pollEvents();
+                    doOneFrame();
                     mWindow.swapBuffers();        
                 }
                 mFrameTime = mStopwatch.lap();

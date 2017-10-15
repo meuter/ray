@@ -81,7 +81,7 @@ namespace ray { namespace entities {
                 lastCursorPos = newPos;
                 if (dpos.x != 0) rotate(vec3(0,1,0), mMouseSensitivity * dpos.x);
                 if (dpos.y != 0) rotate(left(), -mMouseSensitivity * dpos.y);
-                return (dpos.x != 0) || (dpos.y != 0);
+                return true;
             }
     
             return false;
