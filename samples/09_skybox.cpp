@@ -79,16 +79,6 @@ private:
     Handle<create, destroy> mHandle;
 };
 
-class TexturedCube : public Cube 
-{
-public:
-    TexturedCube(const std::string &textureFilename) : mTexture(textureFilename) {}
-    const Texture &texture() const { return mTexture; }
-private:
-    VertexBuffer<f32,5> mVertexBuffer;
-    Texture mTexture;
-};
-
 class Skybox : public Cube
 {
 public:
@@ -126,11 +116,13 @@ class SkyboxRenderer
     );
 
 public:
-    SkyboxRenderer() : mShader(VERTEX_SHADER, FRAGMENT_SHADER) {
+    SkyboxRenderer() : mShader(VERTEX_SHADER, FRAGMENT_SHADER) 
+    {
         projection = mShader.getUniform<mat4>("projection");
-        view = mShader.getUniform<mat4>("view");
-        cubeMap = mShader.getUniform<samplerCube>("cubeMap");
-        position = mShader.getAttribute<vec3>("vertPosition");
+        view       = mShader.getUniform<mat4>("view");
+        cubeMap    = mShader.getUniform<samplerCube>("cubeMap");
+
+        position   = mShader.getAttribute<vec3>("vertPosition");
     }
 
     void bind(const Skybox &skybox)
@@ -140,13 +132,16 @@ public:
 
     void render(const Camera &camera, const Skybox &skybox)
     {
-        glDepthFunc(GL_LEQUAL);
         mShader.start();
+        glEnable(GL_DEPTH_TEST);        
+        glDepthFunc(GL_LEQUAL);
         view.set(stripTranslation(camera.viewMatrix()));
         projection.set(camera.projectionMatrix());
         cubeMap.set(skybox.cubeMap().bind(GL_TEXTURE0));
         skybox.draw();
         glDepthFunc(GL_LESS);
+        glDisable(GL_DEPTH_TEST);        
+        mShader.stop();
     }
 
 private:
@@ -156,85 +151,15 @@ private:
     Attribute<vec3> position;    
 };
 
-
-class CubeRenderer 
-{
-    static constexpr auto VERTEX_SHADER = GLSL(330, 
-        in vec3 vertPosition;
-        in vec2 vertTexCoord;        
-        out vec2 fragTexCoord;
-        uniform mat4 modelMatrix;
-        uniform mat4 viewMatrix;
-        uniform mat4 projection;
-        void main()
-        {
-            fragTexCoord = vertTexCoord;    
-            gl_Position = projection * viewMatrix * modelMatrix * vec4(vertPosition, 1.0);
-        }  
-    );
-    
-    static constexpr auto FRAGMENT_SHADER = GLSL(330,
-        out vec4 FragColor;        
-        in vec2 fragTexCoord;
-        uniform sampler2D diffuseTexture;
-        void main()
-        {    
-            FragColor = texture(diffuseTexture, fragTexCoord);
-        }
-    );
-
-public:
-    CubeRenderer() : mShader(VERTEX_SHADER, FRAGMENT_SHADER) 
-    {
-        projection = mShader.getUniform<mat4>("projection");
-        viewMatrix = mShader.getUniform<mat4>("viewMatrix");
-        modelMatrix = mShader.getUniform<mat4>("modelMatrix");
-        texture = mShader.getUniform<sampler2D>("diffuseTexture");
-        position = mShader.getAttribute<vec3>("vertPosition");
-        texCoord = mShader.getAttribute<vec2>("vertTexCoord");
-
-        modelMatrix.set(scaling(1.0f));
-    }
-
-    void bind(const TexturedCube &cube)
-    {
-        cube.bindPosition(position);
-        cube.bindTexCoord(texCoord);    
-    }
-
-    void render(const Camera &camera, const TexturedCube &cube)
-    {
-        mShader.start();
-        texture.set(cube.texture().bind(GL_TEXTURE0));
-        viewMatrix.set(camera.viewMatrix());
-        projection.set(camera.projectionMatrix());
-        cube.draw();
-    }
-
-private:
-    ShaderProgram mShader;
-    Uniform<sampler2D> texture;
-    Uniform<mat4> projection, viewMatrix, modelMatrix;
-    Attribute<vec3> position;
-    Attribute<vec2> texCoord;
-};
-
-
 int main()
 {
     auto window         = Window(1920, 1080, "Skybox");
     auto loop           = GameLoop(window, 60);
-    auto cubeRenderer   = CubeRenderer();
     auto skyboxRenderer = SkyboxRenderer();
     auto camera         = Camera(45_deg, window.aspectRatio(), 0.001f, 1000.0f);
 
     camera.moveTo(0.0f, 0.0f, 3.0f);
     camera.rotate(vec3(0,1,0), 180_deg);
-
-    glEnable(GL_DEPTH_TEST);
-
-    auto cube = TexturedCube("res/images/marble.jpg");
-    cubeRenderer.bind(cube);
 
     auto skybox = Skybox({
         "res/images/skybox/right.jpg",
@@ -253,7 +178,6 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        cubeRenderer.render(camera, cube); 
         skyboxRenderer.render(camera, skybox);
 
         if (loop.frameCount()%60 == 0)

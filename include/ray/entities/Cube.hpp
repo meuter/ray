@@ -6,6 +6,7 @@ namespace ray { namespace entities {
 
     class Cube : public gl::VertexArray 
     {
+    protected:
         using vec3 = math::vec3;
         using vec2 = math::vec2;
     public:

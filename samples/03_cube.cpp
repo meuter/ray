@@ -1,4 +1,5 @@
 #include <ray/platform/Window.hpp>
+#include <ray/entities/Cube.hpp>
 #include <ray/gl/VertexArray.hpp>
 #include <ray/gl/ShaderProgram.hpp>
 #include <ray/gl/Texture.hpp>
@@ -10,85 +11,12 @@ using namespace ray::gl;
 using namespace ray::math;
 using namespace ray::components;
 
-struct Cube : public VertexArray, public Transformable
+struct Cube : public ray::entities::Cube, public Transformable
 {
-    Cube(const char *textureFilename) 
-    {
-        mTexture.load(textureFilename);
-        vbo.load({
-            ////////////////////////////////////////////////////////////
-            // Position             TexCoord        Normal    
-            ////////////////////////////////////////////////////////////
-            // Front face
-            -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f, 1.0f,
-             0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     0.0f,  0.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     0.0f,  0.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f,    0.0f, 1.0f,     0.0f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f, 1.0f,
-
-            // Back face
-            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     0.0f,  0.0f, -1.0f,
-             0.5f, -0.5f, -0.5f,    1.0f, 0.0f,     0.0f,  0.0f, -1.0f,
-             0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f, -1.0f,
-             0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f, -1.0f,
-            -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f, -1.0f,
-            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     0.0f,  0.0f, -1.0f,
-
-            // Left face
-            -0.5f,  0.5f, -0.5f,    1.0f, 0.0f,     1.0f,  0.0f,  0.0f,
-            -0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f,  0.5f,    0.0f, 1.0f,     1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f,  0.5f,    0.0f, 1.0f,     1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     1.0f,  0.0f,  0.0f,
-            -0.5f,  0.5f, -0.5f,    1.0f, 0.0f,     1.0f,  0.0f,  0.0f,
-
-            // Right face 
-            0.5f,  0.5f, -0.5f,     1.0f, 0.0f,     -1.0f,  0.0f,  0.0f,
-            0.5f,  0.5f, +0.5f,     1.0f, 1.0f,     -1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f, +0.5f,     0.0f, 1.0f,     -1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f, +0.5f,     0.0f, 1.0f,     -1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f, -0.5f,     0.0f, 0.0f,     -1.0f,  0.0f,  0.0f,
-            0.5f,  0.5f, -0.5f,     1.0f, 0.0f,     -1.0f,  0.0f,  0.0f,
-
-            // Bottom face
-            -0.5f, -0.5f,  0.5f,    0.0f, 1.0f,     0.0f, 1.0f,  0.0f,
-             0.5f, -0.5f,  0.5f,    1.0f, 1.0f,     0.0f, 1.0f,  0.0f,
-             0.5f, -0.5f, -0.5f,    1.0f, 0.0f,     0.0f, 1.0f,  0.0f,
-             0.5f, -0.5f, -0.5f,    1.0f, 0.0f,     0.0f, 1.0f,  0.0f,
-            -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     0.0f, 1.0f,  0.0f,
-            -0.5f, -0.5f, +0.5f,    0.0f, 1.0f,     0.0f, 1.0f,  0.0f,
-
-            // Top face
-            -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  -1.0f,  0.0f,
-             0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  -1.0f,  0.0f,
-             0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  -1.0f,  0.0f,
-             0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  -1.0f,  0.0f,
-            -0.5f,  0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  -1.0f,  0.0f,
-            -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  -1.0f,  0.0f
-        });        
-        moveTo(0,0,-3);
-    }
-
-    void bindPosition(Attribute<vec3> position) const { bindAttributeAtOffset(0, position, vbo);  }
-    void bindTexCoord(Attribute<vec2> texCoord) const { bindAttributeAtOffset(3, texCoord, vbo);  }
-    void bindNormal(Attribute<vec3> normal)     const { bindAttributeAtOffset(5, normal, vbo);    }
+    Cube(const char *textureFilename) : mTexture(textureFilename) { moveTo(0,0,-3); }
     const Texture &texture() const { return mTexture; }
-    
-    void draw() const
-    {
-        bind();
-        glDrawArrays(GL_TRIANGLES, 0, vbo.vertexCount());
-        unbind();
-    }
-
-    void update() 
-    {
-        rotate(vec3(1,0,0), 2_deg);
-    }
-
+    void update() { rotate(vec3(1,0,0), 2_deg); }
 private:    
-    VertexBuffer<f32,8> vbo;
     Texture mTexture;
 };
 
@@ -125,7 +53,6 @@ public:
         texture = shader.getUniform<sampler2D>("diffuseTexture");
         modelMatrix = shader.getUniform<mat4>("modelMatrix");
         projectionMatrix = shader.getUniform<mat4>("projectionMatrix");    
-
         projectionMatrix = perspective(43_deg, window.aspectRatio(), 0.01f, 1000.0f);        
     }
 
