@@ -40,6 +40,8 @@ namespace ray { namespace platform {
 
         inline Window(GLFWwindow *handle, bool shouldBeDestroyed) : mHandle(handle), mShouldBeDestroyed(shouldBeDestroyed) 
         {
+            hide();
+
             makeContextCurrent();
             gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
             swapInterval(0);
@@ -94,7 +96,13 @@ namespace ray { namespace platform {
             float yScale = (float)frameBufferWidth/winWidth;
             setSize(width/xScale,height/yScale);
             glViewport(0, 0, width, height); 
+
+            const auto vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());    
+            setPosition((vidmode->width - width/xScale) / 2, (vidmode->height - height/yScale) / 2);
+
+            show();
         }
+
     public:
         inline Window(int width, int height, const std::string &title, const Window &share) : Window(GLFW::getInstance().createWindow(width, height, title, nullptr, share.mHandle), true) {}
         inline Window(int width, int height, const std::string &title) : Window(GLFW::getInstance().createWindow(width, height, title, nullptr, nullptr), true) {}
