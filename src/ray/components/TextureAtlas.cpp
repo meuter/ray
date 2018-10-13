@@ -2,6 +2,8 @@
 
 using namespace ray::math;
 
+#undef max
+
 namespace ray { namespace components {
 
     TextureAtlas::TextureAtlas(int depth) : mCursor{1,1}, mNextY(1)

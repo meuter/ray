@@ -14,7 +14,7 @@ namespace ray { namespace components {
     public:
         TextureAtlas(int depth);
         TextureAtlas(int width, int height, int depth) : Texture(width, height, depth, Color(0)), mCursor{1,1}, mNextY(1) {}
-        TextureAtlas(const TextureAtlas &&other) = delete;
+        TextureAtlas(const TextureAtlas &other) = delete;
         TextureAtlas(TextureAtlas &&other) = default;
     
         TextureAtlas &operator=(const TextureAtlas &other) = delete;

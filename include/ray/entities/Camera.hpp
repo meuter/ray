@@ -7,6 +7,11 @@
 #include <ray/platform/Inputs.hpp>
 #include <ray/math/Transform.hpp>
 
+#ifdef WIN32
+#undef near
+#undef far
+#endif
+
 namespace ray { namespace entities {
 
     class Camera : public components::Movable, public components::Orientable

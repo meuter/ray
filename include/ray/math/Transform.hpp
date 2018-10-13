@@ -5,6 +5,11 @@
 #include <ray/math/Matrix.hpp>
 #include <ray/math/Trigonometry.hpp>
 
+#ifdef WIN32
+#undef near
+#undef far
+#endif
+
 namespace ray { namespace math {
 
     template<typename S>

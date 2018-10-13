@@ -10,3 +10,6 @@
 [submodule "contrib/tinyobjloader"]
 	path = contrib/tinyobjloader
 	url = https://github.com/syoyo/tinyobjloader.git
+[submodule "contrib/boost-cmake"]
+	path = contrib/boost-cmake
+	url = https://github.com/Orphis/boost-cmake.git

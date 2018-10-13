@@ -3,15 +3,21 @@ cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_CXX_STANDARD 14)
 
+###### setup compiler flags
+if (WIN32)
+    add_compile_options(-nologo -W3 -DNOMINMAX -D_CRT_SECURE_NO_DEPRECATE -wd4101 -wd4996 -wd4146 -wd4244 -wd4267)
+else()
+    add_compile_options(-Wall -Wextra -pedantic -Wno-unused -Wno-unused-parameter)
+    add_compile_options(-Wno-newline-eof -Wno-gnu-zero-variadic-macro-arguments)
+endif()
+
+
 ###### Boost
-find_package(Boost COMPONENTS system filesystem REQUIRED)
+add_subdirectory(contrib/boost-cmake)
 add_library(boost INTERFACE)
-target_include_directories(boost INTERFACE ${Boost_FILESYSTEM_INCLUDE_DIRS})
-target_link_libraries(boost
-INTERFACE
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-)
+target_include_directories(boost INTERFACE Boost::filesystem Boost::system)
+target_link_libraries(boost INTERFACE Boost::filesystem Boost::system)
+
 
 ###### OpenGL
 find_package(OpenGL REQUIRED)
@@ -29,7 +35,7 @@ target_include_directories(glad PUBLIC contrib/glfw/deps/)
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE contrib/stb)
 
-######
+###### TinyOBJLoader
 add_subdirectory(contrib/tinyobjloader)
 
 
