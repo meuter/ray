@@ -15,3 +15,5 @@ add_sample(08_text)
 add_sample(09_skybox)
 add_sample(10_framebuffer)
 add_sample(99_all)
+
+add_subdirectory(windows)
