@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 14)
 if (WIN32)
     add_compile_options(-nologo -W3 -DNOMINMAX -D_CRT_SECURE_NO_DEPRECATE -wd4101 -wd4996 -wd4146 -wd4244 -wd4267)
 else()
-    add_compile_options(-Wall -Wextra -pedantic -Wno-unused -Wno-unused-parameter)
+    add_compile_options(-Wall -Wextra -Wno-unused -Wno-unused-parameter)
     add_compile_options(-Wno-newline-eof -Wno-gnu-zero-variadic-macro-arguments)
 endif()
 
