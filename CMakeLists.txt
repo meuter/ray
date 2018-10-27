@@ -18,7 +18,6 @@ add_library(boost INTERFACE)
 target_include_directories(boost INTERFACE Boost::filesystem Boost::system)
 target_link_libraries(boost INTERFACE Boost::filesystem Boost::system)
 
-
 ###### OpenGL
 find_package(OpenGL REQUIRED)
 
@@ -38,7 +37,6 @@ target_include_directories(stb INTERFACE contrib/stb)
 ###### TinyOBJLoader
 add_subdirectory(contrib/tinyobjloader)
 
-
 ###### Ray
 add_library(ray 
     src/ray/assets/Bitmap.cpp
@@ -55,5 +53,6 @@ add_subdirectory(samples)
 
 ###### Tests
 enable_testing()
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(contrib/googletest)
 add_subdirectory(test)
