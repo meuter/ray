@@ -5,6 +5,8 @@ templates:
     os: windows
     before_script:
       - export PATH="/c/Program Files/CMake/bin":$PATH
+    install:
+      - choco install directx
 
   linux: &linux
     addons:
