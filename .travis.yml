@@ -14,6 +14,7 @@ templates:
         sources:
           - kubuntu-backports
           - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-4.0
           - llvm-toolchain-trusty-5.0
           - llvm-toolchain-trusty-6.0
           - llvm-toolchain-trusty-7
