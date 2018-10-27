@@ -12,7 +12,6 @@ templates:
         sources:
           - kubuntu-backports
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-4.0
           - llvm-toolchain-trusty-5.0
           - llvm-toolchain-trusty-6.0
           - llvm-toolchain-trusty-7
@@ -27,8 +26,6 @@ templates:
           - mesa-common-dev
           - libboost-dev
           - libboost-filesystem-dev
-          - g++-4.9
-          - gcc-4.9
           - g++-5
           - gcc-5 
           - g++-6
@@ -48,9 +45,6 @@ matrix:
     ###########################################################################
     # GCC on Linux 
     ###########################################################################
-    - env: GENERATOR="Unix Makefiles" CXX=g++-4.9 CC=gcc-4.9
-      <<: *linux
-
     - env: GENERATOR="Unix Makefiles" CXX=g++-5 CC=gcc-5
       <<: *linux
       
