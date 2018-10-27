@@ -1,83 +1,94 @@
-language: cpp
+language: bash
+
+templates:
+  windows: &windows
+    os: windows
+    before_script:
+      - export PATH="/c/Program Files/CMake/bin":$PATH
+
+  linux: &linux
+    addons:
+      apt:
+        sources:
+          - kubuntu-backports
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-5.0            
+        packages:
+          - cmake
+          - libxrandr-dev
+          - libxinerama-dev
+          - libxcursor-dev
+          - libxi-dev
+          - libglu1-mesa-dev
+          - freeglut3-dev
+          - mesa-common-dev
+          - libboost-dev
+          - libboost-filesystem-dev
 
 matrix:
   include:  
 
-    ## Linux(Trusty) - GCC-5 - Debug
-    - os: linux
-      dist: trusty
-      compiler: gcc
-      addons: &1
-        apt:
-          sources:
-            - kubuntu-backports
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0            
-          packages:
-            - cmake
-            - libxrandr-dev
-            - libxinerama-dev
-            - libxcursor-dev
-            - libxi-dev
-            - libglu1-mesa-dev
-            - freeglut3-dev
-            - mesa-common-dev
-            - libboost-dev
-            - libboost-filesystem-dev
-            - g++-5
-            - clang-5.0
-      env: MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && BUILD_TYPE=Debug"
+    ###########################################################################
+    # GCC on Linux 
+    ###########################################################################
+    - env: GENERATOR="Unix Makefiles" CXX=g++-5 && CC=gcc-5 
+      <<: *linux
+      
+    ###########################################################################
+    # GCC on Linux 
+    ###########################################################################
+    - env: GENERATOR="Unix Makefiles" CXX=clang++-5.0 CC=clang-5.0
+      <<: *linux      
 
-    ## Linux(Trusty) - GCC-5 - Release
-    - os: linux
-      dist: trusty
-      compiler: gcc
-      addons: *1
-      env: MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && BUILD_TYPE=Release"
+    ###########################################################################
+    # MSVC on Windows
+    ###########################################################################
+    - env: GENERATOR="Visual Studio 15 2017 Win64"
+      <<: *windows
 
-    ## Linux(Trusty) - CLANG-5 - Release
-    - os: linux
-      dist: trusty
-      compiler: clang
-      addons: *1
-      env: MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0 && BUILT_TYPE=Release"
+    - env: GENERATOR="Visual Studio 15 2017"
+      <<: *windows
 
-    ## Linux(Trusty) - CLANG-5 - Debug
-    - os: linux
-      dist: trusty
-      compiler: clang
-      addons: *1
-      env: MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0 && BUILT_TYPE=Debug"
+    ###########################################################################
+    # Clang on OSX
+    ###########################################################################
+    - env: GENERATOR="Unix Makefiles" CXX=clang++ CC=clang
+      os: osx
+      osx_image: xcode10
 
-    ## Windows
-    - os: windows
-      env: MATRIX_EVAL="BUILT_TYPE=Release"
+    - env: GENERATOR="Unix Makefiles" CXX=clang++ CC=clang
+      os: osx
+      osx_image: xcode9.4
 
-    ## Windows
-    - os: windows
-      env: MATRIX_EVAL="BUILT_TYPE=Debug"
-
-    ## OSX - XCode 8 - Release
-    - os: osx
-      osx_image: xcode8
-      env: MATRIX_EVAL="BUILD_TYPE=Release"
-
-    ## OSX - XCode 8 - Debug
-    - os: osx
-      osx_image: xcode8
-      env: MATRIX_EVAL="BUILD_TYPE=Debug"
-
-before_install:
-  - eval "${MATRIX_EVAL}"
-
-before_script:
-  - mkdir -p build
-  - cd build  
-  - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DGLFW_BUILD_EXAMPLES=0 -DGLFW_BUILD_TESTS=0 ..
+    - env: GENERATOR="Unix Makefiles" CXX=clang++ CC=clang
+      os: osx
+      osx_image: xcode8.3
 
 script:
-  - cmake --build . -- -j10
-  - ctest -j10 -C ${BUILD_TYPE} --output-on-failure
+  ###########################################################################
+  # Common flags
+  ###########################################################################
+  - export CMAKE_FLAGS="-DGLFW_BUILD_EXAMPLES=0 -DGLFW_BUILD_TESTS=0"
+
+  ###########################################################################
+  # Debug
+  ###########################################################################
+  - mkdir -p build/Debug
+  - cd build/Debug
+  - cmake -G "${GENERATOR}" ${CMAKE_FLAGS} -DCMAKE_BUILD_TYPE=Debug ../../
+  - cmake --build . --config Debug
+  - ctest --output-on-failure
+  - cd ../..
+
+  ###########################################################################
+  # Release
+  ###########################################################################
+  - mkdir -p build/Release
+  - cd build/Release
+  - cmake -G "${GENERATOR}" ${CMAKE_FLAGS} -DCMAKE_BUILD_TYPE=Release ../../
+  - cmake --build . --config Release
+  - ctest --output-on-failure
+  - cd ../..
 
 notifications:
   email: false
