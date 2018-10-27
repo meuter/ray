@@ -19,7 +19,7 @@ namespace ray { namespace platform {
     public:
 
         GameLoop(Window &window, fps targetFPS, bool vSync=true) 
-            : mWindow(window), mFrameTimesSum(1_sec), mTargetFPS(targetFPS), mFrameCount(0), mLastFrameTimeIndex(0)
+            : mWindow(window), mFrameTimesSum(1_sec), mFrameCount(0), mTargetFPS(targetFPS), mLastFrameTimeIndex(0)
         {
             window.swapInterval(vSync ? 1 : 0);
             mFrameTimes.resize(targetFPS, 1_sec/mTargetFPS);            
