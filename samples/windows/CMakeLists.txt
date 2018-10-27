@@ -1,7 +1,7 @@
 if(WIN32)
     add_library(directx INTERFACE)
     target_include_directories(directx INTERFACE "C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Include")
-    if(NOT CMAKE_CL_64)
+    if(CMAKE_CL_64)
         link_directories("C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Lib\\x64")
     else()
         link_directories("C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Lib\\x86")
