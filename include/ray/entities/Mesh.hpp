@@ -45,8 +45,8 @@ namespace ray { namespace entities {
             mVertexBuffer.unmap();
 
             // TODO(cme): if there are no texture, load default white
-            for (int material = 0; material < object.materialCount(); ++material)
-                mDiffuseTextures.push_back(gl::Texture(object.getDiffuseTextureFilename(material)));
+            for (size_t material = 0; material < object.materialCount(); ++material)
+                mDiffuseTextures.push_back(gl::Texture(object.getDiffuseTextureFilename((int)material)));
         }
         
         void draw() const
