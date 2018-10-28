@@ -26,7 +26,7 @@ using uvec2 = Vector2<u32>;
 #define TEST_VECTOR2_STRUCTURE(vec, scalar, s1, s2)\
     TEST(vec, isPod) { EXPECT_TRUE(std::is_pod<vec>::value); }\
     TEST(vec, arePacked) { EXPECT_EQ(sizeof(vec), 2*sizeof(scalar)); }\
-    TEST(vec, canBeDefaultConstructed) { vec v; }\
+    TEST(vec, canBeDefaultConstructed) { vec v; (void)v; }\
     TEST(vec, canBeConstructedFromOneScalar) { vec v(33); EXPECT_EQ(v.x,scalar(33)); EXPECT_EQ(v.y,scalar(33)); }\
     TEST(vec, canBeConstructedFromMultipleScalar) { vec v(33,34); EXPECT_EQ(v.x,scalar(33)); EXPECT_EQ(v.y,scalar(34)); }\
     TEST_VECTOR2_COORDINATES(vec, scalar, x, y, s1, s2)\
@@ -170,4 +170,10 @@ TEST(widest, worksOnVector2)
     EXPECT_EQ(typeid(widest<dvec2,vec2>),typeid(dvec2));
     EXPECT_EQ(typeid(widest<dvec2,dvec2>),typeid(dvec2));
     EXPECT_EQ(typeid(widest<dvec2,uvec2>),typeid(dvec2));
+}
+
+TEST(Vector2, constexpr_ness) 
+{
+    constexpr auto v = ivec2{1,2} + ivec2{3,4};
+    static_assert(v == ivec2{4,6}, "oops");
 }

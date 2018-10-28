@@ -30,7 +30,7 @@ namespace ray { namespace math {
         constexpr Vector3() = default;
         constexpr Vector3(const vector3 &other) = default;
         constexpr Vector3(scalar v) : x{v}, y{v}, z{v} {}
-        constexpr Vector3(scalar x, scalar y, scalar z) : x(x), y(y), z{z} {}
+        constexpr Vector3(scalar x, scalar y, scalar z) : x{x}, y{y}, z{z} {}
         constexpr Vector3(vector2 xy, scalar z) : xy{xy}, _z{z} {}
         constexpr Vector3(scalar x, vector2 yz) : _x{x}, yz{yz} {}
 

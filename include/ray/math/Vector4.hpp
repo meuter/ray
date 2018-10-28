@@ -15,25 +15,25 @@ namespace ray { namespace math {
 
         union 
         { 
-             struct { scalar x,y,z,w; };
-             struct { vector2 xy; vector2 zw; };
-             struct { scalar _x; vector2 yz; scalar _w; };
-             struct { scalar __x; scalar __y; vector2 _zw; };
-             struct { vector3 xyz; scalar __w; };
-             struct { scalar ___x; vector3 yzw; };
+            struct { scalar x,y,z,w; };
+            struct { vector2 xy; vector2 zw; };
+            struct { scalar _x; vector2 yz; scalar _w; };
+            struct { scalar __x; scalar __y; vector2 _zw; };
+            struct { vector3 xyz; scalar __w; };
+            struct { scalar ___x; vector3 yzw; };
 
-             struct { scalar r,g,b,a; };  
-             struct { vector2 rg; vector2 ba; };
-             struct { scalar _r; vector2 gb; scalar _a; };
-             struct { scalar __r; scalar __g; vector2 _ba; };
-             struct { vector3 rgb; scalar __a; };
-             struct { scalar ___r; vector3 gba; };             
+            struct { scalar r,g,b,a; };  
+            struct { vector2 rg; vector2 ba; };
+            struct { scalar _r; vector2 gb; scalar _a; };
+            struct { scalar __r; scalar __g; vector2 _ba; };
+            struct { vector3 rgb; scalar __a; };
+            struct { scalar ___r; vector3 gba; };
         };
         
         constexpr Vector4() = default;
         constexpr Vector4(const vector4 &other) = default;
         constexpr Vector4(scalar v) : x{v}, y{v}, z{v}, w(v) {}
-        constexpr Vector4(scalar x, scalar y, scalar z, scalar w) : x(x), y(y), z{z}, w{w} {}
+        constexpr Vector4(scalar x, scalar y, scalar z, scalar w) : x(x), y(y), z(z), w(w) {}
         constexpr Vector4(vector2 xy, scalar z, scalar w) : xy{xy}, zw{z,w} {}
         constexpr Vector4(vector2 xy, vector2 zw) : xy{xy}, zw{zw} {}
         constexpr Vector4(scalar x, vector2 yz, scalar w) : _x{x}, yz{yz}, _w{w} {}

@@ -48,6 +48,7 @@ class MeshRenderer
 public:
     MeshRenderer(const Window &window, const Camera &camera)
     {
+        (void)window;
         shader.load(VERTEX_SHADER, FRAGMENT_SHADER);    
         texture = shader.getUniform<sampler2D>("diffuseTexture");
         modelMatrix = shader.getUniform<mat4>("modelMatrix");

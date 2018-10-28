@@ -3,8 +3,9 @@ macro(add_unit_test SUBDIR TARGET)
     add_test(${TARGET} ${TARGET})
     target_include_directories(${TARGET} PRIVATE gtest)
     target_link_libraries(${TARGET} ray gtest gtest_main)
-    if(NOT WIN32)
-        target_link_libraries(${TARGET} ray pthread)
+    turn_on_all_warnings_as_error(${TARGET})
+    if (NOT WIN32)
+        target_link_libraries(${TARGET} pthread)
     endif()
 endmacro(add_unit_test)
 
@@ -18,5 +19,3 @@ add_unit_test(math MatrixTests)
 add_unit_test(math UtilsTests)
 add_unit_test(math QuaternionTests)
 add_unit_test(math TransformableTests)
-
-

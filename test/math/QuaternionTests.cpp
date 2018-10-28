@@ -10,6 +10,7 @@ using vec4 = Vector4<float>;
 TEST(quat, canBeDefaultConstructed)
 {
     auto q = quat();
+    (void)q;
 }
 
 TEST(quat, canBeConstructedFromScalars)
@@ -24,10 +25,10 @@ TEST(quat, canBeConstructedFromScalars)
 TEST(quat, canBeCopyConstructed)
 {
     auto q1 = quat{1.0f,2.0f,3.0f,4.0f}, q2 = q1;
-    EXPECT_EQ(q1.x, 1.0f);
-    EXPECT_EQ(q1.y, 2.0f);
-    EXPECT_EQ(q1.z, 3.0f);
-    EXPECT_EQ(q1.w, 4.0f);
+    EXPECT_EQ(q2.x, 1.0f);
+    EXPECT_EQ(q2.y, 2.0f);
+    EXPECT_EQ(q2.z, 3.0f);
+    EXPECT_EQ(q2.w, 4.0f);
 }
 
 TEST(quat, canBeConstructedFromAxisAngle)

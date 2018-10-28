@@ -235,6 +235,7 @@ class MeshRenderer
 public:
     MeshRenderer(const Window &window)
     {
+        (void)window;
         shader.load(VERTEX_SHADER, FRAGMENT_SHADER);    
         modelMatrix = shader.getUniform<mat4>("modelMatrix");
         projectionMatrix = shader.getUniform<mat4>("projectionMatrix");    

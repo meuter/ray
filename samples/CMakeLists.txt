@@ -1,6 +1,7 @@
 macro(add_sample TARGET)
     add_executable(${TARGET} ${TARGET}.cpp)
     target_link_libraries(${TARGET} ray)
+    turn_on_all_warnings_as_error(${TARGET})
 endmacro(add_sample)
 
 add_sample(00_window)

@@ -26,7 +26,7 @@ namespace ray { namespace math {
     constexpr auto scalar_equal(const Scalar<T> &a, const Scalar<U> &b) { return std::abs(b-a) <= std::numeric_limits<T>::epsilon(); }
 
     template<typename T, typename U, integral_only<T> = 0, integral_only<U> = 0>
-    constexpr auto scalar_equal(const Scalar<T> &a, const Scalar<U> &b) { return (a==b);}
+    constexpr auto scalar_equal(const Scalar<T> &a, const Scalar<U> &b) { return (static_cast<U>(a)==b);}
 
     template<typename T, typename U, integral_only<T> = 0, floating_only<U> = 0>
     constexpr auto scalar_equal(const Scalar<T> &a, const Scalar<U> &b) { return std::abs(b-a) <= std::numeric_limits<T>::epsilon(); }

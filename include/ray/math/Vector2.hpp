@@ -20,7 +20,7 @@ namespace ray { namespace math {
         constexpr Vector2() = default;
         constexpr Vector2(const vector2 &other) = default;
         constexpr Vector2(scalar v) : x{v}, y{v} {}
-        constexpr Vector2(scalar x, scalar y) : x(x), y(y) {}
+        constexpr Vector2(scalar x, scalar y) : x{x}, y{y} {}
 
         constexpr vector2 &operator=(const vector2 &other) = default;
 

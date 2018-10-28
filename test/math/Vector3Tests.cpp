@@ -37,12 +37,14 @@ TEST(vec, constructionFromSmallerVector)
 {
     auto xy = ivec2{1,2};
     auto u = ivec3{xy,2};
+    (void)xy;
+    (void)u;
 }
 
 #define TEST_VECTOR3_STRUCTURE(vec, scalar, s1, s2, s3)\
     TEST(vec, isPod) { EXPECT_TRUE(std::is_pod<vec>::value); }\
     TEST(vec, arePacked) { EXPECT_EQ(sizeof(vec), 3*sizeof(scalar)); }\
-    TEST(vec, canBeDefaultConstructed) { vec v; }\
+    TEST(vec, canBeDefaultConstructed) { vec v; (void)v; }\
     TEST(vec, canBeConstructedFromOneScalar) { vec v(33); EXPECT_EQ(v.x,scalar(33)); EXPECT_EQ(v.y,scalar(33)); EXPECT_EQ(v.y,scalar(33)); }\
     TEST(vec, canBeConstructedFromMultipleScalar) { vec v(33,34,35); EXPECT_EQ(v.x,scalar(33)); EXPECT_EQ(v.y,scalar(34)); EXPECT_EQ(v.z,scalar(35));}\
     TEST(vec, canBeConstructedFromVector2AndScalar) { vec v(Vector2<scalar>(33,34),35); EXPECT_EQ(v.x,scalar(33)); EXPECT_EQ(v.y,scalar(34)); EXPECT_EQ(v.z,scalar(35));}\
@@ -204,4 +206,12 @@ TEST(widest, worksOnVector3)
     EXPECT_EQ(typeid(widest<dvec3,vec3>),typeid(dvec3));
     EXPECT_EQ(typeid(widest<dvec3,dvec3>),typeid(dvec3));
     EXPECT_EQ(typeid(widest<dvec3,uvec3>),typeid(dvec3));
+}
+
+TEST(Vector3, constexpr_ness) 
+{
+    constexpr auto v1 = ivec3{1,2,3};
+    constexpr auto v = ivec3{1,2,3} + ivec3{3,4,5};
+    static_assert(v == ivec3{4,6,8}, "oops");
+    static_assert(v1.x==1 && v1.y==2 && v1.z==3, "oops");
 }

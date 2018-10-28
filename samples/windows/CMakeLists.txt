@@ -1,16 +1,13 @@
-if(WIN32)
-    add_library(directx INTERFACE)
-    target_include_directories(directx INTERFACE "C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Include")
-    if(CMAKE_CL_64)
-        link_directories("C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Lib\\x64")
-    else()
-        link_directories("C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Lib\\x86")
+macro(add_win32_sample TARGET)
+    if(WIN32)
+        add_executable(${TARGET} WIN32 ${TARGET}.cpp)
+        target_link_libraries(${TARGET} ray directx)
+        turn_on_all_warnings_as_error(${TARGET})
     endif()
-    
-    add_executable(00_hello_msg_box WIN32 00_hello_msg_box.cpp)
-    add_executable(01_windows WIN32 01_windows.cpp)
-    add_executable(02_triangle WIN32 02_triangle.cpp)
-    target_link_libraries(02_triangle PUBLIC directx)
-endif()
+endmacro(add_win32_sample)
+
+add_win32_sample(00_hello_msg_box)
+add_win32_sample(01_windows)
+add_win32_sample(02_triangle)
 
 

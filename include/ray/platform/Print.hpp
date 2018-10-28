@@ -8,7 +8,7 @@ namespace ray { namespace platform {
     
     namespace details 
     {
-        inline void printHelper(std::ostream &out) {}
+        inline void printHelper(std::ostream &out) { (void)out; }
         
         template <typename T, typename... Args>
         inline void printHelper(std::ostream &out, T &&value, Args&&... args) { printHelper(out << std::forward<T>(value), std::forward<Args>(args)...); }        

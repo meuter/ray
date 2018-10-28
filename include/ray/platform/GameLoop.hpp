@@ -65,8 +65,8 @@ namespace ray { namespace platform {
         platform::Stopwatch mStopwatch;
         sec mFrameTime, mFrameTimesSum;
         u64 mFrameCount;        
-        u16 mLastFrameTimeIndex;
         fps mTargetFPS;
+        u16 mLastFrameTimeIndex;
         std::vector<sec> mFrameTimes;
     };
 }}

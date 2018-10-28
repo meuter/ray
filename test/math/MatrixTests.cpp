@@ -13,6 +13,7 @@ using imat2 = Matrix<int,2,2>;
 TEST(Matrix, isDefaultConstructible)
 {
     auto m = Matrix<int,5,2>();
+    (void)m;
 }
 
 TEST(Matrix, isPOD)

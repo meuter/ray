@@ -36,8 +36,8 @@ TEST(Scalar, isAValidType)
     EXPECT_EQ(typeid(result), typeid(widest<decltype(s),decltype(w)>));
 }
 
-template<class T, floating_only<T> = 0> int someFunction(T t) { return 1; }
-template<class T, integral_only<T> = 0> int someFunction(T t) { return 2; }                          
+template<class T, floating_only<T> = 0> int someFunction(T t) { (void)t; return 1; }
+template<class T, integral_only<T> = 0> int someFunction(T t) { (void)t; return 2; }                          
 
 TEST(floating_only_and_integral_only, Works)
 {

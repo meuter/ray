@@ -3,15 +3,6 @@ cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_CXX_STANDARD 14)
 
-###### setup compiler flags
-if (WIN32)
-    add_compile_options(-nologo -W3 -DNOMINMAX -D_CRT_SECURE_NO_DEPRECATE -wd4101 -wd4996 -wd4146 -wd4244 -wd4267)
-else()
-    add_compile_options(-Wall -Wextra -Wno-unused -Wno-unused-parameter)
-    add_compile_options(-Wno-newline-eof -Wno-gnu-zero-variadic-macro-arguments)
-endif()
-
-
 ###### Boost
 add_subdirectory(contrib/boost-cmake)
 add_library(boost INTERFACE)
@@ -20,6 +11,27 @@ target_link_libraries(boost INTERFACE Boost::filesystem Boost::system)
 
 ###### OpenGL
 find_package(OpenGL REQUIRED)
+
+###### DirectX
+# TODO(cme): find a more portable way to have this
+if(WIN32)
+    add_library(directx INTERFACE)
+    target_include_directories(directx INTERFACE "C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Include")
+    if(CMAKE_CL_64)
+        link_directories("C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Lib\\x64")
+    else()
+        link_directories("C:\\Program Files (x86)\\Microsoft DirectX SDK (June 2010)\\Lib\\x86")
+    endif()
+endif()
+
+macro(turn_on_all_warnings_as_error TARGET)
+    if(WIN32)
+        target_compile_options(${TARGET} PRIVATE -Wall -WX)
+    else()
+        target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Werror)
+    endif()    
+endmacro()
+
 
 ###### GLFW
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -47,6 +59,7 @@ add_library(ray
 )
 target_include_directories(ray PUBLIC include)
 target_link_libraries(ray PUBLIC stb glfw glad tinyobjloader boost)
+turn_on_all_warnings_as_error(ray)
 
 ###### Samples
 add_subdirectory(samples)
