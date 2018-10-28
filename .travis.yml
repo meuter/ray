@@ -6,9 +6,7 @@ templates:
     before_script:
       - export PATH="/c/Program Files/CMake/bin":$PATH
     install:
-      - choco install -y directx
-    after_failure:
-      - cat /c/ProgramData/chocolatey/logs/chocolatey.log
+      - (choco install -y directx) || cat /c/ProgramData/chocolatey/logs/chocolatey.log
 
   linux: &linux
     addons:
