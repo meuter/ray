@@ -18,7 +18,7 @@ namespace ray { namespace math {
         constexpr Matrix() = default;
 
         template<typename... scalars>
-        constexpr Matrix(const scalars... x) : data{x...} {}
+        constexpr Matrix(const scalars... x) : data{{x...}} {}
 
         const scalar &operator()(size_t l, size_t c) const { return reinterpret_cast<const scalar*>(this)[l*C+c]; }
         scalar &operator()(size_t l, size_t c)             { return reinterpret_cast<scalar*>(this)[l*C+c]; }
