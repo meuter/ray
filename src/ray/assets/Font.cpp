@@ -3,9 +3,24 @@
 #include <fstream>
 #include <ray/platform/FileSystem.hpp>
 
+// NOTE(cme): silence two unused parameters
+#if defined(__clang__)
+#   pragma clang diagnostic push 
+#   pragma clang diagnostic ignored "-Wunused-variable"
+#elif defined(__GNUC__)
+#   pragma GCC diagnostic push 
+#   pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 #define STB_TRUETYPE_IMPLEMENTATION 
 #include <stb_truetype.h>
 #undef STB_TRUETYPE_IMPLEMENTATION 
+
+#if defined(__clang__)
+#   pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#   pragma GCC diagnostic pop
+#endif
 
 namespace fs = ray::platform::fs;
 

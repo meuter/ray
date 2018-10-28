@@ -28,7 +28,7 @@ macro(turn_on_all_warnings_as_error TARGET)
     if(WIN32)
         target_compile_options(${TARGET} PRIVATE -Wall -WX)
     else()
-        target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Werror -Wno-unused)
+        target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Werror)
     endif()    
 endmacro()
 

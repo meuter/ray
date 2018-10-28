@@ -15,6 +15,7 @@ namespace ray { namespace platform {
     
     namespace details 
     {
+#ifndef NDEBUG        
         static void checkGlError(const char *file, int line, const char *call)
         {
             auto error = glGetError();
@@ -25,6 +26,7 @@ namespace ray { namespace platform {
             }
                 
         }
+#endif        
     }
     
 }}
