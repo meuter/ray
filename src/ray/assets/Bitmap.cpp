@@ -1,25 +1,9 @@
 #include <ray/assets/Bitmap.hpp>
 #include <ray/platform/Panic.hpp>
 
-// NOTE(cme): silence two unused parameters
-//            fixed in https://github.com/nothings/stb/pull/662
-#if defined(__clang__)
-#   pragma clang diagnostic push 
-#   pragma clang diagnostic ignored "-Wunused-parameter"
-#elif defined(__GNUC__)
-#   pragma GCC diagnostic push 
-#   pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif
-
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #undef STB_IMAGE_IMPLEMENTATION
-
-#if defined(__clang__)
-#   pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#   pragma GCC diagnostic pop
-#endif
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
