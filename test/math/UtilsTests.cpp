@@ -8,7 +8,7 @@ using vec2 = Vector2<float>;
 
 TEST(lerp, canBeUsedOnFloat)
 {
-    EXPECT_FLOAT_EQ(3.0f, lerp(1,5,0.5));
+    EXPECT_FLOAT_EQ(3.0f, lerp(1.0f,5.0f,0.5f));
 }
 
 TEST(lerp, canBeUsedOnVec2)

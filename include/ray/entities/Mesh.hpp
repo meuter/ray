@@ -45,14 +45,14 @@ namespace ray { namespace entities {
             mVertexBuffer.unmap();
 
             // TODO(cme): if there are no texture, load default white
-            for (size_t material = 0u; material < object.materialCount(); ++material)
+            for (int material = 0; material < object.materialCount(); ++material)
                 mDiffuseTextures.push_back(gl::Texture(object.getDiffuseTextureFilename(material)));
         }
         
         void draw() const
         {
             mVertexArray.bind();
-            glDrawArrays(GL_TRIANGLES, 0, mVertexBuffer.vertexCount());
+            glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mVertexBuffer.vertexCount());
             mVertexArray.unbind();
         }
 

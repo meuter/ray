@@ -34,7 +34,7 @@ namespace ray { namespace gl {
         {
             vbo.bind();
             gl(EnableVertexAttribArray(mLocation));
-            glVertexAttribPointer(mLocation, scalarCount(), getType<T>(), normalized ? GL_TRUE : GL_FALSE, stride * sizeof(T), (GLvoid *)(offset*sizeof(T)));
+            glVertexAttribPointer(mLocation, (int)scalarCount(), getType<T>(), normalized ? GL_TRUE : GL_FALSE, stride * sizeof(T), (GLvoid *)(offset*sizeof(T)));
         }
 
         constexpr auto type() const { return getType<V>(); }

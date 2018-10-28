@@ -126,7 +126,6 @@ using uvec2 = Vector2<u32>;
     TEST_VECTOR2_ONE_BIN_OP(vec, x1, y1, x2, y2, /, Divide)\
     TEST_VECTOR2_SCALED_BY_SCALAR(vec, x1, y1, x2, *, Multiply)\
     TEST_VECTOR2_SCALED_BY_SCALAR(vec, x1, y1, x2, /, Divide)\
-    TEST_VECTOR2_NEGATION(vec, x1, y1)\
     TEST(vec, canBeUsedInDotProduct) { EXPECT_EQ(dot(vec{x1,y1},vec{x2,y2}), x1*x2 + y1*y2); }
 
 #define TEST_VECTOR2_CAN_BE_PRINTED(vec, str, s1, s2)\
@@ -134,18 +133,22 @@ using uvec2 = Vector2<u32>;
 
 TEST_VECTOR2_STRUCTURE(vec2, f32, 5.0f, 1.0f)
 TEST_VECTOR2_OPERATIONS(vec2, 1.2f, 2.5f, 5.3f, 6.8f)
+TEST_VECTOR2_NEGATION(vec2, 1.2f, 2.5f)
 TEST_VECTOR2_CAN_BE_PRINTED(vec2, "(1.2,3.5)", 1.2f, 3.5f)
 
 TEST_VECTOR2_STRUCTURE(dvec2, double, 5.0, 1.0)
 TEST_VECTOR2_OPERATIONS(dvec2, 1.2, 2.5, 5.3, 6.8)
+TEST_VECTOR2_NEGATION(dvec2, 1.2, 2.5)
 TEST_VECTOR2_CAN_BE_PRINTED(dvec2, "(1.2,3.5)", 1.2, 3.5)
 
 TEST_VECTOR2_STRUCTURE(ivec2, i32, 5, 1)
 TEST_VECTOR2_OPERATIONS(ivec2, 10, 25, 53, 58)
+TEST_VECTOR2_NEGATION(ivec2, 10, 25)
 TEST_VECTOR2_CAN_BE_PRINTED(ivec2, "(1,2)", 1, 2)
 
 TEST_VECTOR2_STRUCTURE(uvec2, u32, 5u, 10u)
 TEST_VECTOR2_OPERATIONS(uvec2, 10u, 25u, 53u, 58u)
+// NOTE(cme): no negation tests on unsigned
 TEST_VECTOR2_CAN_BE_PRINTED(uvec2, "(1,2)", 1u, 2u)
 
 
@@ -174,6 +177,8 @@ TEST(widest, worksOnVector2)
 
 TEST(Vector2, constexpr_ness) 
 {
+#if !defined(_MSC_VER)    
     constexpr auto v = ivec2{1,2} + ivec2{3,4};
     static_assert(v == ivec2{4,6}, "oops");
+#endif
 }

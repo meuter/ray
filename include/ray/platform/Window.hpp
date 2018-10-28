@@ -95,11 +95,11 @@ namespace ray { namespace platform {
             getFrameBufferSize(frameBufferWidth, frameBufferHeight);
             float xScale = (float)frameBufferHeight/winHeight;
             float yScale = (float)frameBufferWidth/winWidth;
-            setSize(width/xScale,height/yScale);
+            setSize((int)(width/xScale),(int)(height/yScale));
             glViewport(0, 0, width, height); 
 
             const auto vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());    
-            setPosition((vidmode->width - width/xScale) / 2, (vidmode->height - height/yScale) / 2);
+            setPosition( (int)((vidmode->width - width/xScale) / 2), (int) ((vidmode->height - height/yScale) / 2));
 
             show();
         }
@@ -114,7 +114,7 @@ namespace ray { namespace platform {
         inline bool shouldClose() const { return glfwWindowShouldClose(mHandle); }        
         inline void setShouldClose(bool value) const { return glfwSetWindowShouldClose(mHandle, value); }
         inline void setTitle(const std::string &title) const { glfwSetWindowTitle(mHandle, title.c_str()); }
-        inline void setIcon(const std::vector<GLFWimage> &images) const { glfwSetWindowIcon(mHandle, images.size(), &images[0]); } // @TODO: create proper Image class
+        inline void setIcon(const std::vector<GLFWimage> &images) const { glfwSetWindowIcon(mHandle, (int)images.size(), &images[0]); } // @TODO: create proper Image class
         inline void getPosition(int &x, int &y) const { glfwGetWindowPos(mHandle, &x, &y); }
         inline void setPosition(int x, int y) const { glfwSetWindowPos(mHandle, x, y); }
         inline void getSize(int &w, int &h) const { glfwGetWindowSize(mHandle, &w, &h); }

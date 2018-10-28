@@ -161,7 +161,6 @@ TEST(vec, constructionFromSmallerVector)
     TEST_VECTOR3_ONE_BIN_OP(vec, x1, y1, z1, x2, y2, z2, /, Divide)\
     TEST_VECTOR3_SCALED_BY_SCALAR(vec, x1, y1, z1, x2, *, Multiply)\
     TEST_VECTOR3_SCALED_BY_SCALAR(vec, x1, y1, z1, x2, /, Divide)\
-    TEST_VECTOR3_NEGATION(vec, x1, y1, z1)\
     TEST(vec, canBeUsedInDotProduct) { EXPECT_EQ(dot(vec{x1,y1,z1},vec{x2,y2,z2}), x1*x2 + y1*y2 + z1*z2); }\
     TEST_VECTOR3_CROSS_PRODUCT(vec)
 
@@ -171,18 +170,22 @@ TEST(vec, constructionFromSmallerVector)
 
 TEST_VECTOR3_STRUCTURE(vec3, f32, 5.0f, 1.0f, 7.0f)
 TEST_VECTOR3_OPERATIONS(vec3, 1.2f, 2.5f, 0.2f, 5.3f, 6.8f, 1.9f)
+TEST_VECTOR3_NEGATION(vec3, 1.2f, 2.5f, 0.2f)
 TEST_VECTOR3_CAN_BE_PRINTED(vec3, "(1.2,3.5,5.5)", 1.2f, 3.5f, 5.5f)
 
 TEST_VECTOR3_STRUCTURE(dvec3, double, 5.0, 1.0, 7.0)
 TEST_VECTOR3_OPERATIONS(dvec3, 1.2, 2.5, 0.2, 5.3, 6.8, 1.9)
+TEST_VECTOR3_NEGATION(dvec3, 1.2, 2.5, 0.2)
 TEST_VECTOR3_CAN_BE_PRINTED(dvec3, "(1.2,3.5,5.5)", 1.2, 3.5,5.5)
 
 TEST_VECTOR3_STRUCTURE(ivec3, i32, 5, 1, 7)
 TEST_VECTOR3_OPERATIONS(ivec3, 10, 25, 5, 53, 58, 3)
+TEST_VECTOR3_NEGATION(ivec3, 10, 25, 5)
 TEST_VECTOR3_CAN_BE_PRINTED(ivec3, "(1,2,3)", 1, 2, 3)
 
 TEST_VECTOR3_STRUCTURE(uvec3, u32, 5u, 10u, 70u)
 TEST_VECTOR3_OPERATIONS(uvec3, 10u, 25u, 5u, 53u, 58u, 3u)
+// NOTE(cme): no negation on unsigned vectors
 TEST_VECTOR3_CAN_BE_PRINTED(uvec3, "(1,2,3)", 1u, 2u, 3u)
 
 TEST(widest, worksOnVector3)
@@ -210,8 +213,10 @@ TEST(widest, worksOnVector3)
 
 TEST(Vector3, constexpr_ness) 
 {
+#if !defined(_MSC_VER)    
     constexpr auto v1 = ivec3{1,2,3};
     constexpr auto v = ivec3{1,2,3} + ivec3{3,4,5};
     static_assert(v == ivec3{4,6,8}, "oops");
     static_assert(v1.x==1 && v1.y==2 && v1.z==3, "oops");
+#endif
 }

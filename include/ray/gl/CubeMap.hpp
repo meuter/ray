@@ -20,7 +20,7 @@ namespace ray { namespace gl {
             for (size_t i = 0; i < 6u; ++i)
             {   
                 auto face = Bitmap(faces[i]);
-                AbstractTexture::load(face.width(), face.height(), face.depth(), face.pixels(), GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, false);
+                AbstractTexture::load(face.width(), face.height(), face.depth(), face.pixels(), (GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i), false);
             }
             setFilter(GL_LINEAR, GL_LINEAR);
             setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);

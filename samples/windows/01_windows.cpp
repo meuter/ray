@@ -85,7 +85,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     }
 
     // return this part of the WM_QUIT message to Windows
-    return msg.wParam;
+    return (int)msg.wParam;
 }
 
 // this is the main message handler for the program

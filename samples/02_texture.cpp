@@ -54,7 +54,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         quad.bind();
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, vbo.vertexCount());
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, (GLsizei)vbo.vertexCount());
 
         window.pollEvents();
         window.swapBuffers();

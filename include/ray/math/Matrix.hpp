@@ -49,7 +49,7 @@ namespace ray { namespace math {
         {
             for (size_t l = 0; l < L; ++l)
                 for (size_t c = 0; c < C; ++c)
-                    (*this)(l,c) *= s;
+                    (*this)(l,c) = static_cast<T>((*this)(l,c) * s); 
             return (*this);
         }
 
@@ -58,7 +58,7 @@ namespace ray { namespace math {
         {
             for (size_t l = 0; l < L; ++l)
                 for (size_t c = 0; c < C; ++c)
-                    (*this)(l,c) /= s;
+                    (*this)(l,c) = static_cast<T>((*this)(l,c) / s);
             return (*this);
         }
 

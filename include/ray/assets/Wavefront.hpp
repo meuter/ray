@@ -22,7 +22,7 @@ namespace ray { namespace assets {
 
         size_t totalVertexCount() const 
         {
-            int result = 0;
+            size_t result = 0;
             for (auto &shape: mShapes)
                 result += shape.mesh.indices.size();
             return result;        

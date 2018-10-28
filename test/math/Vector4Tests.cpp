@@ -190,25 +190,28 @@ using uvec4 = Vector4<u32>;
      TEST_VECTOR4_ONE_BIN_OP(vec, x1, y1, z1, w1, x2, y2, z2, w2, /, Divide)\
      TEST_VECTOR4_SCALED_BY_SCALAR(vec, x1, y1, z1, w1, x2, *, Multiply)\
      TEST_VECTOR4_SCALED_BY_SCALAR(vec, x1, y1, z1, w1, x2, /, Divide)\
-     TEST_VECTOR4_NEGATION(vec, x1, y1, z1, w1)
 
 #define TEST_VECTOR4_CAN_BE_PRINTED(vec, str, s1, s2, s3,s4)\
     TEST(vec, canBePrinted) { EXPECT_EQ(str, fmt("%1%", vec{s1,s2,s3,s4})); }
             
 TEST_VECTOR4_STRUCTURE(vec4, f32, 5.0f, 1.0f, 7.0f, 2.3f)
 TEST_VECTOR4_OPERATORS(vec4, 1.2f, 2.5f, 0.2f, 5.3f, 6.8f, 1.9f, 20.5f, 10.3f)
+TEST_VECTOR4_NEGATION(vec4, 1.2f, 2.5f, 0.2f, 5.3f)
 TEST_VECTOR4_CAN_BE_PRINTED(vec4, "(1.2,3.5,5.5,4.4)", 1.2f, 3.5f, 5.5f, 4.4f)
 
 TEST_VECTOR4_STRUCTURE(dvec4, double, 5.0, 1.0, 7.0, 2.3)
 TEST_VECTOR4_OPERATORS(dvec4, 1.2, 2.5, 0.2, 5.3, 6.8, 1.9, 20.5, 10.3)
+TEST_VECTOR4_NEGATION(dvec4, 1.2, 2.5, 0.2, 5.3);
 TEST_VECTOR4_CAN_BE_PRINTED(dvec4, "(1.2,3.5,5.5,4.4)", 1.2, 3.5,5.5,4.4)
 
 TEST_VECTOR4_STRUCTURE(ivec4, i32, 5, 1, 7, 4)
 TEST_VECTOR4_OPERATORS(ivec4, 10, 25, 5, 53, 58, 3, 20, 10)
+TEST_VECTOR4_NEGATION(ivec4, 10, 25, 5, 53)
 TEST_VECTOR4_CAN_BE_PRINTED(ivec4, "(1,2,3,4)", 1, 2, 3,4)
 
 TEST_VECTOR4_STRUCTURE(uvec4, u32, 5u, 10u, 70u, 1u)
 TEST_VECTOR4_OPERATORS(uvec4, 10u, 25u, 5u, 53u, 58u, 3u, 20u, 10u)
+// NOTE(cme): no negation tests on unsigned
 TEST_VECTOR4_CAN_BE_PRINTED(uvec4, "(1,2,3,4)", 1u, 2u, 3u,4u)
 
 TEST(widest, worksOnVector4)
@@ -234,8 +237,10 @@ TEST(widest, worksOnVector4)
     EXPECT_EQ(typeid(widest<dvec4,uvec4>),typeid(dvec4));
 }
 
-// TEST(Vector4, constexpr_ness)
-// {
-//     constexpr auto v = ivec4(1,0,0,0) + ivec4(0,1,0,0);
-//     static_assert(v == ivec4(1,1,0,0), "wrong");
-// }
+TEST(Vector4, constexpr_ness)
+{
+#if !defined(_MSC_VER)    
+    constexpr auto v = ivec4(1,0,0,0) + ivec4(0,1,0,0);
+    static_assert(v == ivec4(1,1,0,0), "wrong");
+#endif    
+}

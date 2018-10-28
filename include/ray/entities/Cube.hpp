@@ -73,7 +73,7 @@ namespace ray { namespace entities {
         void draw() const
         {
             bind();
-            glDrawArrays(GL_TRIANGLES, 0, mVertexBuffer.vertexCount());
+            glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mVertexBuffer.vertexCount());
             unbind();
         }
     
